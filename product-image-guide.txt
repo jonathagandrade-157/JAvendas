@@ -1,0 +1,44 @@
+GUIA DE IMAGENS - JA STORE
+============================================================
+
+1) Logo: salve como  assets/logo.png  (fundo transparente de preferência)
+
+2) Fotos dos produtos - salve cada uma com o nome exato abaixo,
+   dentro da pasta assets/products/  (formato .jpg):
+
+Tênis Running Leve — Cinza                    ->  tenis-running-leve-cinza.jpg
+Tênis Casual Retrô — Preto                    ->  tenis-casual-retro-preto.jpg
+Tênis Chunky Esportivo                        ->  tenis-chunky-esportivo.jpg
+Tênis Clássico Couro — Preto/Branco           ->  tenis-classico-couro-preto-branco.jpg
+Tênis Clássico Couro — Branco                 ->  tenis-classico-couro-branco.jpg
+Camisa Polo Tricô — Cinza                     ->  camisa-polo-trico-cinza.jpg
+Camisa Polo Tricô — Caqui                     ->  camisa-polo-trico-caqui.jpg
+Camisa Polo Tricô — Off White                 ->  camisa-polo-trico-off-white.jpg
+Camisa Polo Tricô — Marrom                    ->  camisa-polo-trico-marrom.jpg
+Camiseta Oversized Estampada — Branca         ->  camiseta-oversized-estampada-branca.jpg
+Camiseta Oversized Estampada — Preta          ->  camiseta-oversized-estampada-preta.jpg
+Camiseta Oversized Estampada — Off White      ->  camiseta-oversized-estampada-off-white.jpg
+Camiseta Oversized Estampada — Bege           ->  camiseta-oversized-estampada-bege.jpg
+Conjunto Esportivo Dri-Fit — Cinza            ->  conjunto-esportivo-dri-fit-cinza.jpg
+Conjunto Esportivo Dri-Fit — Royal            ->  conjunto-esportivo-dri-fit-royal.jpg
+Conjunto Esportivo Dri-Fit — Marinho          ->  conjunto-esportivo-dri-fit-marinho.jpg
+Conjunto Esportivo Dri-Fit — Preto/Branco     ->  conjunto-esportivo-dri-fit-preto-branco.jpg
+Conjunto Tactel Premium — Verde               ->  conjunto-tactel-premium-verde.jpg
+Conjunto Tactel Premium — Azul Marinho        ->  conjunto-tactel-premium-azul-marinho.jpg
+Conjunto Tactel Premium — Preto               ->  conjunto-tactel-premium-preto.jpg
+Conjunto Tactel Premium — Marinho/Bege        ->  conjunto-tactel-premium-marinho-bege.jpg
+Corta-Vento Esportivo                         ->  corta-vento-esportivo.jpg
+Kit 3 Pares de Meias Esportivas — Cinza       ->  kit-3-pares-de-meias-esportivas-cinza.jpg
+Kit 3 Pares de Meias Esportivas — Preta       ->  kit-3-pares-de-meias-esportivas-preta.jpg
+Calça de Moletom Wide                         ->  calca-de-moletom-wide.jpg
+Calça de Moletom Wide — Preta                 ->  calca-de-moletom-wide-preta.jpg
+Moletom Premium Fleece — Preto                ->  moletom-premium-fleece-preto.jpg
+Moletom Premium Fleece — Off White            ->  moletom-premium-fleece-off-white.jpg
+Short Elastano Esportivo — Bege               ->  short-elastano-esportivo-bege.jpg
+Short Elastano Esportivo — Areia              ->  short-elastano-esportivo-areia.jpg
+Short Elastano Esportivo — Marinho            ->  short-elastano-esportivo-marinho.jpg
+Short Elastano Esportivo — Preto              ->  short-elastano-esportivo-preto.jpg
+Suéter Tricô Premium — Off White              ->  sueter-trico-premium-off-white.jpg
+Suéter Tricô Premium — Caramelo               ->  sueter-trico-premium-caramelo.jpg
+Suéter Tricô Premium Gola Careca — Cinza      ->  sueter-trico-premium-gola-careca-cinza.jpg
+Suéter Tricô Urban — Areia                    ->  sueter-trico-urban-areia.jpg

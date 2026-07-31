@@ -1,0 +1,17 @@
+{
+  "name": "ja-store",
+  "version": "1.0.0",
+  "private": true,
+  "description": "JA Store — loja virtual completa (Netlify Functions + Supabase + Mercado Pago + Melhor Envio)",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "mercadopago": "^2.0.15",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  }
+}

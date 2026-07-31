@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout | JA Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EDEAE2; --ink:#221F1B; --ink-soft:#5B564C; --line:#D9D3C5;
+    --green:#34493A; --rust:#8B3A2B; --gold:#C79A3C; --card:#FFFFFF;
+    --accent:#C2541F; --accent-dark:#9C3F16;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif;}
+  .serif{font-family:'Fraunces',serif;}
+  a{color:inherit;}
+  input,select{
+    width:100%; padding:11px 13px; border-radius:8px; border:1.5px solid var(--line);
+    font-family:'Inter',sans-serif; font-size:14px; background:#fff; color:var(--ink); outline:none;
+  }
+  input:focus,select:focus{border-color:var(--accent);}
+  label{display:block; font-size:12.5px; font-weight:700; color:var(--ink-soft); margin-bottom:6px; letter-spacing:.02em;}
+  .field{margin-bottom:14px;}
+  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .row-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;}
+  button{cursor:pointer; font-family:inherit;}
+
+  header{background:var(--accent); padding:16px 20px;}
+  header .container{max-width:1040px; margin:0 auto; display:flex; align-items:center; gap:10px;}
+  header a{color:#fff; font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px;}
+  header .brand{color:#fff; font-weight:700; font-size:16px; margin-left:auto;}
+
+  .container{max-width:1040px; margin:0 auto; padding:0 20px;}
+  .layout{display:grid; grid-template-columns:1fr; gap:28px; padding:32px 0 80px;}
+  @media (min-width:900px){ .layout{grid-template-columns:1.5fr 1fr;} }
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px; margin-bottom:20px;}
+  .card h2{font-size:16px; margin:0 0 16px; display:flex; align-items:center; gap:8px;}
+  .step-num{
+    width:22px; height:22px; border-radius:50%; background:var(--ink); color:#fff;
+    font-size:12px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+
+  .cart-line{display:flex; gap:12px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line);}
+  .cart-line:last-child{border-bottom:none;}
+  .cart-line img{width:56px; height:56px; object-fit:cover; border-radius:8px; background:var(--line); flex-shrink:0;}
+  .cart-line .name{font-size:13.5px; font-weight:600; margin:0 0 2px;}
+  .cart-line .meta{font-size:12px; color:var(--ink-soft); margin:0;}
+  .qty-controls{display:flex; align-items:center; gap:8px; margin-top:6px;}
+  .qty-btn{width:22px; height:22px; border:1px solid var(--line); background:#fff; border-radius:5px; font-size:13px; line-height:1;}
+  .remove-btn{font-size:12px; color:var(--rust); background:none; border:none; text-decoration:underline; margin-left:auto;}
+  .line-total{font-size:13.5px; font-weight:700; white-space:nowrap;}
+
+  .shipping-opt{
+    display:flex; align-items:center; gap:10px; padding:12px; border:1.5px solid var(--line);
+    border-radius:8px; margin-bottom:8px; cursor:pointer; font-size:13.5px;
+  }
+  .shipping-opt.selected{border-color:var(--accent); background:rgba(194,84,31,0.06);}
+  .shipping-opt .price{margin-left:auto; font-weight:700;}
+
+  .coupon-row{display:flex; gap:8px;}
+  .coupon-row input{flex:1;}
+  .coupon-row button{padding:0 16px; border:none; border-radius:8px; background:var(--ink); color:#fff; font-size:13.5px; font-weight:600;}
+  #couponMsg{font-size:12.5px; margin-top:8px;}
+
+  .summary-row{display:flex; justify-content:space-between; font-size:14px; margin-bottom:8px; color:var(--ink-soft);}
+  .summary-row.total{color:var(--ink); font-weight:700; font-size:17px; font-family:'Fraunces',serif; border-top:1px solid var(--line); padding-top:12px; margin-top:8px;}
+
+  .pay-methods{display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap;}
+  .pay-pill{
+    flex:1; min-width:100px; text-align:center; padding:12px 8px; border:1.5px solid var(--line); border-radius:8px;
+    font-size:13px; font-weight:600; color:var(--ink-soft);
+  }
+  .pay-note{font-size:12px; color:var(--ink-soft); line-height:1.5; margin-top:-8px; margin-bottom:16px;}
+
+  .pay-btn{
+    width:100%; padding:15px; border:none; border-radius:8px; background:var(--green); color:#fff;
+    font-size:15px; font-weight:700; letter-spacing:.02em;
+  }
+  .pay-btn:disabled{opacity:.5; cursor:not-allowed;}
+  #formError{color:var(--rust); font-size:13px; margin-top:10px; display:none;}
+
+  .status-screen{max-width:520px; margin:80px auto; text-align:center; padding:0 20px;}
+  .status-icon{width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;}
+  .status-screen h1{font-size:24px; margin:0 0 10px;}
+  .status-screen p{color:var(--ink-soft); font-size:15px; line-height:1.6;}
+  .status-screen a{display:inline-block; margin-top:22px; padding:12px 24px; background:var(--ink); color:var(--bg); border-radius:8px; font-size:14px; font-weight:600; text-decoration:none;}
+
+  .empty-cart{text-align:center; padding:60px 20px; color:var(--ink-soft);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="index.html">← Voltar à loja</a>
+    <span class="brand serif">JA Store</span>
+  </div>
+</header>
+
+<div id="app"></div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabase-client.js"></script>
+<script>
+(function(){
+  const app = document.getElementById('app');
+  const urlParams = new URLSearchParams(window.location.search);
+  const status = urlParams.get('status');
+
+  // ---------- Se voltou do Mercado Pago, mostra a tela de status ----------
+  if (status){
+    renderStatusScreen(status);
+    return;
+  }
+
+  const cart = JSON.parse(localStorage.getItem('ja_cart') || '[]');
+  if (!cart.length){
+    app.innerHTML = `<div class="container"><div class="empty-cart"><p>Sua sacola está vazia.</p><a href="index.html">Voltar à loja</a></div></div>`;
+    return;
+  }
+
+  let shippingOptions = [];
+  let selectedShipping = null;
+  let coupon = { code: null, discount: 0 };
+
+  function formatBRL(v){ return Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+
+  function subtotal(){
+    return cart.reduce((s,i)=> s + (i.price * i.qty), 0);
+  }
+  function total(){
+    const shippingPrice = selectedShipping ? selectedShipping.price : 0;
+    return Math.max(0, subtotal() - coupon.discount + shippingPrice);
+  }
+
+  function render(){
+    app.innerHTML = `
+      <div class="container layout">
+        <div>
+          <div class="card">
+            <h2><span class="step-num">1</span> Sua sacola</h2>
+            <div id="cartLines"></div>
+          </div>
+
+          <div class="card">
+            <h2><span class="step-num">2</span> Seus dados</h2>
+            <div class="row-2">
+              <div class="field"><label>Nome completo</label><input id="custName" type="text" required></div>
+              <div class="field"><label>CPF (opcional)</label><input id="custCpf" type="text" placeholder="000.000.000-00"></div>
+            </div>
+            <div class="row-2">
+              <div class="field"><label>E-mail</label><input id="custEmail" type="email" required></div>
+              <div class="field"><label>WhatsApp</label><input id="custPhone" type="tel" placeholder="(11) 90000-0000" required></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2><span class="step-num">3</span> Endereço de entrega</h2>
+            <div class="row-2">
+              <div class="field"><label>CEP</label><input id="cep" type="text" placeholder="00000-000" required></div>
+              <div class="field"><label>Cidade</label><input id="city" type="text" required></div>
+            </div>
+            <div class="row-2">
+              <div class="field"><label>Rua</label><input id="street" type="text" required></div>
+              <div class="field"><label>Número</label><input id="number" type="text" required></div>
+            </div>
+            <div class="row-2">
+              <div class="field"><label>Bairro</label><input id="neighborhood" type="text" required></div>
+              <div class="field"><label>Estado (UF)</label><input id="state" type="text" maxlength="2" required></div>
+            </div>
+            <div class="field"><label>Complemento (opcional)</label><input id="complement" type="text"></div>
+
+            <div id="shippingOptions"></div>
+            <p id="shippingMsg" style="font-size:12.5px;color:var(--ink-soft);"></p>
+          </div>
+
+          <div class="card">
+            <h2><span class="step-num">4</span> Cupom de desconto</h2>
+            <div class="coupon-row">
+              <input id="couponInput" type="text" placeholder="Código do cupom">
+              <button id="applyCouponBtn">Aplicar</button>
+            </div>
+            <p id="couponMsg"></p>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="position:sticky; top:20px;">
+            <h2>Resumo do pedido</h2>
+            <div class="summary-row"><span>Subtotal</span><span id="sumSubtotal"></span></div>
+            <div class="summary-row"><span>Desconto</span><span id="sumDiscount">R$ 0,00</span></div>
+            <div class="summary-row"><span>Frete</span><span id="sumShipping">Calcule o CEP</span></div>
+            <div class="summary-row total"><span>Total</span><span id="sumTotal"></span></div>
+
+            <div class="pay-methods" style="margin-top:18px;">
+              <div class="pay-pill">💳 Cartão</div>
+              <div class="pay-pill">Pix</div>
+              <div class="pay-pill">Boleto</div>
+            </div>
+            <p class="pay-note">Você escolhe a forma de pagamento na próxima tela, com segurança do Mercado Pago.</p>
+
+            <button class="pay-btn" id="payBtn">Ir para pagamento</button>
+            <p id="formError"></p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    renderCartLines();
+    updateSummary();
+    bindEvents();
+  }
+
+  function renderCartLines(){
+    document.getElementById('cartLines').innerHTML = cart.map((item, idx) => `
+      <div class="cart-line" data-idx="${idx}">
+        <img src="${item.image || ''}" onerror="this.style.visibility='hidden'">
+        <div style="flex:1">
+          <p class="name">${item.name}</p>
+          <p class="meta">${item.size ? `Tam ${item.size} · ` : ''}${formatBRL(item.price)}</p>
+          <div class="qty-controls">
+            <button class="qty-btn" data-action="dec" data-idx="${idx}">−</button>
+            <span style="font-size:13px;width:16px;text-align:center">${item.qty}</span>
+            <button class="qty-btn" data-action="inc" data-idx="${idx}">+</button>
+            <button class="remove-btn" data-idx="${idx}">remover</button>
+          </div>
+        </div>
+        <span class="line-total">${formatBRL(item.price * item.qty)}</span>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.qty-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const idx = Number(btn.dataset.idx);
+        cart[idx].qty += btn.dataset.action === 'inc' ? 1 : -1;
+        if (cart[idx].qty <= 0) cart.splice(idx,1);
+        if (cart.length === 0){
+          localStorage.removeItem('ja_cart');
+          app.innerHTML = `<div class="container"><div class="empty-cart"><p>Sua sacola está vazia.</p><a href="index.html">Voltar à loja</a></div></div>`;
+          return;
+        }
+        localStorage.setItem('ja_cart', JSON.stringify(cart));
+        renderCartLines();
+        updateSummary();
+      });
+    });
+    document.querySelectorAll('.remove-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const idx = Number(btn.dataset.idx);
+        cart.splice(idx,1);
+        localStorage.setItem('ja_cart', JSON.stringify(cart));
+        if (cart.length === 0){
+          app.innerHTML = `<div class="container"><div class="empty-cart"><p>Sua sacola está vazia.</p><a href="index.html">Voltar à loja</a></div></div>`;
+          return;
+        }
+        renderCartLines();
+        updateSummary();
+      });
+    });
+  }
+
+  function updateSummary(){
+    document.getElementById('sumSubtotal').textContent = formatBRL(subtotal());
+    document.getElementById('sumDiscount').textContent = '- ' + formatBRL(coupon.discount);
+    document.getElementById('sumShipping').textContent = selectedShipping ? formatBRL(selectedShipping.price) : 'Calcule o CEP';
+    document.getElementById('sumTotal').textContent = formatBRL(total());
+  }
+
+  function bindEvents(){
+    // Busca endereço automaticamente pelo CEP (ViaCEP — gratuito, sem chave)
+    document.getElementById('cep').addEventListener('blur', async (e)=>{
+      const cep = e.target.value.replace(/\D/g,'');
+      if (cep.length !== 8) return;
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await res.json();
+        if (!data.erro){
+          document.getElementById('street').value = data.logradouro || '';
+          document.getElementById('neighborhood').value = data.bairro || '';
+          document.getElementById('city').value = data.localidade || '';
+          document.getElementById('state').value = data.uf || '';
+        }
+      } catch(err){ console.error('Erro ao buscar CEP', err); }
+
+      await calculateShipping(cep);
+    });
+
+    document.getElementById('applyCouponBtn').addEventListener('click', applyCoupon);
+    document.getElementById('payBtn').addEventListener('click', goToPayment);
+  }
+
+  async function calculateShipping(cep){
+    const msgEl = document.getElementById('shippingMsg');
+    const optsEl = document.getElementById('shippingOptions');
+    msgEl.textContent = 'Calculando frete...';
+    optsEl.innerHTML = '';
+    try {
+      const res = await fetch('/.netlify/functions/shipping-quote', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ cepDestino: cep, items: cart.map(i=>({quantity:i.qty})) })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.options || data.options.length === 0){
+        msgEl.textContent = data.error || 'Não foi possível calcular o frete. Tente novamente.';
+        return;
+      }
+      shippingOptions = data.options;
+      msgEl.textContent = '';
+      optsEl.innerHTML = shippingOptions.map((opt, i) => `
+        <div class="shipping-opt" data-idx="${i}">
+          <span>${opt.service} — até ${opt.days} dia(s)</span>
+          <span class="price">${formatBRL(opt.price)}</span>
+        </div>
+      `).join('');
+      optsEl.querySelectorAll('.shipping-opt').forEach(el=>{
+        el.addEventListener('click', ()=>{
+          optsEl.querySelectorAll('.shipping-opt').forEach(o=>o.classList.remove('selected'));
+          el.classList.add('selected');
+          selectedShipping = shippingOptions[Number(el.dataset.idx)];
+          updateSummary();
+        });
+      });
+      // seleciona a opção mais barata automaticamente
+      optsEl.querySelector('.shipping-opt')?.click();
+    } catch(err){
+      console.error(err);
+      msgEl.textContent = 'Erro ao calcular frete. Verifique sua conexão.';
+    }
+  }
+
+  async function applyCoupon(){
+    const code = document.getElementById('couponInput').value.trim();
+    const msgEl = document.getElementById('couponMsg');
+    if (!code) return;
+    msgEl.style.color = 'var(--ink-soft)';
+    msgEl.textContent = 'Verificando...';
+    try {
+      const res = await fetch('/.netlify/functions/apply-coupon', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ code, subtotal: subtotal() })
+      });
+      const data = await res.json();
+      if (!data.valid){
+        coupon = { code: null, discount: 0 };
+        msgEl.style.color = 'var(--rust)';
+        msgEl.textContent = data.message || 'Cupom inválido.';
+      } else {
+        coupon = { code: data.code, discount: data.discount || 0 };
+        msgEl.style.color = 'var(--green)';
+        msgEl.textContent = data.message;
+      }
+      updateSummary();
+    } catch(err){
+      console.error(err);
+      msgEl.style.color = 'var(--rust)';
+      msgEl.textContent = 'Erro ao validar cupom.';
+    }
+  }
+
+  async function goToPayment(){
+    const errEl = document.getElementById('formError');
+    errEl.style.display = 'none';
+
+    const customer = {
+      name: document.getElementById('custName').value.trim(),
+      cpf: document.getElementById('custCpf').value.trim(),
+      email: document.getElementById('custEmail').value.trim(),
+      phone: document.getElementById('custPhone').value.trim(),
+    };
+    const address = {
+      cep: document.getElementById('cep').value.trim(),
+      street: document.getElementById('street').value.trim(),
+      number: document.getElementById('number').value.trim(),
+      complement: document.getElementById('complement').value.trim(),
+      neighborhood: document.getElementById('neighborhood').value.trim(),
+      city: document.getElementById('city').value.trim(),
+      state: document.getElementById('state').value.trim(),
+    };
+
+    if (!customer.name || !customer.email || !customer.phone){
+      showFormError('Preencha nome, e-mail e WhatsApp.'); return;
+    }
+    if (!address.cep || !address.street || !address.number || !address.city || !address.state){
+      showFormError('Preencha o endereço completo.'); return;
+    }
+    if (!selectedShipping){
+      showFormError('Calcule e selecione uma opção de frete.'); return;
+    }
+
+    const payBtn = document.getElementById('payBtn');
+    payBtn.disabled = true;
+    payBtn.textContent = 'Preparando pagamento...';
+
+    try {
+      const res = await fetch('/.netlify/functions/create-payment', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          customer, address,
+          items: cart.map(i => ({ id: i.id, quantity: i.qty, size: i.size })),
+          shipping: selectedShipping,
+          couponCode: coupon.code,
+        })
+      });
+      const data = await res.json();
+      if (!res.ok){
+        showFormError(data.error || 'Não foi possível iniciar o pagamento.');
+        payBtn.disabled = false;
+        payBtn.textContent = 'Ir para pagamento';
+        return;
+      }
+      localStorage.removeItem('ja_cart');
+      window.location.href = data.initPoint;
+    } catch(err){
+      console.error(err);
+      showFormError('Erro de conexão. Tente novamente.');
+      payBtn.disabled = false;
+      payBtn.textContent = 'Ir para pagamento';
+    }
+  }
+
+  function showFormError(msg){
+    const errEl = document.getElementById('formError');
+    errEl.textContent = msg;
+    errEl.style.display = 'block';
+  }
+
+  function renderStatusScreen(status){
+    const config = {
+      success: { color:'#34493A', title:'Pagamento aprovado! 🎉', text:'Recebemos seu pedido e já vamos preparar o envio. Você vai receber a confirmação por e-mail e WhatsApp.' },
+      pending: { color:'#C79A3C', title:'Pagamento em análise', text:'Assim que for aprovado (geralmente até 2 dias úteis para boleto), você recebe a confirmação por e-mail e WhatsApp.' },
+      failure: { color:'#8B3A2B', title:'Pagamento não aprovado', text:'Algo deu errado com o pagamento. Você pode voltar à loja e tentar novamente.' },
+    }[status] || { color:'#5B564C', title:'Status do pedido', text:'' };
+
+    app.innerHTML = `
+      <div class="status-screen">
+        <div class="status-icon" style="background:${config.color}22">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="${config.color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h1 class="serif">${config.title}</h1>
+        <p>${config.text}</p>
+        <a href="index.html">Voltar à loja</a>
+      </div>
+    `;
+  }
+
+  render();
+})();
+</script>
+
+</body>
+</html>
