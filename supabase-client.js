@@ -7,8 +7,8 @@
 // Preencha os dois valores abaixo com os dados do seu projeto Supabase
 // (Painel do projeto -> Settings -> API).
 
-window.SUPABASE_URL = "https://SEU-PROJETO.supabase.co";
-window.SUPABASE_ANON_KEY = "SUA_ANON_KEY_AQUI";
+window.SUPABASE_URL = "https://khzqowftinwuieuvdlgt.supabase.co";
+window.SUPABASE_ANON_KEY = "sb_publishable_IkhJ45ydGWYOn6ygDWGRIw_J36egjpV";
 
 window.getSupabaseClient = function () {
   if (!window.__sb) {
