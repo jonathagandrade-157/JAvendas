@@ -36,8 +36,8 @@ exports.handler = async (event) => {
       weight: Math.max(0.3, totalQty * 0.35),
     };
 
-    const response = await fetch(
-      "https://melhorenvio.com.br/api/v2/me/shipment/calculate",
+   const response = await fetch(
+      `${process.env.MELHORENVIO_BASE_URL || "https://melhorenvio.com.br"}/api/v2/me/shipment/calculate`,
       {
         method: "POST",
         headers: {
