@@ -25,6 +25,7 @@
   .btn-danger{background:var(--rust); color:#fff;}
   .btn-ghost{background:transparent; border:1px solid var(--line); color:var(--ink);}
 
+  /* ---------- login ---------- */
   #loginScreen{max-width:360px; margin:120px auto; padding:0 20px;}
   #loginScreen h1{font-size:22px; margin-bottom:20px;}
   #loginScreen .field{margin-bottom:14px;}
@@ -32,6 +33,7 @@
   #loginScreen input{width:100%;}
   #loginError{color:var(--rust); font-size:13px; margin-top:10px; display:none;}
 
+  /* ---------- dashboard ---------- */
   #dashboard{display:none;}
   header{background:var(--ink); color:#fff; padding:14px 24px; display:flex; align-items:center; gap:16px;}
   header .container{max-width:1180px; margin:0 auto; display:flex; align-items:center; gap:16px; width:100%;}
@@ -46,6 +48,14 @@
   .panel-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;}
   .panel-head h2{font-size:16px; margin:0;}
 
+  .status-badge{padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700;}
+  .status-Pago{background:#34493A22; color:#34493A;}
+  .status-Aguardando{background:#C79A3C22; color:#8a6d1f;}
+  .status-Enviado{background:#1D5F9222; color:#1D5F92;}
+  .status-Entregue{background:#22222222; color:#333;}
+  .status-Cancelado{background:#8B3A2B22; color:#8B3A2B;}
+
+  /* ---------- product form modal ---------- */
   .overlay{position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:50;}
   .overlay.open{display:flex;}
   .modal{background:#fff; border-radius:12px; padding:24px; width:100%; max-width:420px; max-height:88vh; overflow-y:auto;}
@@ -76,6 +86,9 @@
   </div>
   <button class="btn btn-primary" id="loginBtn" style="width:100%">Entrar</button>
   <p id="loginError"></p>
+  <p style="font-size:12.5px;color:var(--ink-soft);margin-top:16px;">
+    Crie o usuário admin em: Supabase → Authentication → Users → Add user.
+  </p>
 </div>
 
 <div id="dashboard">
@@ -85,6 +98,7 @@
       <div class="tabs">
         <button class="tab-btn active" data-tab="products">Produtos</button>
         <button class="tab-btn" data-tab="orders">Pedidos</button>
+        <button class="tab-btn" data-tab="summary">Resumo</button>
       </div>
       <button id="logoutBtn">Sair</button>
     </div>
@@ -113,9 +127,33 @@
         <tbody id="ordersBody"></tbody>
       </table>
     </div>
+
+    <div id="summaryTab" class="panel" style="display:none;">
+      <div class="panel-head"><h2>Resumo de vendas</h2></div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:16px; margin-bottom:24px;">
+        <div style="background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:16px;">
+          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 6px;">Faturamento total</p>
+          <p class="serif" id="statRevenue" style="font-size:22px;margin:0;">R$ 0,00</p>
+        </div>
+        <div style="background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:16px;">
+          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 6px;">Pedidos pagos</p>
+          <p class="serif" id="statOrders" style="font-size:22px;margin:0;">0</p>
+        </div>
+        <div style="background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:16px;">
+          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 6px;">Ticket médio</p>
+          <p class="serif" id="statAvg" style="font-size:22px;margin:0;">R$ 0,00</p>
+        </div>
+        <div style="background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:16px;">
+          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 6px;">Pedidos hoje</p>
+          <p class="serif" id="statToday" style="font-size:22px;margin:0;">0</p>
+        </div>
+      </div>
+      <canvas id="revenueChart" height="90"></canvas>
+    </div>
   </div>
 </div>
 
+<!-- Modal de produto -->
 <div class="overlay" id="productOverlay">
   <div class="modal">
     <h3 class="serif" id="productModalTitle">Novo produto</h3>
@@ -157,6 +195,7 @@
 <div id="toast"></div>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script src="../assets/js/supabase-client.js"></script>
 <script>
 (function(){
@@ -165,10 +204,15 @@
   const loginScreen = document.getElementById('loginScreen');
   const dashboard = document.getElementById('dashboard');
 
+  // ---------------- auth ----------------
   async function checkSession(){
     const { data } = await sb.auth.getSession();
-    if (data.session){ showDashboard(); }
-    else { loginScreen.style.display = 'block'; dashboard.style.display = 'none'; }
+    if (data.session){
+      showDashboard();
+    } else {
+      loginScreen.style.display = 'block';
+      dashboard.style.display = 'none';
+    }
   }
 
   document.getElementById('loginBtn').addEventListener('click', async ()=>{
@@ -197,6 +241,7 @@
     loadProducts();
   }
 
+  // ---------------- tabs ----------------
   document.querySelectorAll('.tab-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -204,10 +249,13 @@
       const tab = btn.dataset.tab;
       document.getElementById('productsTab').style.display = tab === 'products' ? 'block' : 'none';
       document.getElementById('ordersTab').style.display = tab === 'orders' ? 'block' : 'none';
+      document.getElementById('summaryTab').style.display = tab === 'summary' ? 'block' : 'none';
       if (tab === 'orders') loadOrders();
+      if (tab === 'summary') loadSummary();
     });
   });
 
+  // ---------------- produtos ----------------
   async function loadProducts(){
     const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
     if (error){ showToast('Erro ao carregar produtos'); console.error(error); return; }
@@ -294,6 +342,7 @@
     loadProducts();
   });
 
+  // ---------------- pedidos ----------------
   async function loadOrders(){
     const { data, error } = await sb
       .from('orders')
@@ -335,6 +384,56 @@
         const items = order.order_items.map(i=>`${i.quantity}x ${i.product_name}${i.size?` (Tam ${i.size})`:''} — R$ ${Number(i.unit_price*i.quantity).toFixed(2)}`).join('\n');
         alert(`Pedido de ${order.customer_name}\n\n${items}\n\nFrete: R$ ${Number(order.shipping_price).toFixed(2)}\nTotal: R$ ${Number(order.total).toFixed(2)}\n\nEndereço:\n${order.address.street}, ${order.address.number}\n${order.address.neighborhood} — ${order.address.city}/${order.address.state}\nCEP: ${order.address.cep}`);
       });
+    });
+  }
+
+  // ---------------- toast ----------------
+  let revenueChartInstance = null;
+  async function loadSummary(){
+    const { data, error } = await sb
+      .from('orders')
+      .select('total, created_at, payment_status')
+      .eq('payment_status', 'pago')
+      .order('created_at', { ascending: true });
+
+    if (error){ showToast('Erro ao carregar resumo'); console.error(error); return; }
+
+    const totalRevenue = data.reduce((s,o)=> s + Number(o.total), 0);
+    const totalOrders = data.length;
+    const avgTicket = totalOrders ? totalRevenue / totalOrders : 0;
+    const todayStr = new Date().toISOString().slice(0,10);
+    const todayCount = data.filter(o => o.created_at.slice(0,10) === todayStr).length;
+
+    document.getElementById('statRevenue').textContent = 'R$ ' + totalRevenue.toFixed(2);
+    document.getElementById('statOrders').textContent = totalOrders;
+    document.getElementById('statAvg').textContent = 'R$ ' + avgTicket.toFixed(2);
+    document.getElementById('statToday').textContent = todayCount;
+
+    const byDay = {};
+    data.forEach(o => {
+      const day = o.created_at.slice(0,10);
+      byDay[day] = (byDay[day] || 0) + Number(o.total);
+    });
+    const days = Object.keys(byDay).sort().slice(-30);
+    const values = days.map(d => byDay[d]);
+
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    if (revenueChartInstance) revenueChartInstance.destroy();
+    revenueChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: days.map(d => d.slice(5).split('-').reverse().join('/')),
+        datasets: [{
+          label: 'Faturamento por dia (R$)',
+          data: values,
+          backgroundColor: '#C2541F',
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
     });
   }
 
