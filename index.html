@@ -134,6 +134,10 @@
   .qv-close-row{display:flex; justify-content:flex-end; padding:10px;}
   .qv-close-row button{background:none; border:none; color:var(--ink-soft);}
   .qv-thumb{width:100%; height:280px; display:flex; align-items:center; justify-content:center; border-bottom:1px solid var(--line); overflow:hidden;}
+  .qv-gallery{display:flex; gap:8px; padding:12px 24px 0; overflow-x:auto;}
+  .qv-gallery-item{width:56px; height:56px; flex-shrink:0; border-radius:8px; overflow:hidden; border:2px solid transparent; opacity:.65; cursor:pointer;}
+  .qv-gallery-item.active{border-color:var(--ink); opacity:1;}
+  .qv-gallery-item img{width:100%; height:100%; object-fit:cover; display:block;}
   .qv-thumb img{width:100%; height:100%; object-fit:cover;}
   .qv-body{padding:24px;}
   .qv-body h2{font-size:22px; margin:0 0 4px;}
@@ -283,6 +287,7 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </button></div>
     <div class="qv-thumb" id="qvThumb"></div>
+    <div class="qv-gallery" id="qvGallery"></div>
     <div class="qv-body">
       <h2 class="serif" id="qvName"></h2>
       <p class="price" id="qvPrice"></p>
@@ -370,6 +375,7 @@
         sizeType: p.size_type,
         tone: p.tone,
         image: p.image_url,
+        images: p.images || [],
       }));
     } catch (err) {
       console.error("Não foi possível carregar produtos do Supabase:", err);
@@ -482,6 +488,7 @@
   // ---------------- quick view ----------------
   const qvOverlay = document.getElementById('qvOverlay');
   const qvThumb = document.getElementById('qvThumb');
+  const qvGallery = document.getElementById('qvGallery');
   const qvName = document.getElementById('qvName');
   const qvPrice = document.getElementById('qvPrice');
   const qvSizeBlock = document.getElementById('qvSizeBlock');
@@ -489,11 +496,40 @@
   const qvSizes = document.getElementById('qvSizes');
   const qvAddBtn = document.getElementById('qvAddBtn');
 
+  function imageOrPlaceholder(url, tone, category, big){
+    if(!url) return placeholderHTML(tone, category, big);
+    return `<img src="${url}" alt="" onerror="this.parentElement.innerHTML=window.__jaPlaceholder(${tone},'${category}',${big});">`;
+  }
+
   function openQuickView(id){
     quickView = PRODUCTS.find(p=>p.id===id);
     if(!quickView) return;
     selectedSize = SIZE_SETS[quickView.sizeType][0];
-    qvThumb.innerHTML = productThumbHTML(quickView, true);
+
+    const gallery = [quickView.image, ...(quickView.images||[])].filter(Boolean);
+    const uniqueGallery = [...new Set(gallery)];
+
+    qvThumb.innerHTML = imageOrPlaceholder(uniqueGallery[0], quickView.tone, quickView.category, true);
+
+    if (uniqueGallery.length > 1){
+      qvGallery.style.display = 'flex';
+      qvGallery.innerHTML = uniqueGallery.map((url, i) => `
+        <div class="qv-gallery-item ${i===0?'active':''}" data-url="${url}">
+          <img src="${url}" onerror="this.closest('.qv-gallery-item').style.display='none'">
+        </div>
+      `).join('');
+      qvGallery.querySelectorAll('.qv-gallery-item').forEach(item=>{
+        item.addEventListener('click', ()=>{
+          qvGallery.querySelectorAll('.qv-gallery-item').forEach(i=>i.classList.remove('active'));
+          item.classList.add('active');
+          qvThumb.innerHTML = imageOrPlaceholder(item.dataset.url, quickView.tone, quickView.category, true);
+        });
+      });
+    } else {
+      qvGallery.style.display = 'none';
+      qvGallery.innerHTML = '';
+    }
+
     qvName.textContent = quickView.name;
     qvPrice.textContent = formatBRL(quickView.price);
     if (quickView.sizeType === "none"){
