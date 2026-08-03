@@ -183,7 +183,12 @@
     <div class="field"><label>Preço de venda (R$)</label><input id="prodPrice" type="number" step="0.01"></div>
     <div class="field"><label>Custo (R$, opcional)</label><input id="prodCost" type="number" step="0.01"></div>
     <div class="field"><label>Estoque</label><input id="prodStock" type="number" step="1"></div>
-    <div class="field"><label>URL da imagem (ex: assets/products/nome.jpg)</label><input id="prodImage"></div>
+    <div class="field"><label>URL da foto de capa (ex: assets/products/nome.jpg)</label><input id="prodImage"></div>
+    <div class="field">
+      <label>Fotos adicionais (uma URL por linha — ex: outro ângulo, no modelo)</label>
+      <textarea id="prodImages" rows="4" style="width:100%; padding:9px 11px; border-radius:6px; border:1.5px solid var(--line); font-size:13px; font-family:inherit;" placeholder="assets/products/nome-lado.jpg
+assets/products/nome-modelo.jpg"></textarea>
+    </div>
     <div class="field"><label><input type="checkbox" id="prodActive" style="width:auto;display:inline-block;margin-right:6px;">Produto ativo (visível na loja)</label></div>
     <div class="modal-actions">
       <button class="btn btn-primary" id="saveProductBtn" style="flex:1">Salvar</button>
@@ -307,6 +312,7 @@
     document.getElementById('prodCost').value = product?.cost || '';
     document.getElementById('prodStock').value = product?.stock ?? 0;
     document.getElementById('prodImage').value = product?.image_url || '';
+    document.getElementById('prodImages').value = (product?.images || []).join('\n');
     document.getElementById('prodActive').checked = product ? product.active : true;
     productOverlay.classList.add('open');
   }
@@ -325,6 +331,10 @@
       cost: Number(document.getElementById('prodCost').value || 0) || null,
       stock: Number(document.getElementById('prodStock').value || 0),
       image_url: document.getElementById('prodImage').value.trim() || null,
+      images: document.getElementById('prodImages').value
+        .split('\n')
+        .map(s => s.trim())
+        .filter(Boolean),
       active: document.getElementById('prodActive').checked,
       updated_at: new Date().toISOString(),
     };
