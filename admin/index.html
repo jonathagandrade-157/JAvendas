@@ -335,7 +335,7 @@
               <input type="text" id="custSearch" placeholder="Buscar cliente...">
             </div>
             <table>
-              <thead><tr><th>Cliente</th><th>E-mail</th><th>Telefone</th><th>Pedidos</th><th>Total gasto</th></tr></thead>
+              <thead><tr><th>Cliente</th><th>E-mail</th><th>Telefone</th><th>Cidade/UF</th><th>Última compra</th><th>Pedidos</th><th>Total gasto</th><th></th></tr></thead>
               <tbody id="customersBody"></tbody>
             </table>
             <div class="pagination" id="customersPagination"></div>
@@ -350,7 +350,7 @@
               <button class="btn btn-primary" id="newCouponBtn">+ Novo cupom</button>
             </div>
             <table>
-              <thead><tr><th>Cupom</th><th>Desconto</th><th>Tipo</th><th>Usos</th><th>Validade</th><th>Status</th><th></th></tr></thead>
+              <thead><tr><th>Cupom</th><th>Desconto</th><th>Tipo</th><th>Mín. compra</th><th>Usos</th><th>Validade</th><th>Status</th><th></th></tr></thead>
               <tbody id="couponsBody"></tbody>
             </table>
           </div>
@@ -503,8 +503,12 @@
       </select>
     </div>
     <div class="field"><label>Valor do desconto</label><input id="coupValue" type="number" step="0.01"></div>
+    <div class="field"><label>Valor mínimo de compra (R$, opcional)</label><input id="coupMinPurchase" type="number" step="0.01"></div>
     <div class="field"><label>Limite de usos (opcional)</label><input id="coupLimit" type="number" step="1"></div>
-    <div class="field"><label>Válido até (opcional)</label><input id="coupExpires" type="date"></div>
+    <div class="settings-grid">
+      <div class="field"><label>Válido a partir de (opcional)</label><input id="coupStarts" type="date"></div>
+      <div class="field"><label>Válido até (opcional)</label><input id="coupExpires" type="date"></div>
+    </div>
     <div class="field"><label><input type="checkbox" id="coupActive" style="width:auto;display:inline-block;margin-right:6px;">Cupom ativo</label></div>
     <div class="modal-actions">
       <button class="btn btn-primary" id="saveCouponBtn" style="flex:1">Salvar</button>
@@ -515,11 +519,21 @@
 
 <!-- Modal de visualização de pedido -->
 <div class="overlay" id="orderOverlay">
-  <div class="modal" style="max-width:480px;">
+  <div class="modal" style="max-width:520px;">
     <h3>Detalhes do pedido</h3>
+    <div id="orderTimeline" style="margin-bottom:16px;"></div>
     <div id="orderDetailBody" style="font-size:13.5px; line-height:1.7;"></div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" id="closeOrderBtn" style="flex:1">Fechar</button>
+    <div class="field" style="margin-top:10px;">
+      <label>Código de rastreio</label>
+      <div style="display:flex; gap:8px;">
+        <input id="orderTrackingCode" style="flex:1;" placeholder="Ex: BR123456789">
+        <button class="btn btn-ghost" id="saveTrackingBtn">Salvar</button>
+      </div>
+    </div>
+    <div class="modal-actions" style="flex-wrap:wrap;">
+      <button class="btn btn-primary" id="orderWhatsappBtn" style="flex:1; min-width:120px;">WhatsApp</button>
+      <button class="btn btn-ghost" id="orderPrintBtn" style="flex:1; min-width:120px;">Imprimir</button>
+      <button class="btn btn-ghost" id="closeOrderBtn" style="flex:1; min-width:120px;">Fechar</button>
     </div>
   </div>
 </div>
@@ -1105,13 +1119,26 @@
         </td>
         <td>${formatBRL(o.total)}</td>
         <td>${new Date(o.created_at).toLocaleDateString('pt-BR')}</td>
-        <td style="text-align:right;">
+        <td style="text-align:right; white-space:nowrap;">
+          <button class="icon-btn" data-whatsapp-order="${o.id}" title="WhatsApp">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20.5 3.5A11 11 0 003.8 17.4L2 22l4.7-1.7A11 11 0 1020.5 3.5z" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
           <button class="icon-btn" data-view-order="${o.id}" title="Ver detalhes">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/></svg>
           </button>
         </td>
       </tr>
     `).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhum pedido encontrado.</td></tr>`;
+
+    document.querySelectorAll('[data-whatsapp-order]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const o = allOrders.find(o=>o.id===btn.dataset.whatsappOrder);
+        if (!o) return;
+        const digits = (o.customer_phone || '').replace(/\D/g,'');
+        const msg = `Olá, ${o.customer_name}! Aqui é da JA Store, sobre o seu pedido #${o.id.slice(0,8)}.`;
+        window.open(`https://wa.me/55${digits}?text=${encodeURIComponent(msg)}`, '_blank');
+      });
+    });
 
     document.querySelectorAll('[data-status]').forEach(sel=>{
       sel.addEventListener('change', async ()=>{
@@ -1135,34 +1162,110 @@
   const orderOverlay = document.getElementById('orderOverlay');
   document.getElementById('closeOrderBtn').addEventListener('click', ()=> orderOverlay.classList.remove('open'));
 
+  const TIMELINE_STAGES = ['Aguardando pagamento', 'Pago', 'Enviado', 'Entregue'];
+
+  function renderOrderTimeline(order){
+    if (order.order_status === 'Cancelado'){
+      return `<div class="badge badge-red" style="font-size:12.5px;">Pedido cancelado</div>`;
+    }
+    const currentIdx = TIMELINE_STAGES.indexOf(order.order_status);
+    return `
+      <div style="display:flex; align-items:center;">
+        ${TIMELINE_STAGES.map((stage, i) => `
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; position:relative;">
+            ${i > 0 ? `<div style="position:absolute; top:8px; right:50%; width:100%; height:2px; background:${i<=currentIdx?'#111':'#E4E4E4'};"></div>` : ''}
+            <div style="width:16px; height:16px; border-radius:50%; background:${i<=currentIdx?'#111':'#E4E4E4'}; z-index:1; margin-bottom:6px;"></div>
+            <span style="font-size:10.5px; color:${i<=currentIdx?'var(--ink)':'var(--ink-soft)'}; font-weight:${i===currentIdx?'700':'500'};">${stage}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  let currentOpenOrder = null;
+
   function openOrderDetail(order){
     if (!order) return;
+    currentOpenOrder = order;
+    document.getElementById('orderTrackingCode').closest('.field').style.display = 'block';
+    document.getElementById('orderWhatsappBtn').style.display = 'block';
+    document.getElementById('orderPrintBtn').style.display = 'block';
     const items = order.order_items.map(i=>`${i.quantity}x ${i.product_name}${i.size?` (Tam ${i.size})`:''} — ${formatBRL(i.unit_price*i.quantity)}`).join('<br>');
+    document.getElementById('orderTimeline').innerHTML = renderOrderTimeline(order);
     document.getElementById('orderDetailBody').innerHTML = `
       <p><b>Cliente:</b> ${order.customer_name}<br><b>Telefone:</b> ${order.customer_phone}<br><b>E-mail:</b> ${order.customer_email}</p>
       <p><b>Itens:</b><br>${items}</p>
-      <p><b>Frete:</b> ${formatBRL(order.shipping_price)}<br><b>Total:</b> ${formatBRL(order.total)}</p>
+      <p><b>Pagamento:</b> ${order.payment_method || '—'} (${order.payment_status})<br><b>Frete:</b> ${formatBRL(order.shipping_price)} — ${order.shipping_service || ''}<br><b>Total:</b> ${formatBRL(order.total)}</p>
       <p><b>Endereço:</b><br>${order.address.street}, ${order.address.number}<br>${order.address.neighborhood} — ${order.address.city}/${order.address.state}<br>CEP: ${order.address.cep}</p>
     `;
+    document.getElementById('orderTrackingCode').value = order.tracking_code || '';
     orderOverlay.classList.add('open');
   }
+
+  document.getElementById('saveTrackingBtn').addEventListener('click', async ()=>{
+    if (!currentOpenOrder) return;
+    const code = document.getElementById('orderTrackingCode').value.trim();
+    const { error } = await sb.from('orders').update({ tracking_code: code, updated_at: new Date().toISOString() }).eq('id', currentOpenOrder.id);
+    if (error){ showToast('Erro ao salvar rastreio'); return; }
+    currentOpenOrder.tracking_code = code;
+    showToast('Código de rastreio salvo!');
+  });
+
+  document.getElementById('orderWhatsappBtn').addEventListener('click', ()=>{
+    if (!currentOpenOrder) return;
+    const o = currentOpenOrder;
+    let msg = `Olá, ${o.customer_name}! Aqui é da JA Store, sobre o seu pedido #${o.id.slice(0,8)}.`;
+    if (o.tracking_code) msg += ` Código de rastreio: ${o.tracking_code}.`;
+    const digits = (o.customer_phone || '').replace(/\D/g,'');
+    window.open(`https://wa.me/55${digits}?text=${encodeURIComponent(msg)}`, '_blank');
+  });
+
+  document.getElementById('orderPrintBtn').addEventListener('click', ()=>{
+    if (!currentOpenOrder) return;
+    const o = currentOpenOrder;
+    const items = o.order_items.map(i=>`<tr><td>${i.quantity}x ${i.product_name}${i.size?` (Tam ${i.size})`:''}</td><td style="text-align:right;">${formatBRL(i.unit_price*i.quantity)}</td></tr>`).join('');
+    const win = window.open('', '_blank');
+    win.document.write(`
+      <html><head><title>Pedido #${o.id.slice(0,8)}</title>
+      <style>body{font-family:sans-serif;padding:30px;color:#111;} table{width:100%;border-collapse:collapse;margin:14px 0;} td{padding:6px 0;border-bottom:1px solid #eee;} h1{font-size:18px;}</style>
+      </head><body>
+      <h1>JA Store — Pedido #${o.id.slice(0,8)}</h1>
+      <p><b>Cliente:</b> ${o.customer_name}<br><b>Telefone:</b> ${o.customer_phone}<br><b>E-mail:</b> ${o.customer_email}</p>
+      <p><b>Endereço:</b> ${o.address.street}, ${o.address.number} — ${o.address.neighborhood}, ${o.address.city}/${o.address.state} — CEP ${o.address.cep}</p>
+      <table>${items}</table>
+      <p><b>Frete:</b> ${formatBRL(o.shipping_price)}<br><b>Total:</b> ${formatBRL(o.total)}</p>
+      ${o.tracking_code ? `<p><b>Rastreio:</b> ${o.tracking_code}</p>` : ''}
+      </body></html>
+    `);
+    win.document.close();
+    win.print();
+  });
 
   // ================= CLIENTES =================
   let allCustomers = [];
   let customersPage = 1;
 
   async function loadCustomers(){
-    const { data, error } = await sb.from('orders').select('customer_name, customer_email, customer_phone, total, payment_status');
+    const { data, error } = await sb.from('orders').select('*, order_items(*)').order('created_at', { ascending:false });
     if (error){ showToast('Erro ao carregar clientes'); console.error(error); return; }
 
     const map = {};
     data.forEach(o=>{
       const key = o.customer_email || o.customer_phone;
-      if (!map[key]) map[key] = { name:o.customer_name, email:o.customer_email, phone:o.customer_phone, orders:0, spent:0 };
+      if (!map[key]){
+        map[key] = {
+          name:o.customer_name, email:o.customer_email, phone:o.customer_phone,
+          city: o.address?.city || '—', state: o.address?.state || '',
+          orders:0, spent:0, lastPurchase: o.created_at, allOrders: [],
+        };
+      }
       map[key].orders += 1;
       if (o.payment_status === 'pago') map[key].spent += Number(o.total);
+      map[key].allOrders.push(o);
+      // dados são ordenados do mais recente pro mais antigo, então o primeiro
+      // pedido de cada cliente já traz a cidade/estado/data mais recentes.
     });
-    allCustomers = Object.values(map).sort((a,b)=> b.spent - a.spent);
+    allCustomers = Object.values(map).sort((a,b)=> new Date(b.lastPurchase) - new Date(a.lastPurchase));
     customersPage = 1;
     renderCustomersTable();
   }
@@ -1174,17 +1277,54 @@
     customersPage = Math.min(customersPage, totalPages);
     const pageItems = filtered.slice((customersPage-1)*PAGE_SIZE, customersPage*PAGE_SIZE);
 
-    document.getElementById('customersBody').innerHTML = pageItems.map(c => `
+    document.getElementById('customersBody').innerHTML = pageItems.map((c, i) => `
       <tr>
         <td>${c.name}</td>
         <td>${c.email||'—'}</td>
         <td>${c.phone||'—'}</td>
+        <td>${c.city}${c.state?'/'+c.state:''}</td>
+        <td>${new Date(c.lastPurchase).toLocaleDateString('pt-BR')}</td>
         <td>${c.orders}</td>
         <td>${formatBRL(c.spent)}</td>
+        <td style="text-align:right; white-space:nowrap;">
+          <button class="icon-btn" data-cust-whatsapp="${i}" title="WhatsApp">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20.5 3.5A11 11 0 003.8 17.4L2 22l4.7-1.7A11 11 0 1020.5 3.5z" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+          <button class="icon-btn" data-cust-history="${i}" title="Ver histórico">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9M3 12l3-3M3 12l-3-3M3 12l3 3" stroke="currentColor" stroke-width="1.7"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+        </td>
       </tr>
-    `).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhum cliente encontrado.</td></tr>`;
+    `).join('') || `<tr><td colspan="8" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhum cliente encontrado.</td></tr>`;
+
+    document.querySelectorAll('[data-cust-whatsapp]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const c = pageItems[Number(btn.dataset.custWhatsapp)];
+        const digits = (c.phone || '').replace(/\D/g,'');
+        window.open(`https://wa.me/55${digits}?text=${encodeURIComponent('Olá, ' + c.name + '! Aqui é da JA Store.')}`, '_blank');
+      });
+    });
+    document.querySelectorAll('[data-cust-history]').forEach(btn=>{
+      btn.addEventListener('click', ()=> openCustomerHistory(pageItems[Number(btn.dataset.custHistory)]));
+    });
 
     renderPagination('customersPagination', customersPage, totalPages, filtered.length, (p)=>{ customersPage=p; renderCustomersTable(); });
+  }
+
+  function openCustomerHistory(customer){
+    const rows = customer.allOrders.map(o => `
+      <tr><td>#${o.id.slice(0,8)}</td><td>${new Date(o.created_at).toLocaleDateString('pt-BR')}</td><td>${statusBadge(o.order_status)}</td><td>${formatBRL(o.total)}</td></tr>
+    `).join('');
+    document.getElementById('orderTimeline').innerHTML = '';
+    document.getElementById('orderDetailBody').innerHTML = `
+      <p><b>${customer.name}</b><br>${customer.email||''} · ${customer.phone||''}</p>
+      <table><thead><tr><th>Pedido</th><th>Data</th><th>Status</th><th>Total</th></tr></thead><tbody>${rows}</tbody></table>
+    `;
+    document.getElementById('orderTrackingCode').closest('.field').style.display = 'none';
+    document.getElementById('orderWhatsappBtn').style.display = 'none';
+    document.getElementById('orderPrintBtn').style.display = 'none';
+    currentOpenOrder = null;
+    orderOverlay.classList.add('open');
   }
 
   document.getElementById('custSearch').addEventListener('input', ()=>{ customersPage=1; renderCustomersTable(); });
@@ -1197,12 +1337,14 @@
     document.getElementById('couponsBody').innerHTML = data.map(c => {
       const desconto = c.discount_type === 'percent' ? `${Number(c.discount_value)}%` : formatBRL(c.discount_value);
       const validade = c.expires_at ? new Date(c.expires_at).toLocaleDateString('pt-BR') : '—';
+      const minimo = c.min_purchase && Number(c.min_purchase) > 0 ? formatBRL(c.min_purchase) : '—';
       const usos = c.usage_limit ? `${c.used_count||0} / ${c.usage_limit}` : `${c.used_count||0}`;
       return `
         <tr>
           <td><b>${c.code}</b></td>
           <td>${desconto}</td>
           <td>${c.discount_type === 'percent' ? 'Percentual' : 'Fixo'}</td>
+          <td>${minimo}</td>
           <td>${usos}</td>
           <td>${validade}</td>
           <td>${c.active ? '<span class="badge badge-green">Ativo</span>' : '<span class="badge badge-red">Inativo</span>'}</td>
@@ -1216,7 +1358,7 @@
           </td>
         </tr>
       `;
-    }).join('') || `<tr><td colspan="7" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhum cupom cadastrado.</td></tr>`;
+    }).join('') || `<tr><td colspan="8" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhum cupom cadastrado.</td></tr>`;
 
     document.querySelectorAll('[data-edit-coupon]').forEach(btn=>{
       btn.addEventListener('click', ()=> openCouponModal(data.find(c=>c.id===btn.dataset.editCoupon)));
@@ -1242,7 +1384,9 @@
     document.getElementById('coupCode').value = coupon?.code || '';
     document.getElementById('coupType').value = coupon?.discount_type || 'percent';
     document.getElementById('coupValue').value = coupon?.discount_value || '';
+    document.getElementById('coupMinPurchase').value = coupon?.min_purchase || '';
     document.getElementById('coupLimit').value = coupon?.usage_limit || '';
+    document.getElementById('coupStarts').value = coupon?.starts_at ? coupon.starts_at.slice(0,10) : '';
     document.getElementById('coupExpires').value = coupon?.expires_at ? coupon.expires_at.slice(0,10) : '';
     document.getElementById('coupActive').checked = coupon ? coupon.active : true;
     couponOverlay.classList.add('open');
@@ -1257,7 +1401,9 @@
       code,
       discount_type: document.getElementById('coupType').value,
       discount_value: Number(document.getElementById('coupValue').value || 0),
+      min_purchase: Number(document.getElementById('coupMinPurchase').value || 0) || 0,
       usage_limit: Number(document.getElementById('coupLimit').value || 0) || null,
+      starts_at: document.getElementById('coupStarts').value || null,
       expires_at: document.getElementById('coupExpires').value || null,
       active: document.getElementById('coupActive').checked,
     };
