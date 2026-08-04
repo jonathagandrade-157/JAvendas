@@ -103,7 +103,10 @@ exports.handler = async (event) => {
         .maybeSingle();
 
       if (coupon) {
-        const expired = coupon.expires_at && new Date(coupon.expires_at) < new Date();
+        // Mesma correção de fuso horário do apply-coupon.js: trata a validade
+        // como "até o fim do dia no horário de Brasília", não meia-noite UTC.
+        const expired = coupon.expires_at &&
+          new Date(new Date(coupon.expires_at).getTime() + 27 * 60 * 60 * 1000 - 1000) < new Date();
         const overLimit = coupon.usage_limit && coupon.used_count >= coupon.usage_limit;
         if (!expired && !overLimit) {
           if (coupon.discount_type === "percent") {
