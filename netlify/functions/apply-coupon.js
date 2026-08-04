@@ -41,7 +41,17 @@ exports.handler = async (event) => {
       };
     }
 
-    if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+    // O campo de validade guarda só a data (ex: 2026-08-04), que o banco
+    // interpreta como meia-noite em UTC. Como o Brasil está 3h atrás do UTC,
+    // tratamos o cupom como válido até o FIM do dia escolhido no horário de
+    // Brasília (UTC-3) — não até a meia-noite UTC, que expiraria cedo demais.
+    const isExpired = (expiresAt) => {
+      if (!expiresAt) return false;
+      const cutoff = new Date(new Date(expiresAt).getTime() + 27 * 60 * 60 * 1000 - 1000);
+      return cutoff < new Date();
+    };
+
+    if (isExpired(coupon.expires_at)) {
       return {
         statusCode: 200,
         body: JSON.stringify({ valid: false, message: "Este cupom expirou." }),
