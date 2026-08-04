@@ -189,31 +189,80 @@
         <div class="panel" data-panel="dashboard">
           <div class="stat-grid">
             <div class="stat-card">
-              <p class="label">Vendas totais</p>
-              <p class="value" id="statRevenue">R$ 0,00</p>
+              <p class="label">Vendas hoje</p>
+              <p class="value" id="statSalesToday">R$ 0,00</p>
             </div>
             <div class="stat-card">
-              <p class="label">Pedidos pagos</p>
-              <p class="value" id="statOrders">0</p>
+              <p class="label">Vendas do mês</p>
+              <p class="value" id="statSalesMonth">R$ 0,00</p>
+            </div>
+            <div class="stat-card">
+              <p class="label">Pedidos hoje</p>
+              <p class="value" id="statToday">0</p>
+            </div>
+            <div class="stat-card">
+              <p class="label">Pedidos pendentes</p>
+              <p class="value" id="statPending">0</p>
+            </div>
+            <div class="stat-card">
+              <p class="label">Pedidos enviados</p>
+              <p class="value" id="statShipped">0</p>
+            </div>
+            <div class="stat-card">
+              <p class="label">Clientes cadastrados</p>
+              <p class="value" id="statCustomers">0</p>
             </div>
             <div class="stat-card">
               <p class="label">Ticket médio</p>
               <p class="value" id="statAvg">R$ 0,00</p>
             </div>
             <div class="stat-card">
-              <p class="label">Pedidos hoje</p>
-              <p class="value" id="statToday">0</p>
+              <p class="label">Produtos ativos</p>
+              <p class="value" id="statActiveProducts">0</p>
+            </div>
+            <div class="stat-card">
+              <p class="label">Estoque baixo</p>
+              <p class="value" id="statLowStock">0</p>
             </div>
           </div>
+
           <div class="charts-grid">
             <div class="card">
-              <div class="panel-head"><h2>Vendas</h2></div>
+              <div class="panel-head"><h2>Vendas — últimos 30 dias</h2></div>
               <canvas id="revenueChart" height="180"></canvas>
             </div>
             <div class="card">
               <div class="panel-head"><h2>Pedidos por dia</h2></div>
               <canvas id="ordersChart" height="180"></canvas>
             </div>
+          </div>
+          <div class="card">
+            <div class="panel-head"><h2>Categorias mais vendidas</h2></div>
+            <canvas id="categoryChart" height="90"></canvas>
+          </div>
+
+          <div class="charts-grid">
+            <div class="card">
+              <div class="panel-head"><h2>Últimos pedidos</h2></div>
+              <table>
+                <thead><tr><th>Pedido</th><th>Cliente</th><th>Status</th><th>Total</th></tr></thead>
+                <tbody id="recentOrdersBody"></tbody>
+              </table>
+            </div>
+            <div class="card">
+              <div class="panel-head"><h2>Clientes recentes</h2></div>
+              <table>
+                <thead><tr><th>Cliente</th><th>Pedidos</th><th>Total gasto</th></tr></thead>
+                <tbody id="recentCustomersBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="panel-head"><h2>Produtos com estoque baixo</h2></div>
+            <table>
+              <thead><tr><th>Produto</th><th>Categoria</th><th>Estoque</th></tr></thead>
+              <tbody id="lowStockBody"></tbody>
+            </table>
           </div>
         </div>
 
@@ -244,9 +293,15 @@
                 <option value="active">Ativo</option>
                 <option value="inactive">Inativo</option>
               </select>
+              <select id="prodStockFilter">
+                <option value="">Todo o estoque</option>
+                <option value="in">Em estoque</option>
+                <option value="low">Estoque baixo (≤5)</option>
+                <option value="out">Esgotado</option>
+              </select>
             </div>
             <table>
-              <thead><tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Estoque</th><th>Status</th><th></th></tr></thead>
+              <thead><tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Estoque</th><th>Status</th><th>Criado em</th><th></th></tr></thead>
               <tbody id="productsBody"></tbody>
             </table>
             <div class="pagination" id="productsPagination"></div>
@@ -526,36 +581,64 @@
   // ================= DASHBOARD =================
   let revenueChartInstance = null;
   let ordersChartInstance = null;
+  let categoryChartInstance = null;
+  const LOW_STOCK_THRESHOLD = 5;
 
   async function loadDashboard(){
-    const { data, error } = await sb
-      .from('orders')
-      .select('total, created_at, payment_status')
-      .eq('payment_status', 'pago')
-      .order('created_at', { ascending: true });
+    const [ordersRes, productsRes] = await Promise.all([
+      sb.from('orders').select('id, customer_name, customer_email, total, created_at, payment_status, order_status, order_items(product_name, quantity, product_id)').order('created_at', { ascending: true }),
+      sb.from('products').select('id, name, category, stock, active'),
+    ]);
 
-    if (error){ showToast('Erro ao carregar dashboard'); console.error(error); return; }
+    if (ordersRes.error){ showToast('Erro ao carregar dashboard'); console.error(ordersRes.error); return; }
+    if (productsRes.error){ showToast('Erro ao carregar produtos do dashboard'); console.error(productsRes.error); return; }
 
-    const totalRevenue = data.reduce((s,o)=> s + Number(o.total), 0);
-    const totalOrders = data.length;
-    const avgTicket = totalOrders ? totalRevenue / totalOrders : 0;
-    const todayStr = new Date().toISOString().slice(0,10);
-    const todayCount = data.filter(o => o.created_at.slice(0,10) === todayStr).length;
+    const orders = ordersRes.data;
+    const products = productsRes.data;
+    const paidOrders = orders.filter(o => o.payment_status === 'pago');
 
-    document.getElementById('statRevenue').textContent = formatBRL(totalRevenue);
-    document.getElementById('statOrders').textContent = totalOrders;
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0,10);
+    const monthStr = now.toISOString().slice(0,7);
+
+    // ---------- cartões ----------
+    const salesToday = paidOrders.filter(o => o.created_at.slice(0,10) === todayStr).reduce((s,o)=> s + Number(o.total), 0);
+    const salesMonth = paidOrders.filter(o => o.created_at.slice(0,7) === monthStr).reduce((s,o)=> s + Number(o.total), 0);
+    const ordersToday = orders.filter(o => o.created_at.slice(0,10) === todayStr).length;
+    const pendingOrders = orders.filter(o => o.order_status === 'Aguardando pagamento').length;
+    const shippedOrders = orders.filter(o => o.order_status === 'Enviado').length;
+    const uniqueCustomers = new Set(orders.map(o => o.customer_email)).size;
+    const avgTicket = paidOrders.length ? paidOrders.reduce((s,o)=> s + Number(o.total),0) / paidOrders.length : 0;
+    const activeProducts = products.filter(p => p.active).length;
+    const lowStockProducts = products.filter(p => p.stock <= LOW_STOCK_THRESHOLD);
+
+    document.getElementById('statSalesToday').textContent = formatBRL(salesToday);
+    document.getElementById('statSalesMonth').textContent = formatBRL(salesMonth);
+    document.getElementById('statToday').textContent = ordersToday;
+    document.getElementById('statPending').textContent = pendingOrders;
+    document.getElementById('statShipped').textContent = shippedOrders;
+    document.getElementById('statCustomers').textContent = uniqueCustomers;
     document.getElementById('statAvg').textContent = formatBRL(avgTicket);
-    document.getElementById('statToday').textContent = todayCount;
+    document.getElementById('statActiveProducts').textContent = activeProducts;
+    document.getElementById('statLowStock').textContent = lowStockProducts.length;
 
+    // ---------- gráfico: vendas e pedidos últimos 30 dias ----------
     const byDayRevenue = {};
     const byDayCount = {};
-    data.forEach(o => {
+    paidOrders.forEach(o => {
       const day = o.created_at.slice(0,10);
       byDayRevenue[day] = (byDayRevenue[day] || 0) + Number(o.total);
+    });
+    orders.forEach(o => {
+      const day = o.created_at.slice(0,10);
       byDayCount[day] = (byDayCount[day] || 0) + 1;
     });
-    const days = Object.keys(byDayRevenue).sort().slice(-14);
-    const revenueValues = days.map(d => byDayRevenue[d]);
+    const days = [];
+    for (let i=29;i>=0;i--){
+      const d = new Date(now.getTime() - i*86400000).toISOString().slice(0,10);
+      days.push(d);
+    }
+    const revenueValues = days.map(d => byDayRevenue[d] || 0);
     const countValues = days.map(d => byDayCount[d] || 0);
     const labels = days.map(d => d.slice(5).split('-').reverse().join('/'));
 
@@ -563,7 +646,7 @@
     if (revenueChartInstance) revenueChartInstance.destroy();
     revenueChartInstance = new Chart(revCtx, {
       type: 'line',
-      data: { labels, datasets: [{ label:'Vendas (R$)', data: revenueValues, borderColor:'#111', backgroundColor:'rgba(17,17,17,0.06)', fill:true, tension:.3 }] },
+      data: { labels, datasets: [{ label:'Vendas (R$)', data: revenueValues, borderColor:'#111', backgroundColor:'rgba(17,17,17,0.06)', fill:true, tension:.3, pointRadius:0 }] },
       options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
     });
 
@@ -574,6 +657,59 @@
       data: { labels, datasets: [{ label:'Pedidos', data: countValues, backgroundColor:'#111' }] },
       options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{stepSize:1}}} }
     });
+
+    // ---------- gráfico: categorias mais vendidas ----------
+    const productCategoryMap = {};
+    products.forEach(p => { productCategoryMap[p.id] = p.category; });
+    const byCategory = {};
+    paidOrders.forEach(o => {
+      (o.order_items || []).forEach(item => {
+        const cat = productCategoryMap[item.product_id] || 'outros';
+        byCategory[cat] = (byCategory[cat] || 0) + item.quantity;
+      });
+    });
+    const catLabels = Object.keys(byCategory);
+    const catValues = catLabels.map(c => byCategory[c]);
+
+    const catCtx = document.getElementById('categoryChart').getContext('2d');
+    if (categoryChartInstance) categoryChartInstance.destroy();
+    categoryChartInstance = new Chart(catCtx, {
+      type: 'bar',
+      data: { labels: catLabels, datasets: [{ label:'Unidades vendidas', data: catValues, backgroundColor:'#111' }] },
+      options: { indexAxis:'y', responsive:true, plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true, ticks:{stepSize:1}}} }
+    });
+
+    // ---------- últimos pedidos ----------
+    const recentOrders = [...orders].sort((a,b)=> new Date(b.created_at)-new Date(a.created_at)).slice(0,5);
+    document.getElementById('recentOrdersBody').innerHTML = recentOrders.map(o => `
+      <tr>
+        <td>#${o.id.slice(0,8)}</td>
+        <td>${o.customer_name}</td>
+        <td>${statusBadge(o.order_status)}</td>
+        <td>${formatBRL(o.total)}</td>
+      </tr>
+    `).join('') || `<tr><td colspan="4" style="text-align:center;color:var(--ink-soft);padding:16px;">Nenhum pedido ainda.</td></tr>`;
+
+    // ---------- clientes recentes ----------
+    const customerMap = {};
+    orders.forEach(o=>{
+      const key = o.customer_email;
+      if (!customerMap[key]) customerMap[key] = { name:o.customer_name, orders:0, spent:0, last:o.created_at };
+      customerMap[key].orders += 1;
+      if (o.payment_status === 'pago') customerMap[key].spent += Number(o.total);
+      if (new Date(o.created_at) > new Date(customerMap[key].last)) customerMap[key].last = o.created_at;
+    });
+    const recentCustomers = Object.values(customerMap).sort((a,b)=> new Date(b.last)-new Date(a.last)).slice(0,5);
+    document.getElementById('recentCustomersBody').innerHTML = recentCustomers.map(c => `
+      <tr><td>${c.name}</td><td>${c.orders}</td><td>${formatBRL(c.spent)}</td></tr>
+    `).join('') || `<tr><td colspan="3" style="text-align:center;color:var(--ink-soft);padding:16px;">Nenhum cliente ainda.</td></tr>`;
+
+    // ---------- estoque baixo ----------
+    document.getElementById('lowStockBody').innerHTML = lowStockProducts
+      .sort((a,b)=> a.stock - b.stock)
+      .map(p => `
+        <tr><td>${p.name}</td><td>${p.category}</td><td>${p.stock <= 0 ? '<span class="badge badge-red">Esgotado</span>' : `<span class="badge badge-amber">${p.stock} un.</span>`}</td></tr>
+      `).join('') || `<tr><td colspan="3" style="text-align:center;color:var(--ink-soft);padding:16px;">Nenhum produto com estoque baixo.</td></tr>`;
   }
 
   // ================= PRODUTOS =================
@@ -593,11 +729,15 @@
     const search = document.getElementById('prodSearch').value.trim().toLowerCase();
     const cat = document.getElementById('prodCategoryFilter').value;
     const status = document.getElementById('prodStatusFilter').value;
+    const stockFilter = document.getElementById('prodStockFilter').value;
     return allProducts.filter(p=>{
       if (search && !p.name.toLowerCase().includes(search)) return false;
       if (cat && p.category !== cat) return false;
       if (status === 'active' && !p.active) return false;
       if (status === 'inactive' && p.active) return false;
+      if (stockFilter === 'in' && p.stock <= LOW_STOCK_THRESHOLD) return false;
+      if (stockFilter === 'low' && (p.stock <= 0 || p.stock > LOW_STOCK_THRESHOLD)) return false;
+      if (stockFilter === 'out' && p.stock > 0) return false;
       return true;
     });
   }
@@ -620,7 +760,14 @@
         <td>${p.sale_price && Number(p.sale_price) < Number(p.price) ? `<span style="text-decoration:line-through;color:var(--ink-soft);">${formatBRL(p.price)}</span> <b>${formatBRL(p.sale_price)}</b>` : formatBRL(p.price)}</td>
         <td>${p.stock}</td>
         <td>${p.active ? '<span class="badge badge-green">Ativo</span>' : '<span class="badge badge-red">Inativo</span>'}</td>
+        <td>${p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : '—'}</td>
         <td style="text-align:right; white-space:nowrap;">
+          <button class="icon-btn" data-view="${p.id}" title="Visualizar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+          <button class="icon-btn" data-duplicate="${p.id}" title="Duplicar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
           <button class="icon-btn" data-edit="${p.id}" title="Editar">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="1.7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.7"/></svg>
           </button>
@@ -629,10 +776,30 @@
           </button>
         </td>
       </tr>
-    `).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhum produto encontrado.</td></tr>`;
+    `).join('') || `<tr><td colspan="7" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhum produto encontrado.</td></tr>`;
 
     document.querySelectorAll('[data-edit]').forEach(btn=>{
       btn.addEventListener('click', ()=> openProductModal(allProducts.find(p=>p.id===btn.dataset.edit)));
+    });
+    document.querySelectorAll('[data-view]').forEach(btn=>{
+      btn.addEventListener('click', ()=> openProductModal(allProducts.find(p=>p.id===btn.dataset.view), true));
+    });
+    document.querySelectorAll('[data-duplicate]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const original = allProducts.find(p=>p.id===btn.dataset.duplicate);
+        if (!original) return;
+        const copy = { ...original };
+        delete copy.id;
+        delete copy.created_at;
+        delete copy.updated_at;
+        copy.name = original.name + ' (cópia)';
+        copy.slug = slugify(copy.name) + '-' + Date.now().toString().slice(-5);
+        copy.active = false;
+        const { error } = await sb.from('products').insert(copy);
+        if (error){ showToast('Erro ao duplicar: ' + error.message); return; }
+        showToast('Produto duplicado! Revise e ative quando quiser.');
+        loadProducts();
+      });
     });
     document.querySelectorAll('[data-delete]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
@@ -647,7 +814,7 @@
     renderPagination('productsPagination', productsPage, totalPages, filtered.length, (p)=>{ productsPage=p; renderProductsTable(); });
   }
 
-  ['prodSearch','prodCategoryFilter','prodStatusFilter'].forEach(id=>{
+  ['prodSearch','prodCategoryFilter','prodStatusFilter','prodStockFilter'].forEach(id=>{
     document.getElementById(id).addEventListener('input', ()=>{ productsPage=1; renderProductsTable(); });
   });
 
@@ -668,8 +835,8 @@
   document.getElementById('newProductBtn').addEventListener('click', ()=> openProductModal(null));
   document.getElementById('cancelProductBtn').addEventListener('click', ()=> productOverlay.classList.remove('open'));
 
-  function openProductModal(product){
-    document.getElementById('productModalTitle').textContent = product ? 'Editar produto' : 'Novo produto';
+  function openProductModal(product, readOnly){
+    document.getElementById('productModalTitle').textContent = readOnly ? 'Visualizar produto' : (product ? 'Editar produto' : 'Novo produto');
     document.getElementById('prodId').value = product?.id || '';
     document.getElementById('prodName').value = product?.name || '';
     document.getElementById('prodCategory').value = product?.category || 'camisetas';
@@ -681,6 +848,11 @@
     document.getElementById('prodImage').value = product?.image_url || '';
     document.getElementById('prodImages').value = (product?.images || []).join('\n');
     document.getElementById('prodActive').checked = product ? product.active : true;
+
+    const fieldIds = ['prodName','prodCategory','prodSizeType','prodPrice','prodSalePrice','prodCost','prodStock','prodImage','prodImages','prodActive'];
+    fieldIds.forEach(id => { document.getElementById(id).disabled = !!readOnly; });
+    document.getElementById('saveProductBtn').style.display = readOnly ? 'none' : 'block';
+
     productOverlay.classList.add('open');
   }
 
