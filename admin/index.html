@@ -364,6 +364,7 @@
               <button class="settings-tab" data-stab="loja">Logomarca</button>
               <button class="settings-tab" data-stab="pagamento">Pagamento</button>
               <button class="settings-tab" data-stab="envio">Envio</button>
+              <button class="settings-tab" data-stab="motoboy">Motoboy</button>
             </div>
 
             <div class="settings-panel active" data-spanel="geral">
@@ -400,6 +401,31 @@
                 As credenciais do Melhor Envio (<code>MELHORENVIO_TOKEN</code>, <code>STORE_ORIGIN_CEP</code>)
                 também ficam nas variáveis de ambiente da Netlify, pelo mesmo motivo de segurança.
               </p>
+            </div>
+
+            <div class="settings-panel" data-spanel="motoboy">
+              <div class="field">
+                <label><input type="checkbox" id="setMotoboyEnabled" style="width:auto;display:inline-block;margin-right:6px;">Ativar entrega por Motoboy</label>
+              </div>
+              <div class="settings-grid">
+                <div class="field"><label>Raio máximo de atendimento (km)</label><input id="setMotoboyRadius" type="number" step="0.1"></div>
+                <div class="field"><label>Taxa base (R$)</label><input id="setMotoboyBaseFee" type="number" step="0.01"></div>
+                <div class="field"><label>Valor por km (R$)</label><input id="setMotoboyPerKm" type="number" step="0.01"></div>
+              </div>
+              <p style="font-size:12px; color:var(--ink-soft); margin:4px 0 16px;">
+                Fórmula do frete: <b>Taxa base + (valor por km × distância)</b>. Ex: com os valores padrão (R$ 9,90 + R$ 2,50/km), uma entrega de 5 km custa R$ 22,40.
+              </p>
+
+              <div class="field" style="background:var(--bg); padding:14px; border-radius:8px;">
+                <label>Endereço da loja (usado para calcular a distância)</label>
+                <p style="font-size:12px; color:var(--ink-soft); margin:0 0 10px;">
+                  Esse é o mesmo endereço da aba "Geral". Depois de preenchê-lo lá, clique no botão abaixo para localizar as coordenadas da loja.
+                </p>
+                <button class="btn btn-ghost" id="verifyMotoboyOriginBtn" type="button">Verificar coordenadas da loja</button>
+                <p id="motoboyOriginStatus" style="font-size:12.5px; margin-top:10px;"></p>
+              </div>
+
+              <button class="btn btn-primary" id="saveMotoboySettingsBtn" style="margin-top:16px;">Salvar configuração de Motoboy</button>
             </div>
           </div>
         </div>
@@ -1437,6 +1463,16 @@
     document.getElementById('setStoreAddress').value = data.store_address || '';
     document.getElementById('setStoreDescription').value = data.store_description || '';
     document.getElementById('setLogoUrl').value = data.logo_url || '';
+    document.getElementById('setMotoboyEnabled').checked = !!data.motoboy_enabled;
+    document.getElementById('setMotoboyRadius').value = data.motoboy_radius_km ?? 15;
+    document.getElementById('setMotoboyBaseFee').value = data.motoboy_base_fee ?? 9.90;
+    document.getElementById('setMotoboyPerKm').value = data.motoboy_per_km ?? 2.50;
+    const originStatusEl = document.getElementById('motoboyOriginStatus');
+    if (data.motoboy_origin_lat && data.motoboy_origin_lng){
+      originStatusEl.innerHTML = `<span style="color:var(--green);">✅ Coordenadas salvas (${Number(data.motoboy_origin_lat).toFixed(4)}, ${Number(data.motoboy_origin_lng).toFixed(4)})</span>`;
+    } else {
+      originStatusEl.innerHTML = `<span style="color:var(--amber);">⚠️ Coordenadas da loja ainda não verificadas — clique no botão acima.</span>`;
+    }
     const preview = document.getElementById('logoPreview');
     if (data.logo_url){
       preview.innerHTML = `<img src="${data.logo_url}" onerror="this.parentElement.innerHTML='<span style=\\'color:#7A7A7E;font-size:12px;\\'>Não foi possível carregar</span>'">`;
@@ -1465,6 +1501,52 @@
     if (error){ showToast('Erro ao salvar: ' + error.message); return; }
     showToast('Logomarca salva!');
     loadSettings();
+  });
+
+  document.getElementById('saveMotoboySettingsBtn').addEventListener('click', async ()=>{
+    const payload = {
+      motoboy_enabled: document.getElementById('setMotoboyEnabled').checked,
+      motoboy_radius_km: Number(document.getElementById('setMotoboyRadius').value || 15),
+      motoboy_base_fee: Number(document.getElementById('setMotoboyBaseFee').value || 9.90),
+      motoboy_per_km: Number(document.getElementById('setMotoboyPerKm').value || 2.50),
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
+    if (error){ showToast('Erro ao salvar: ' + error.message); return; }
+    showToast('Configuração de Motoboy salva!');
+  });
+
+  document.getElementById('verifyMotoboyOriginBtn').addEventListener('click', async ()=>{
+    const address = document.getElementById('setStoreAddress').value.trim();
+    const statusEl = document.getElementById('motoboyOriginStatus');
+    if (!address){
+      statusEl.innerHTML = `<span style="color:var(--red);">Preencha o endereço da loja na aba "Geral" primeiro.</span>`;
+      return;
+    }
+    statusEl.textContent = 'Verificando endereço...';
+    try {
+      const res = await fetch('/.netlify/functions/geocode-address', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ address })
+      });
+      const data = await res.json();
+      if (!data.found){
+        statusEl.innerHTML = `<span style="color:var(--red);">Não foi possível localizar esse endereço. Tente deixá-lo mais completo (rua, número, cidade, estado).</span>`;
+        return;
+      }
+      const { error } = await sb.from('store_settings').update({
+        motoboy_origin_lat: data.lat,
+        motoboy_origin_lng: data.lng,
+        updated_at: new Date().toISOString(),
+      }).eq('id', 1);
+      if (error){ statusEl.innerHTML = `<span style="color:var(--red);">Erro ao salvar coordenadas.</span>`; return; }
+      statusEl.innerHTML = `<span style="color:var(--green);">✅ Coordenadas salvas (${data.lat.toFixed(4)}, ${data.lng.toFixed(4)})</span>`;
+      showToast('Endereço da loja verificado e salvo!');
+    } catch (err) {
+      console.error(err);
+      statusEl.innerHTML = `<span style="color:var(--red);">Erro ao verificar endereço.</span>`;
+    }
   });
 
   // ---------------- toast ----------------
