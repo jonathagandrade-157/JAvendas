@@ -344,26 +344,59 @@
     msgEl.textContent = 'Calculando frete...';
     optsEl.innerHTML = '';
     try {
-      const res = await fetch('/.netlify/functions/shipping-quote', {
+      const correiosPromise = fetch('/.netlify/functions/shipping-quote', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ cepDestino: cep, items: cart.map(i=>({quantity:i.qty})) })
-      });
-      const data = await res.json();
-      if (!res.ok || !data.options || data.options.length === 0){
+      }).then(r=>r.json());
+
+      // Monta o endereço (sem o número, que o cliente ainda não digitou
+      // nesse momento) só pra estimar a região — suficiente pra calcular
+      // a distância até a loja.
+      const addressForMotoboy = [
+        document.getElementById('street').value,
+        document.getElementById('neighborhood').value,
+        document.getElementById('city').value,
+        document.getElementById('state').value,
+        cep,
+      ].filter(Boolean).join(', ');
+
+      const motoboyPromise = fetch('/.netlify/functions/motoboy-quote', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ address: addressForMotoboy })
+      }).then(r=>r.json()).catch(()=> ({ available:false }));
+
+      const [data, motoboyData] = await Promise.all([correiosPromise, motoboyPromise]);
+
+      if (!data.options || data.options.length === 0){
         msgEl.textContent = data.error || 'Não foi possível calcular o frete. Tente novamente.';
         return;
       }
 
+      let options = [...data.options];
+      let motoboyNote = '';
+
+      if (motoboyData.available){
+        options.push({
+          service: '🛵 Entrega por Motoboy',
+          price: motoboyData.price,
+          days: 0,
+          etaText: motoboyData.etaText,
+        });
+      } else if (motoboyData.reason === 'out_of_range'){
+        motoboyNote = motoboyData.message || 'Entrega por motoboy indisponível para este endereço.';
+      }
+
       const freeShipping = subtotal() >= FREE_SHIPPING_THRESHOLD;
-      shippingOptions = data.options.map(opt => freeShipping ? { ...opt, price: 0 } : opt);
+      shippingOptions = options.map(opt => freeShipping ? { ...opt, price: 0 } : opt);
 
       msgEl.textContent = freeShipping
         ? `🎉 Frete grátis! Sua compra passou de ${formatBRL(FREE_SHIPPING_THRESHOLD)}.`
-        : '';
+        : motoboyNote;
       optsEl.innerHTML = shippingOptions.map((opt, i) => `
         <div class="shipping-opt" data-idx="${i}">
-          <span>${opt.service} — até ${opt.days} dia(s)</span>
+          <span>${opt.service}${opt.etaText ? ` — ${opt.etaText}` : ` — até ${opt.days} dia(s)`}</span>
           <span class="price">${opt.price === 0 ? 'Grátis' : formatBRL(opt.price)}</span>
         </div>
       `).join('');
