@@ -443,6 +443,46 @@
     <div class="field"><label>URL da imagem de capa</label><input id="prodImage"></div>
     <div class="field"><label>Fotos adicionais (uma URL por linha)</label><textarea id="prodImages" rows="3"></textarea></div>
     <div class="field"><label><input type="checkbox" id="prodActive" style="width:auto;display:inline-block;margin-right:6px;">Produto ativo (visível na loja)</label></div>
+
+    <div id="variantsSection" style="border-top:1px solid var(--line); margin-top:6px; padding-top:16px;">
+      <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); margin:0 0 10px; text-transform:uppercase; letter-spacing:.04em;">Variações (cor / tamanho)</p>
+
+      <div id="variantsHint" style="font-size:12.5px; color:var(--ink-soft); display:none;">
+        Salve o produto primeiro — depois de criado, você pode cadastrar as variações de cor e tamanho aqui.
+      </div>
+
+      <div id="variantsManager" style="display:none;">
+        <table style="margin-bottom:10px;">
+          <thead><tr><th>Cor</th><th>Tam.</th><th>Estoque</th><th></th></tr></thead>
+          <tbody id="variantsBody"></tbody>
+        </table>
+
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:flex-end; background:var(--bg); padding:10px; border-radius:8px;">
+          <div style="flex:1; min-width:100px;">
+            <label style="font-size:11px; font-weight:700; color:var(--ink-soft); display:block; margin-bottom:4px;">Cor</label>
+            <select id="newVariantColor" style="width:100%;">
+              <option value="Preto">Preto</option>
+              <option value="Branco">Branco</option>
+              <option value="Cinza">Cinza</option>
+              <option value="Azul">Azul</option>
+              <option value="Verde">Verde</option>
+              <option value="__custom__">Outra...</option>
+            </select>
+            <input id="newVariantColorCustom" placeholder="Nome da cor" style="width:100%; margin-top:4px; display:none;">
+          </div>
+          <div style="width:80px;">
+            <label style="font-size:11px; font-weight:700; color:var(--ink-soft); display:block; margin-bottom:4px;">Tam.</label>
+            <select id="newVariantSize" style="width:100%;"></select>
+          </div>
+          <div style="width:80px;">
+            <label style="font-size:11px; font-weight:700; color:var(--ink-soft); display:block; margin-bottom:4px;">Estoque</label>
+            <input id="newVariantStock" type="number" step="1" value="0" style="width:100%;">
+          </div>
+          <button class="btn btn-primary" id="addVariantBtn" type="button" style="padding:9px 12px;">+ Add</button>
+        </div>
+      </div>
+    </div>
+
     <div class="modal-actions">
       <button class="btn btn-primary" id="saveProductBtn" style="flex:1">Salvar</button>
       <button class="btn btn-ghost" id="cancelProductBtn">Cancelar</button>
@@ -853,8 +893,100 @@
     fieldIds.forEach(id => { document.getElementById(id).disabled = !!readOnly; });
     document.getElementById('saveProductBtn').style.display = readOnly ? 'none' : 'block';
 
+    // ---------- variações ----------
+    if (product && product.id && !readOnly){
+      document.getElementById('variantsHint').style.display = 'none';
+      document.getElementById('variantsManager').style.display = 'block';
+      populateVariantSizeOptions();
+      loadVariants(product.id);
+    } else {
+      document.getElementById('variantsHint').style.display = readOnly ? 'none' : 'block';
+      document.getElementById('variantsManager').style.display = 'none';
+      document.getElementById('variantsBody').innerHTML = '';
+    }
+
     productOverlay.classList.add('open');
   }
+
+  const VARIANT_SIZE_SETS = {
+    clothing: ['PP','P','M','G','GG'],
+    shoe: ['38','39','40','41','42','43'],
+    none: ['Único'],
+  };
+
+  function populateVariantSizeOptions(){
+    const sizeType = document.getElementById('prodSizeType').value;
+    const sizes = VARIANT_SIZE_SETS[sizeType] || VARIANT_SIZE_SETS.clothing;
+    document.getElementById('newVariantSize').innerHTML = sizes.map(s => `<option value="${s}">${s}</option>`).join('');
+  }
+  document.getElementById('prodSizeType').addEventListener('change', populateVariantSizeOptions);
+
+  document.getElementById('newVariantColor').addEventListener('change', (e)=>{
+    document.getElementById('newVariantColorCustom').style.display = e.target.value === '__custom__' ? 'block' : 'none';
+  });
+
+  let currentVariants = [];
+
+  async function loadVariants(productId){
+    const { data, error } = await sb.from('product_variants').select('*').eq('product_id', productId).order('color').order('size');
+    if (error){ showToast('Erro ao carregar variações'); console.error(error); return; }
+    currentVariants = data;
+    renderVariantsList();
+  }
+
+  function renderVariantsList(){
+    document.getElementById('variantsBody').innerHTML = currentVariants.map(v => `
+      <tr>
+        <td>${v.color || '—'}</td>
+        <td>${v.size || '—'}</td>
+        <td><input type="number" step="1" value="${v.stock}" data-variant-stock="${v.id}" style="width:64px; padding:5px 7px;"></td>
+        <td style="text-align:right;">
+          <button class="icon-btn" data-delete-variant="${v.id}" title="Excluir" type="button">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+        </td>
+      </tr>
+    `).join('') || `<tr><td colspan="4" style="text-align:center;color:var(--ink-soft);padding:10px;font-size:12.5px;">Nenhuma variação cadastrada ainda.</td></tr>`;
+
+    document.querySelectorAll('[data-variant-stock]').forEach(input=>{
+      input.addEventListener('change', async ()=>{
+        const { error } = await sb.from('product_variants').update({ stock: Number(input.value||0) }).eq('id', input.dataset.variantStock);
+        if (error){ showToast('Erro ao atualizar estoque da variação'); return; }
+        showToast('Estoque da variação atualizado');
+      });
+    });
+    document.querySelectorAll('[data-delete-variant]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const { error } = await sb.from('product_variants').delete().eq('id', btn.dataset.deleteVariant);
+        if (error){ showToast('Erro ao excluir variação'); return; }
+        showToast('Variação excluída');
+        loadVariants(document.getElementById('prodId').value);
+      });
+    });
+  }
+
+  document.getElementById('addVariantBtn').addEventListener('click', async ()=>{
+    const productId = document.getElementById('prodId').value;
+    if (!productId) return;
+
+    let color = document.getElementById('newVariantColor').value;
+    if (color === '__custom__'){
+      color = document.getElementById('newVariantColorCustom').value.trim();
+      if (!color){ showToast('Informe o nome da cor'); return; }
+    }
+    const size = document.getElementById('newVariantSize').value;
+    const stock = Number(document.getElementById('newVariantStock').value || 0);
+
+    const exists = currentVariants.some(v => v.color === color && v.size === size);
+    if (exists){ showToast('Essa combinação de cor/tamanho já existe'); return; }
+
+    const { error } = await sb.from('product_variants').insert({ product_id: productId, color, size, stock });
+    if (error){ showToast('Erro ao adicionar variação: ' + error.message); return; }
+    showToast('Variação adicionada');
+    document.getElementById('newVariantColorCustom').value = '';
+    document.getElementById('newVariantStock').value = 0;
+    loadVariants(productId);
+  });
 
   document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
     const id = document.getElementById('prodId').value;
@@ -876,14 +1008,30 @@
       updated_at: new Date().toISOString(),
     };
 
-    let error;
-    if (id){ ({ error } = await sb.from('products').update(payload).eq('id', id)); }
-    else { ({ error } = await sb.from('products').insert(payload)); }
+    let error, insertedId = id;
+    if (id){
+      ({ error } = await sb.from('products').update(payload).eq('id', id));
+    } else {
+      const { data: inserted, error: insertErr } = await sb.from('products').insert(payload).select().single();
+      error = insertErr;
+      if (inserted) insertedId = inserted.id;
+    }
 
     if (error){ showToast('Erro ao salvar: ' + error.message); return; }
     showToast('Produto salvo!');
-    productOverlay.classList.remove('open');
     loadProducts();
+
+    if (!id && insertedId){
+      // Produto novo: mantém o modal aberto, já em modo edição, pra já dar
+      // pra cadastrar as variações sem precisar reabrir o produto de novo.
+      document.getElementById('prodId').value = insertedId;
+      document.getElementById('variantsHint').style.display = 'none';
+      document.getElementById('variantsManager').style.display = 'block';
+      populateVariantSizeOptions();
+      loadVariants(insertedId);
+    } else {
+      productOverlay.classList.remove('open');
+    }
   });
 
   // ================= PEDIDOS =================
