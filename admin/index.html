@@ -375,6 +375,10 @@
                 <div class="field"><label>Endereço</label><input id="setStoreAddress"></div>
               </div>
               <div class="field"><label>Descrição da loja</label><textarea id="setStoreDescription" rows="3"></textarea></div>
+              <div class="settings-grid">
+                <div class="field"><label>Instagram (link completo)</label><input id="setInstagramUrl" placeholder="https://instagram.com/jastore"></div>
+                <div class="field"><label>TikTok (link completo, opcional)</label><input id="setTiktokUrl" placeholder="https://tiktok.com/@jastore"></div>
+              </div>
               <button class="btn btn-primary" id="saveSettingsBtn">Salvar alterações</button>
             </div>
 
@@ -1462,6 +1466,8 @@
     document.getElementById('setStorePhone').value = data.store_phone || '';
     document.getElementById('setStoreAddress').value = data.store_address || '';
     document.getElementById('setStoreDescription').value = data.store_description || '';
+    document.getElementById('setInstagramUrl').value = data.instagram_url || '';
+    document.getElementById('setTiktokUrl').value = data.tiktok_url || '';
     document.getElementById('setLogoUrl').value = data.logo_url || '';
     document.getElementById('setMotoboyEnabled').checked = !!data.motoboy_enabled;
     document.getElementById('setMotoboyRadius').value = data.motoboy_radius_km ?? 15;
@@ -1488,6 +1494,8 @@
       store_phone: document.getElementById('setStorePhone').value.trim(),
       store_address: document.getElementById('setStoreAddress').value.trim(),
       store_description: document.getElementById('setStoreDescription').value.trim(),
+      instagram_url: document.getElementById('setInstagramUrl').value.trim() || null,
+      tiktok_url: document.getElementById('setTiktokUrl').value.trim() || null,
       updated_at: new Date().toISOString(),
     };
     const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
