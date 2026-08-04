@@ -33,6 +33,50 @@
   #grain{position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; mix-blend-mode:multiply; opacity:.05;}
 
   /* ---------- HEADER ---------- */
+  .category-tiles{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+  @media (min-width:640px){ .category-tiles{grid-template-columns:repeat(5,1fr);} }
+  .category-tile{
+    background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 10px; text-align:center;
+    font-size:13px; font-weight:700; cursor:pointer; transition:border-color .15s;
+  }
+  .category-tile:hover{border-color:var(--ink);}
+
+  .section-head-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+  .scroll-row{display:flex; gap:14px; overflow-x:auto; padding-bottom:6px; scroll-snap-type:x proximity;}
+  .scroll-row .tag-card{min-width:180px; max-width:180px; flex-shrink:0; scroll-snap-align:start;}
+  .scroll-row-empty{font-size:13px; color:var(--ink-soft); padding:20px 0;}
+
+  .testimonial-card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px; min-width:240px; max-width:240px; flex-shrink:0;}
+  .testimonial-stars{color:var(--rust); font-size:13px; margin-bottom:8px;}
+  .testimonial-comment{font-size:13.5px; line-height:1.6; margin:0 0 10px;}
+  .testimonial-name{font-size:12.5px; font-weight:700; color:var(--ink-soft);}
+
+  .newsletter-box{background:var(--ink); color:#fff; border-radius:16px; padding:36px 24px; text-align:center;}
+  .newsletter-box h2{color:#fff; font-size:20px; margin:0 0 8px;}
+  .newsletter-box p{color:#B8B8B8; font-size:13.5px; margin:0 0 20px;}
+  .newsletter-form{display:flex; gap:8px; max-width:380px; margin:0 auto; flex-wrap:wrap;}
+  .newsletter-form input{flex:1; min-width:180px; padding:11px 14px; border-radius:6px; border:none; font-size:13.5px;}
+  .newsletter-form button{padding:11px 20px; border-radius:6px; border:none; background:#fff; color:var(--ink); font-weight:800; font-size:13px; text-transform:uppercase;}
+
+  .instagram-cta{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:32px 24px; text-align:center;}
+  .instagram-cta a{display:inline-flex; align-items:center; gap:8px; margin-top:12px; padding:11px 22px; background:var(--ink); color:#fff; border-radius:6px; font-size:13px; font-weight:700;}
+
+  .fav-heart{
+    position:absolute; top:8px; right:8px; z-index:3; width:28px; height:28px; border-radius:50%;
+    background:rgba(255,255,255,0.9); border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+  }
+  .fav-heart.active svg{fill:var(--rust); stroke:var(--rust);}
+
+  .promo-bar{
+    background:var(--ink); color:#fff; font-size:11.5px; font-weight:600;
+    display:flex; justify-content:center; gap:24px; padding:7px 16px; flex-wrap:wrap; text-align:center;
+  }
+  .fav-count{
+    position:absolute; top:-6px; right:-6px; width:16px; height:16px; border-radius:50%;
+    background:var(--rust); color:#fff; font-size:9.5px; display:flex; align-items:center; justify-content:center;
+  }
+  #favoritesToggleBtn{position:relative;}
+
   header{position:sticky; top:0; z-index:40;}
   .header-top{background:var(--accent);}
   .mobile-logo-row{display:none; align-items:center; justify-content:center; gap:8px; padding:10px 20px 0;}
@@ -113,6 +157,7 @@
   @media (min-width:640px){ .hero-copy h1{font-size:44px;} }
   .hero-copy p.lead{color:#C7C7C7; max-width:460px; margin:0 auto 28px; font-size:15.5px; line-height:1.6;}
   .hero-cta{display:inline-flex; align-items:center; gap:8px; padding:13px 26px; background:#fff; color:#0B0B0C; border-radius:6px; font-size:13.5px; font-weight:800; letter-spacing:.03em; text-transform:uppercase;}
+  .hero-cta-ghost{background:transparent; color:#fff; border:1.5px solid #3A3A3C;}
 
   /* ---------- TRUST BADGES ---------- */
   .trust{padding-bottom:44px;}
@@ -204,6 +249,11 @@
   <rect width="100%" height="100%" filter="url(#jaGrain)"/>
 </svg>
 
+<div class="promo-bar" id="promoBar">
+  <span>🚚 Frete grátis acima de R$ 300</span>
+  <span>💸 5% de desconto pagando no Pix</span>
+</div>
+
 <header id="topo">
   <div class="header-top">
     <div class="mobile-logo-row">
@@ -227,16 +277,20 @@
         <a href="#topo">Início</a>
         <a href="#produtos">Produtos</a>
         <a href="#categorias">Categorias</a>
-        <a href="#produtos">Ofertas</a>
+        <a href="#ofertas">Ofertas</a>
         <a href="#sobre">Sobre nós</a>
         <a href="#contato">Contato</a>
       </nav>
 
       <div class="header-right">
+        <button class="icon-btn" id="favoritesToggleBtn" aria-label="Favoritos" title="Meus favoritos">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z" stroke="#fff" stroke-width="1.8"/></svg>
+          <span class="fav-count" id="favCount" style="display:none">0</span>
+        </button>
         <a class="icon-btn" href="https://wa.me/5511946790983" target="_blank" rel="noopener" aria-label="WhatsApp">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20.5 3.5A11 11 0 003.8 17.4L2 22l4.7-1.7A11 11 0 1020.5 3.5z" stroke="#fff" stroke-width="1.8"/></svg>
         </a>
-        <a class="icon-btn" href="#" aria-label="Instagram">
+        <a class="icon-btn" id="instagramLink" href="#" target="_blank" rel="noopener" aria-label="Instagram" style="display:none;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="#fff" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="#fff"/></svg>
         </a>
         <button class="cart-btn" id="openCartBtn">
@@ -267,9 +321,38 @@
         <h1 class="serif">Estilo que te representa.</h1>
       </div>
       <p class="lead">Calçados, camisetas, conjuntos, moletons e mais — peças pensadas pro seu dia a dia, com envio para todo o Brasil.</p>
-      <a href="#produtos" class="hero-cta">Ver coleção</a>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <a href="#produtos" class="hero-cta">Comprar agora</a>
+        <a href="#ofertas" class="hero-cta hero-cta-ghost">Ver ofertas</a>
+      </div>
     </div>
   </div>
+</section>
+
+<section class="container" style="padding:44px 20px 0;">
+  <h2 class="serif" style="font-size:20px; margin:0 0 16px;">Categorias em destaque</h2>
+  <div id="categoryTiles" class="category-tiles"></div>
+</section>
+
+<section class="container" id="ofertas" style="padding:44px 20px 0;">
+  <div class="section-head-row">
+    <h2 class="serif" style="font-size:20px; margin:0;">Ofertas</h2>
+  </div>
+  <div id="ofertasRow" class="scroll-row"></div>
+</section>
+
+<section class="container" id="mais-vendidos" style="padding:44px 20px 0;">
+  <div class="section-head-row">
+    <h2 class="serif" style="font-size:20px; margin:0;">Mais vendidos</h2>
+  </div>
+  <div id="bestSellersRow" class="scroll-row"></div>
+</section>
+
+<section class="container" id="novidades" style="padding:44px 20px 0;">
+  <div class="section-head-row">
+    <h2 class="serif" style="font-size:20px; margin:0;">Novidades</h2>
+  </div>
+  <div id="newArrivalsRow" class="scroll-row"></div>
 </section>
 
 <section class="trust">
@@ -300,6 +383,36 @@
     <span class="products-count" id="productsCount">0 produtos</span>
   </div>
   <div class="products-grid" id="productsGrid"></div>
+</section>
+
+<section class="container" id="depoimentos" style="padding:44px 20px 0;">
+  <div class="section-head-row">
+    <h2 class="serif" style="font-size:20px; margin:0;">O que dizem nossos clientes</h2>
+  </div>
+  <div id="testimonialsRow" class="scroll-row"></div>
+</section>
+
+<section class="container" style="padding:44px 20px 0;">
+  <div class="instagram-cta">
+    <p style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft); margin:0;">Siga a gente</p>
+    <h2 class="serif" style="font-size:20px; margin:8px 0 0;">JA Store no Instagram</h2>
+    <a id="instagramCta" href="#" target="_blank" rel="noopener">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="#fff" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="#fff"/></svg>
+      Ver Instagram
+    </a>
+  </div>
+</section>
+
+<section class="container" style="padding:44px 20px 0;">
+  <div class="newsletter-box">
+    <h2 class="serif">Fique por dentro das novidades</h2>
+    <p>Receba avisos de lançamentos e ofertas exclusivas no seu e-mail.</p>
+    <form class="newsletter-form" id="newsletterForm">
+      <input type="email" id="newsletterEmail" placeholder="Seu e-mail" required>
+      <button type="submit">Inscrever</button>
+    </form>
+    <p id="newsletterMsg" style="font-size:12.5px; margin-top:10px; color:#B8B8B8;"></p>
+  </div>
 </section>
 
 <section class="container" id="sobre" style="padding:60px 20px; border-top:1px solid var(--line);">
@@ -399,6 +512,124 @@
   // novos produtos sem tocar no código do site.
   let PRODUCTS = [];
 
+  // ---------------- categorias em destaque ----------------
+  function renderCategoryTiles(){
+    const tilesEl = document.getElementById('categoryTiles');
+    const cats = CATEGORIES.filter(c => c.id !== 'todos');
+    tilesEl.innerHTML = cats.map(c => `<div class="category-tile" data-cat-tile="${c.id}">${c.label}</div>`).join('');
+    tilesEl.querySelectorAll('[data-cat-tile]').forEach(tile=>{
+      tile.addEventListener('click', ()=>{
+        category = tile.dataset.catTile;
+        showFavoritesOnly = false;
+        renderCatNav();
+        renderProducts();
+        document.getElementById('produtos').scrollIntoView({ behavior:'smooth' });
+      });
+    });
+  }
+
+  // ---------------- ofertas ----------------
+  function renderOfertasRow(){
+    const el = document.getElementById('ofertasRow');
+    const items = PRODUCTS.filter(p => isOnSale(p) && p.stock > 0);
+    el.innerHTML = items.length
+      ? items.map(p => productCardHTML(p)).join('')
+      : `<p class="scroll-row-empty">Nenhuma oferta ativa no momento.</p>`;
+    bindCardEvents(el);
+  }
+
+  // ---------------- novidades ----------------
+  function renderNewArrivalsRow(){
+    const el = document.getElementById('newArrivalsRow');
+    const items = [...PRODUCTS].sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt)).slice(0,8);
+    el.innerHTML = items.length
+      ? items.map(p => productCardHTML(p)).join('')
+      : `<p class="scroll-row-empty">Novidades chegando em breve.</p>`;
+    bindCardEvents(el);
+  }
+
+  // ---------------- mais vendidos ----------------
+  function renderBestSellersRow(ranked){
+    window.__lastBestSellers = ranked;
+    const el = document.getElementById('bestSellersRow');
+    const items = ranked
+      .map(r => PRODUCTS.find(p => p.id === r.productId))
+      .filter(Boolean);
+    el.innerHTML = items.length
+      ? items.map(p => productCardHTML(p)).join('')
+      : `<p class="scroll-row-empty">Ainda não temos vendas suficientes para montar esse ranking.</p>`;
+    bindCardEvents(el);
+  }
+  async function loadBestSellers(){
+    try {
+      const res = await fetch('/.netlify/functions/best-sellers');
+      const data = await res.json();
+      renderBestSellersRow(data.bestSellers || []);
+    } catch (err) {
+      console.error('Erro ao carregar mais vendidos:', err);
+      renderBestSellersRow([]);
+    }
+  }
+
+  // ---------------- depoimentos ----------------
+  async function loadTestimonials(){
+    const el = document.getElementById('testimonialsRow');
+    try {
+      const sb = window.getSupabaseClient();
+      const { data, error } = await sb.from('testimonials').select('*').eq('active', true).order('created_at', { ascending:false });
+      if (error) throw error;
+      el.innerHTML = (data && data.length)
+        ? data.map(t => `
+          <div class="testimonial-card">
+            <div class="testimonial-stars">${'★'.repeat(t.rating)}${'☆'.repeat(5-t.rating)}</div>
+            <p class="testimonial-comment">"${t.comment}"</p>
+            <p class="testimonial-name">${t.customer_name}</p>
+          </div>
+        `).join('')
+        : `<p class="scroll-row-empty">Em breve, depoimentos de quem já comprou com a gente.</p>`;
+    } catch (err) {
+      console.error('Erro ao carregar depoimentos:', err);
+      el.innerHTML = `<p class="scroll-row-empty">Em breve, depoimentos de quem já comprou com a gente.</p>`;
+    }
+  }
+
+  // ---------------- configurações da loja (Instagram etc.) ----------------
+  async function loadStoreSettingsPublic(){
+    try {
+      const sb = window.getSupabaseClient();
+      const { data, error } = await sb.from('store_settings').select('instagram_url').eq('id', 1).maybeSingle();
+      if (error) throw error;
+      if (data && data.instagram_url){
+        document.getElementById('instagramLink').href = data.instagram_url;
+        document.getElementById('instagramLink').style.display = 'flex';
+        document.getElementById('instagramCta').href = data.instagram_url;
+      }
+    } catch (err) {
+      console.error('Erro ao carregar configurações públicas:', err);
+    }
+  }
+
+  // ---------------- newsletter ----------------
+  document.getElementById('newsletterForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const email = document.getElementById('newsletterEmail').value.trim();
+    const msgEl = document.getElementById('newsletterMsg');
+    try {
+      const sb = window.getSupabaseClient();
+      const { error } = await sb.from('newsletter_subscribers').insert({ email });
+      if (error){
+        if (error.code === '23505'){ msgEl.textContent = 'Esse e-mail já está inscrito!'; }
+        else { msgEl.textContent = 'Não foi possível inscrever agora. Tente de novo.'; }
+        return;
+      }
+      msgEl.textContent = 'Inscrito com sucesso! 🎉';
+      document.getElementById('newsletterEmail').value = '';
+    } catch (err) {
+      console.error(err);
+      msgEl.textContent = 'Erro ao inscrever. Tente novamente.';
+    }
+  });
+
   async function loadProducts(){
     try {
       const sb = window.getSupabaseClient();
@@ -421,6 +652,8 @@
         tone: p.tone,
         image: p.image_url,
         images: p.images || [],
+        featured: !!p.featured,
+        createdAt: p.created_at,
       }));
     } catch (err) {
       console.error("Não foi possível carregar produtos do Supabase:", err);
@@ -428,6 +661,10 @@
     }
     renderCatNav();
     renderProducts();
+    renderCategoryTiles();
+    renderOfertasRow();
+    renderNewArrivalsRow();
+    loadBestSellers();
   }
 
   function formatBRL(v){
@@ -473,9 +710,38 @@
   // ---------------- state ----------------
   let category = "todos";
   let search = "";
+  let showFavoritesOnly = false;
   let cart = []; // {id, size, qty}
   let quickView = null;
   let selectedSize = null;
+
+  // ---------------- favoritos ----------------
+  let wishlist = JSON.parse(localStorage.getItem('ja_wishlist') || '[]');
+
+  function updateFavCount(){
+    const el = document.getElementById('favCount');
+    if (wishlist.length > 0){ el.style.display = 'flex'; el.textContent = wishlist.length; }
+    else { el.style.display = 'none'; }
+  }
+  function toggleWishlist(id){
+    const idx = wishlist.indexOf(id);
+    if (idx >= 0) wishlist.splice(idx, 1);
+    else wishlist.push(id);
+    localStorage.setItem('ja_wishlist', JSON.stringify(wishlist));
+    updateFavCount();
+    renderProducts();
+    renderOfertasRow();
+    renderNewArrivalsRow();
+    if (window.__lastBestSellers) renderBestSellersRow(window.__lastBestSellers);
+  }
+  document.getElementById('favoritesToggleBtn').addEventListener('click', ()=>{
+    showFavoritesOnly = !showFavoritesOnly;
+    document.getElementById('favoritesToggleBtn').style.background = showFavoritesOnly ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.2)';
+    document.getElementById('topo').scrollIntoView({ behavior:'smooth' });
+    document.getElementById('produtos').scrollIntoView({ behavior:'smooth' });
+    renderProducts();
+  });
+  updateFavCount();
 
   // ---------------- category nav ----------------
   const catNavDesktop = document.getElementById('catNavDesktop');
@@ -491,6 +757,7 @@
     [...catNavDesktop.querySelectorAll('button'), ...catNavMobile.querySelectorAll('button')].forEach(btn=>{
       btn.addEventListener('click', ()=>{
         category = btn.dataset.cat;
+        showFavoritesOnly = false;
         renderCatNav();
         renderProducts();
       });
@@ -513,24 +780,28 @@
       const q = search.trim().toLowerCase();
       list = list.filter(p=>p.name.toLowerCase().includes(q));
     }
+    if (showFavoritesOnly){
+      list = list.filter(p=> wishlist.includes(p.id));
+    }
     return list;
   }
 
-  function renderProducts(){
-    const list = getFiltered();
-    countEl.textContent = `${list.length} ${list.length===1?'produto':'produtos'}`;
-    grid.innerHTML = list.map(p => {
-      const soldOut = p.stock <= 0;
-      const onSale = isOnSale(p);
-      const priceHTML = soldOut
-        ? 'Esgotado'
-        : onSale
-          ? `<span style="text-decoration:line-through;color:var(--ink-soft);font-weight:400;margin-right:6px;">${formatBRL(p.price)}</span><span style="color:var(--rust);font-weight:700;">${formatBRL(p.salePrice)}</span>`
-          : formatBRL(p.price);
-      return `
+  function productCardHTML(p){
+    const soldOut = p.stock <= 0;
+    const onSale = isOnSale(p);
+    const isFav = wishlist.includes(p.id);
+    const priceHTML = soldOut
+      ? 'Esgotado'
+      : onSale
+        ? `<span style="text-decoration:line-through;color:var(--ink-soft);font-weight:400;margin-right:6px;">${formatBRL(p.price)}</span><span style="color:var(--rust);font-weight:700;">${formatBRL(p.salePrice)}</span>`
+        : formatBRL(p.price);
+    return `
       <button class="tag-card" data-id="${p.id}" ${soldOut ? 'style="opacity:.55"' : ''}>
         <span class="tag-hole"></span>
         ${onSale && !soldOut ? '<span style="position:absolute;top:10px;left:10px;background:var(--rust);color:#fff;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:4px;z-index:2;">OFERTA</span>' : ''}
+        <span class="fav-heart ${isFav?'active':''}" data-fav-toggle="${p.id}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z" stroke="#111" stroke-width="1.8"/></svg>
+        </span>
         <span class="product-thumb">${productThumbHTML(p,false)}</span>
         <span class="info">
           <h3 class="serif">${p.name}</h3>
@@ -538,10 +809,28 @@
         </span>
       </button>
     `;
-    }).join('');
-    grid.querySelectorAll('.tag-card').forEach(card=>{
-      card.addEventListener('click', ()=> openQuickView(card.dataset.id));
+  }
+
+  function bindCardEvents(container){
+    container.querySelectorAll('.tag-card').forEach(card=>{
+      card.addEventListener('click', (e)=>{
+        if (e.target.closest('[data-fav-toggle]')) return;
+        openQuickView(card.dataset.id);
+      });
     });
+    container.querySelectorAll('[data-fav-toggle]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        toggleWishlist(btn.dataset.favToggle);
+      });
+    });
+  }
+
+  function renderProducts(){
+    const list = getFiltered();
+    countEl.textContent = `${list.length} ${list.length===1?'produto':'produtos'}`;
+    grid.innerHTML = list.map(p => productCardHTML(p)).join('');
+    bindCardEvents(grid);
   }
 
   // ---------------- quick view ----------------
@@ -729,6 +1018,8 @@
   renderCatNav();
   renderCartUI();
   loadProducts();
+  loadTestimonials();
+  loadStoreSettingsPublic();
 })();
 </script>
 
