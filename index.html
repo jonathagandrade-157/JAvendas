@@ -9,23 +9,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#EDEAE2;
-    --ink:#221F1B;
-    --ink-soft:#5B564C;
-    --line:#D9D3C5;
+    --bg:#FFFFFF;
+    --ink:#111111;
+    --ink-soft:#6E6E73;
+    --line:#E4E4E4;
     --green:#34493A;
     --rust:#8B3A2B;
     --gold:#C79A3C;
     --card:#FFFFFF;
-    --accent:#C2541F;
-    --accent-dark:#9C3F16;
+    --accent:#111111;
+    --accent-dark:#000000;
   }
   *{box-sizing:border-box;}
   body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased;}
   button{cursor:pointer; font-family:inherit;}
   img{display:block; max-width:100%;}
   a{color:inherit; text-decoration:none;}
-  .serif{font-family:'Fraunces',serif;}
+  .serif{font-family:'Inter',sans-serif; font-weight:800; letter-spacing:-0.02em;}
   .container{max-width:1160px; margin:0 auto; padding:0 20px;}
   .icon{display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;}
 
@@ -37,6 +37,10 @@
   .header-top{background:var(--accent);}
   .mobile-logo-row{display:none; align-items:center; justify-content:center; gap:8px; padding:10px 20px 0;}
   .header-main{display:flex; align-items:center; gap:16px; padding:14px 20px;}
+  .main-nav{display:none; align-items:center; gap:26px; flex-shrink:0;}
+  .main-nav a{color:#fff; font-size:13.5px; font-weight:600; opacity:.88; white-space:nowrap;}
+  .main-nav a:hover{opacity:1;}
+  @media (min-width:900px){ .main-nav{display:flex;} }
   .search-wrap{flex:1; max-width:360px; display:flex; align-items:center;}
   .search-wrap input{
     width:100%; padding:10px 16px; border:none; border-radius:999px 0 0 999px;
@@ -99,12 +103,25 @@
   .hero p.lead{position:relative; max-width:420px; font-size:16px; line-height:1.6; color:var(--ink-soft); margin:0;}
   @media (min-width:640px){ .hero h1{font-size:52px;} }
 
+  .hero-dark{background:#0B0B0C; overflow:hidden; padding:0;}
+  .hero-dark .container{max-width:760px; padding:64px 20px 56px; text-align:center;}
+  .hero-copy .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:#9A9A9A; margin:0 0 18px;}
+  .hero-title-row{display:flex; align-items:center; justify-content:center; gap:14px; margin:0 0 18px; flex-wrap:wrap;}
+  .hero-title-row .mark{width:44px; height:44px; border-radius:10px; border:1.5px solid #3A3A3C; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .hero-title-row .mark svg{width:24px; height:24px;}
+  .hero-copy h1{color:#fff; font-size:32px; line-height:1.08; margin:0;}
+  @media (min-width:640px){ .hero-copy h1{font-size:44px;} }
+  .hero-copy p.lead{color:#C7C7C7; max-width:460px; margin:0 auto 28px; font-size:15.5px; line-height:1.6;}
+  .hero-cta{display:inline-flex; align-items:center; gap:8px; padding:13px 26px; background:#fff; color:#0B0B0C; border-radius:6px; font-size:13.5px; font-weight:800; letter-spacing:.03em; text-transform:uppercase;}
+
   /* ---------- TRUST BADGES ---------- */
   .trust{padding-bottom:44px;}
   .trust-grid{display:grid; grid-template-columns:1fr; gap:1px; background:var(--line); border-radius:16px; overflow:hidden;}
   @media (min-width:640px){ .trust-grid{grid-template-columns:1fr 1fr 1fr;} }
+  .trust-grid-4{grid-template-columns:1fr 1fr;}
+  @media (min-width:640px){ .trust-grid-4{grid-template-columns:repeat(4,1fr);} }
   .trust-item{display:flex; align-items:center; gap:12px; padding:20px 24px; background:var(--card);}
-  .trust-ico{width:44px; height:44px; border-radius:50%; background:rgba(194,84,31,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .trust-ico{width:44px; height:44px; border-radius:50%; background:rgba(0,0,0,0.06); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
   .trust-item b{display:block; font-size:14px; font-weight:500;}
   .trust-item span{font-size:14px; font-weight:600; color:var(--accent-dark);}
 
@@ -159,13 +176,13 @@
   .cart-empty{font-size:14px; color:var(--ink-soft);}
   .cart-row{display:flex; gap:12px;}
   .cart-thumb{width:64px; height:64px; flex-shrink:0; object-fit:cover; background:var(--line);}
-  .cart-row .name{font-size:14px; margin:0 0 4px; font-family:'Fraunces',serif;}
+  .cart-row .name{font-size:14px; margin:0 0 4px; font-family:'Inter',sans-serif; font-weight:800;}
   .cart-row .meta{font-size:12.5px; color:var(--ink-soft); margin:0 0 8px;}
   .qty-row{display:flex; align-items:center; gap:8px;}
   .qty-btn{width:24px; height:24px; border:1px solid var(--line); background:none; display:flex; align-items:center; justify-content:center;}
   .cart-foot{padding:20px; border-top:1px solid var(--line);}
   .cart-total-row{display:flex; justify-content:space-between; font-size:14px; margin-bottom:16px;}
-  .cart-total-row b{font-family:'Fraunces',serif; font-size:18px; font-weight:600;}
+  .cart-total-row b{font-family:'Inter',sans-serif; font-weight:800; font-size:18px;}
   .checkout-btn{width:100%; padding:13px; border:none; border-radius:6px; background:var(--ink); color:var(--bg); font-size:14px; letter-spacing:.02em; font-weight:600;}
 
   /* ---------- TOAST ---------- */
@@ -187,11 +204,11 @@
   <rect width="100%" height="100%" filter="url(#jaGrain)"/>
 </svg>
 
-<header>
+<header id="topo">
   <div class="header-top">
     <div class="mobile-logo-row">
       <img src="assets/logo.png" alt="JA Store" style="height:26px;width:auto" onerror="this.replaceWith(fallbackLogoNode(26))">
-      <span style="color:#fff;font-weight:700;font-family:'Fraunces',serif;font-size:16px;">JA Store</span>
+      <span style="color:#fff;font-weight:700;font-family:'Inter',sans-serif;font-weight:800;font-size:16px;">JA Store</span>
     </div>
     <div class="container header-main">
       <div class="search-wrap">
@@ -206,6 +223,15 @@
         <span>JA Store</span>
       </div>
 
+      <nav class="main-nav">
+        <a href="#topo">Início</a>
+        <a href="#produtos">Produtos</a>
+        <a href="#categorias">Categorias</a>
+        <a href="#produtos">Ofertas</a>
+        <a href="#sobre">Sobre nós</a>
+        <a href="#contato">Contato</a>
+      </nav>
+
       <div class="header-right">
         <a class="icon-btn" href="https://wa.me/5511946790983" target="_blank" rel="noopener" aria-label="WhatsApp">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20.5 3.5A11 11 0 003.8 17.4L2 22l4.7-1.7A11 11 0 1020.5 3.5z" stroke="#fff" stroke-width="1.8"/></svg>
@@ -213,12 +239,6 @@
         <a class="icon-btn" href="#" aria-label="Instagram">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="#fff" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="#fff"/></svg>
         </a>
-        <span class="divider-v"></span>
-        <button class="entrar-btn">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#fff" stroke-width="1.8"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" stroke="#fff" stroke-width="1.8"/></svg>
-          Entrar
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
-        </button>
         <button class="cart-btn" id="openCartBtn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 2L4 6M18 2l2 4M3 8h18l-1.5 12a2 2 0 01-2 1.8H6.5a2 2 0 01-2-1.8L3 8z" stroke="currentColor" stroke-width="1.8"/></svg>
           <span style="display:inline">Carrinho</span>
@@ -228,49 +248,73 @@
     </div>
   </div>
 
-  <div class="cat-nav-wrap">
+  <div class="cat-nav-wrap" id="categorias">
     <nav class="cat-nav" id="catNavDesktop"></nav>
     <div class="cat-nav-mobile" id="catNavMobile"></div>
   </div>
 </header>
 
-<section class="hero">
-  <div class="hero-blobs">
-    <div class="blob" style="width:460px;height:460px;top:-160px;right:-120px;background:radial-gradient(circle,rgba(139,58,43,0.19),transparent 70%)"></div>
-    <div class="blob" style="width:380px;height:380px;top:60px;left:-160px;background:radial-gradient(circle,rgba(52,73,58,0.17),transparent 72%)"></div>
-    <div class="blob" style="width:260px;height:260px;bottom:-120px;right:120px;background:radial-gradient(circle,rgba(199,154,60,0.2),transparent 70%)"></div>
-  </div>
+<section class="hero-dark">
   <div class="container">
-    <p class="eyebrow">JA Store · catálogo completo</p>
-    <h1 class="serif">Streetwear, esporte e casual, tudo num só lugar.</h1>
-    <p class="lead">Calçados, camisetas, conjuntos, moletons e mais — enviamos para todo o Brasil.</p>
+    <div class="hero-copy">
+      <p class="eyebrow">JA Store · coleção atual</p>
+      <div class="hero-title-row">
+        <span class="mark">
+          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <text x="20" y="27" text-anchor="middle" font-family="Inter, sans-serif" font-weight="800" font-size="17" fill="#fff">JA</text>
+          </svg>
+        </span>
+        <h1 class="serif">Estilo que te representa.</h1>
+      </div>
+      <p class="lead">Calçados, camisetas, conjuntos, moletons e mais — peças pensadas pro seu dia a dia, com envio para todo o Brasil.</p>
+      <a href="#produtos" class="hero-cta">Ver coleção</a>
+    </div>
   </div>
 </section>
 
 <section class="trust">
   <div class="container">
-    <div class="trust-grid">
+    <div class="trust-grid trust-grid-4">
       <div class="trust-item">
-        <div class="trust-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="1" y="7" width="13" height="9" stroke="#9C3F16" stroke-width="1.8"/><path d="M14 10h4l3 3v3h-7z" stroke="#9C3F16" stroke-width="1.8"/><circle cx="6" cy="19" r="1.8" stroke="#9C3F16" stroke-width="1.6"/><circle cx="17" cy="19" r="1.8" stroke="#9C3F16" stroke-width="1.6"/></svg></div>
-        <div><b>Envio para</b><span>Todo o Brasil</span></div>
+        <div class="trust-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="1" y="7" width="13" height="9" stroke="#111111" stroke-width="1.8"/><path d="M14 10h4l3 3v3h-7z" stroke="#111111" stroke-width="1.8"/><circle cx="6" cy="19" r="1.8" stroke="#111111" stroke-width="1.6"/><circle cx="17" cy="19" r="1.8" stroke="#111111" stroke-width="1.6"/></svg></div>
+        <div><b>Frete grátis</b><span>Acima de R$ 300</span></div>
       </div>
       <div class="trust-item">
-        <div class="trust-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="1.5" stroke="#9C3F16" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="#9C3F16" stroke-width="1.8"/></svg></div>
+        <div class="trust-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="14" rx="2" stroke="#111111" stroke-width="1.8"/><path d="M2 10h20" stroke="#111111" stroke-width="1.8"/></svg></div>
+        <div><b>Parcelamento</b><span>Em até 12x</span></div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="1.5" stroke="#111111" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="#111111" stroke-width="1.8"/></svg></div>
         <div><b>Compra</b><span>100% segura</span></div>
       </div>
       <div class="trust-item">
-        <div class="trust-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" stroke="#9C3F16" stroke-width="1.8"/><path d="M9 12l2 2 4-4" stroke="#9C3F16" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <div class="trust-ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" stroke="#111111" stroke-width="1.8"/><path d="M9 12l2 2 4-4" stroke="#111111" stroke-width="1.8" stroke-linecap="round"/></svg></div>
         <div><b>Qualidade</b><span>Premium</span></div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="container">
+<section class="container" id="produtos">
   <div class="products-head">
     <span class="products-count" id="productsCount">0 produtos</span>
   </div>
   <div class="products-grid" id="productsGrid"></div>
+</section>
+
+<section class="container" id="sobre" style="padding:60px 20px; border-top:1px solid var(--line);">
+  <h2 class="serif" style="font-size:26px; margin:0 0 14px;">Sobre a JA Store</h2>
+  <p style="max-width:560px; color:var(--ink-soft); line-height:1.7; font-size:15px;">
+    A JA Store nasceu para vestir quem gosta de um visual despojado, sem abrir mão de qualidade —
+    do streetwear ao esporte, do casual ao dia a dia. Selecionamos cada peça pensando em caimento,
+    durabilidade e um preço justo.
+  </p>
+</section>
+
+<section class="container" id="contato" style="padding:0 20px 60px;">
+  <h2 class="serif" style="font-size:26px; margin:0 0 14px;">Contato</h2>
+  <p style="color:var(--ink-soft); font-size:15px; margin-bottom:6px;">WhatsApp: <a href="https://wa.me/5511946790983" style="color:var(--ink); font-weight:700;">(11) 94679-0983</a></p>
+  <p style="color:var(--ink-soft); font-size:15px;">Atendimento: Seg. a sex., 9h às 18h</p>
 </section>
 
 <footer>
@@ -342,7 +386,7 @@
     { id: "sueter", label: "Suéter" },
   ];
 
-  const SWATCHES = ["#34493A", "#8B3A2B", "#C79A3C", "#221F1B", "#5B564C"];
+  const SWATCHES = ["#111111", "#3D3D3D", "#6E6E73", "#A3A3A3", "#D4D4D4"];
 
   const SIZE_SETS = {
     shoe: ["38","39","40","41","42","43"],
@@ -371,6 +415,7 @@
         name: p.name,
         category: p.category,
         price: Number(p.price),
+        salePrice: p.sale_price ? Number(p.sale_price) : null,
         stock: p.stock,
         sizeType: p.size_type,
         tone: p.tone,
@@ -387,6 +432,13 @@
 
   function formatBRL(v){
     return v.toLocaleString("pt-BR",{ style:"currency", currency:"BRL" });
+  }
+
+  function effectivePrice(p){
+    return (p.salePrice && p.salePrice > 0 && p.salePrice < p.price) ? p.salePrice : p.price;
+  }
+  function isOnSale(p){
+    return p.salePrice && p.salePrice > 0 && p.salePrice < p.price;
   }
 
   function iconShirt(color,size){
@@ -411,8 +463,8 @@
     const div = document.createElement('div');
     div.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 40 40" fill="none">
       <path d="M8 4H30L36 20L30 36H8C6.9 36 6 35.1 6 34V6C6 4.9 6.9 4 8 4Z" fill="#ffffff"/>
-      <circle cx="14" cy="12" r="2.6" fill="#C2541F"/>
-      <text x="20.5" y="25.5" text-anchor="middle" font-family="Fraunces, serif" font-weight="700" font-size="13" fill="#C2541F">JA</text>
+      <circle cx="14" cy="12" r="2.6" fill="#111111"/>
+      <text x="20.5" y="25.5" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="13" fill="#111111">JA</text>
     </svg>`;
     return div.firstElementChild;
   }
@@ -469,13 +521,20 @@
     countEl.textContent = `${list.length} ${list.length===1?'produto':'produtos'}`;
     grid.innerHTML = list.map(p => {
       const soldOut = p.stock <= 0;
+      const onSale = isOnSale(p);
+      const priceHTML = soldOut
+        ? 'Esgotado'
+        : onSale
+          ? `<span style="text-decoration:line-through;color:var(--ink-soft);font-weight:400;margin-right:6px;">${formatBRL(p.price)}</span><span style="color:var(--rust);font-weight:700;">${formatBRL(p.salePrice)}</span>`
+          : formatBRL(p.price);
       return `
       <button class="tag-card" data-id="${p.id}" ${soldOut ? 'style="opacity:.55"' : ''}>
         <span class="tag-hole"></span>
+        ${onSale && !soldOut ? '<span style="position:absolute;top:10px;left:10px;background:var(--rust);color:#fff;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:4px;z-index:2;">OFERTA</span>' : ''}
         <span class="product-thumb">${productThumbHTML(p,false)}</span>
         <span class="info">
           <h3 class="serif">${p.name}</h3>
-          <p class="price">${soldOut ? 'Esgotado' : formatBRL(p.price)}</p>
+          <p class="price">${priceHTML}</p>
         </span>
       </button>
     `;
@@ -531,7 +590,11 @@
     }
 
     qvName.textContent = quickView.name;
-    qvPrice.textContent = formatBRL(quickView.price);
+    if (isOnSale(quickView)){
+      qvPrice.innerHTML = `<span style="text-decoration:line-through;color:var(--ink-soft);font-weight:400;margin-right:8px;">${formatBRL(quickView.price)}</span><span style="color:var(--rust);font-weight:800;">${formatBRL(quickView.salePrice)}</span>`;
+    } else {
+      qvPrice.textContent = formatBRL(quickView.price);
+    }
     if (quickView.sizeType === "none"){
       qvSizeBlock.style.display = "none";
     } else {
@@ -584,7 +647,7 @@
   function cartTotal(){
     return cart.reduce((s,i)=>{
       const p = PRODUCTS.find(p=>p.id===i.id);
-      return s + (p ? p.price*i.qty : 0);
+      return s + (p ? effectivePrice(p)*i.qty : 0);
     },0);
   }
 
@@ -608,7 +671,7 @@
           <img class="cart-thumb" src="${p.image}" onerror="this.outerHTML='<div class=\\'cart-thumb\\' style=\\'background:${SWATCHES[p.tone%SWATCHES.length]}18\\'></div>'">
           <div style="flex:1">
             <p class="name">${p.name}</p>
-            <p class="meta">${sizeLabel}${formatBRL(p.price)}</p>
+            <p class="meta">${sizeLabel}${formatBRL(effectivePrice(p))}</p>
             <div class="qty-row">
               <button class="qty-btn" data-action="dec" data-idx="${idx}">−</button>
               <span style="font-size:14px;width:16px;text-align:center">${item.qty}</span>
@@ -644,7 +707,7 @@
         size: item.size,
         qty: item.qty,
         name: p ? p.name : "",
-        price: p ? p.price : 0,
+        price: p ? effectivePrice(p) : 0,
         image: p ? p.image : "",
       };
     });
