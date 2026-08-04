@@ -8,13 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#EDEAE2; --ink:#221F1B; --ink-soft:#5B564C; --line:#D9D3C5;
+    --bg:#FFFFFF; --ink:#111111; --ink-soft:#6E6E73; --line:#E4E4E4;
     --green:#34493A; --rust:#8B3A2B; --gold:#C79A3C; --card:#FFFFFF;
-    --accent:#C2541F; --accent-dark:#9C3F16;
+    --accent:#111111; --accent-dark:#000000;
   }
   *{box-sizing:border-box;}
   body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif;}
-  .serif{font-family:'Fraunces',serif;}
+  .serif{font-family:'Inter',sans-serif; font-weight:800; letter-spacing:-0.02em;}
   a{color:inherit;}
   input,select{
     width:100%; padding:11px 13px; border-radius:8px; border:1.5px solid var(--line);
@@ -27,10 +27,15 @@
   .row-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;}
   button{cursor:pointer; font-family:inherit;}
 
-  header{background:var(--accent); padding:16px 20px;}
-  header .container{max-width:1040px; margin:0 auto; display:flex; align-items:center; gap:10px;}
-  header a{color:#fff; font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px;}
-  header .brand{color:#fff; font-weight:700; font-size:16px; margin-left:auto;}
+  header{background:var(--accent); padding:0;}
+  header .container{max-width:1160px; margin:0 auto; display:flex; align-items:center; gap:24px; padding:14px 20px;}
+  header .brand{display:flex; align-items:center; gap:8px; color:#fff; font-weight:800; font-size:16px;}
+  header .brand img{height:28px; width:auto;}
+  header .main-nav{display:none; align-items:center; gap:22px; flex:1;}
+  header .main-nav a{color:#fff; font-size:13.5px; font-weight:600; opacity:.85;}
+  header .main-nav a:hover{opacity:1;}
+  @media (min-width:800px){ header .main-nav{display:flex;} }
+  header .back-link{color:#fff; font-size:13.5px; font-weight:600; margin-left:auto; opacity:.9;}
 
   .container{max-width:1040px; margin:0 auto; padding:0 20px;}
   .layout{display:grid; grid-template-columns:1fr; gap:28px; padding:32px 0 80px;}
@@ -57,7 +62,7 @@
     display:flex; align-items:center; gap:10px; padding:12px; border:1.5px solid var(--line);
     border-radius:8px; margin-bottom:8px; cursor:pointer; font-size:13.5px;
   }
-  .shipping-opt.selected{border-color:var(--accent); background:rgba(194,84,31,0.06);}
+  .shipping-opt.selected{border-color:var(--accent); background:rgba(0,0,0,0.05);}
   .shipping-opt .price{margin-left:auto; font-weight:700;}
 
   .coupon-row{display:flex; gap:8px;}
@@ -66,13 +71,15 @@
   #couponMsg{font-size:12.5px; margin-top:8px;}
 
   .summary-row{display:flex; justify-content:space-between; font-size:14px; margin-bottom:8px; color:var(--ink-soft);}
-  .summary-row.total{color:var(--ink); font-weight:700; font-size:17px; font-family:'Fraunces',serif; border-top:1px solid var(--line); padding-top:12px; margin-top:8px;}
+  .summary-row.total{color:var(--ink); font-weight:700; font-size:17px; font-family:'Inter',sans-serif; font-weight:800; border-top:1px solid var(--line); padding-top:12px; margin-top:8px;}
 
   .pay-methods{display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap;}
   .pay-pill{
     flex:1; min-width:100px; text-align:center; padding:12px 8px; border:1.5px solid var(--line); border-radius:8px;
-    font-size:13px; font-weight:600; color:var(--ink-soft);
+    font-size:13px; font-weight:600; color:var(--ink-soft); cursor:pointer; background:#fff; transition:all .15s ease;
   }
+  .pay-pill:hover{border-color:#B0B0B0;}
+  .pay-pill.selected{border-color:var(--ink); background:rgba(0,0,0,0.04); color:var(--ink);}
   .pay-note{font-size:12px; color:var(--ink-soft); line-height:1.5; margin-top:-8px; margin-bottom:16px;}
 
   .pay-btn{
@@ -95,8 +102,19 @@
 
 <header>
   <div class="container">
-    <a href="index.html">← Voltar à loja</a>
-    <span class="brand serif">JA Store</span>
+    <span class="brand serif">
+      <img src="assets/logo.png" alt="JA Store" onerror="this.outerHTML='&lt;svg width=&quot;28&quot; height=&quot;28&quot; viewBox=&quot;0 0 40 40&quot;&gt;&lt;rect width=&quot;40&quot; height=&quot;40&quot; rx=&quot;9&quot; fill=&quot;#fff&quot;/&gt;&lt;text x=&quot;20&quot; y=&quot;27&quot; text-anchor=&quot;middle&quot; font-family=&quot;Inter,sans-serif&quot; font-weight=&quot;800&quot; font-size=&quot;17&quot; fill=&quot;#111&quot;&gt;JA&lt;/text&gt;&lt;/svg&gt;'">
+      JA STORE
+    </span>
+    <nav class="main-nav">
+      <a href="index.html#topo">Início</a>
+      <a href="index.html#produtos">Produtos</a>
+      <a href="index.html#categorias">Categorias</a>
+      <a href="index.html#produtos">Ofertas</a>
+      <a href="index.html#sobre">Sobre nós</a>
+      <a href="index.html#contato">Contato</a>
+    </nav>
+    <a href="index.html" class="back-link">← Voltar à loja</a>
   </div>
 </header>
 
@@ -124,6 +142,7 @@
 
   let shippingOptions = [];
   let selectedShipping = null;
+  let selectedPaymentMethod = null;
   let coupon = { code: null, discount: 0 };
 
   function formatBRL(v){ return Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
@@ -195,14 +214,14 @@
             <div class="summary-row"><span>Frete</span><span id="sumShipping">Calcule o CEP</span></div>
             <div class="summary-row total"><span>Total</span><span id="sumTotal"></span></div>
 
-            <div class="pay-methods" style="margin-top:18px;">
-              <div class="pay-pill">💳 Cartão</div>
-              <div class="pay-pill">Pix</div>
-              <div class="pay-pill">Boleto</div>
+            <div class="pay-methods" id="payMethods" style="margin-top:18px;">
+              <div class="pay-pill" data-method="credit_card">💳 Cartão</div>
+              <div class="pay-pill" data-method="pix">Pix</div>
+              <div class="pay-pill" data-method="boleto">Boleto</div>
             </div>
-            <p class="pay-note">Você escolhe a forma de pagamento na próxima tela, com segurança do Mercado Pago.</p>
+            <p class="pay-note">Escolha a forma de pagamento — você conclui com segurança na página do Mercado Pago.</p>
 
-            <button class="pay-btn" id="payBtn">Ir para pagamento</button>
+            <button class="pay-btn" id="payBtn">Escolha uma forma de pagamento</button>
             <p id="formError"></p>
           </div>
         </div>
@@ -265,7 +284,7 @@
   function updateSummary(){
     document.getElementById('sumSubtotal').textContent = formatBRL(subtotal());
     document.getElementById('sumDiscount').textContent = '- ' + formatBRL(coupon.discount);
-    document.getElementById('sumShipping').textContent = selectedShipping ? formatBRL(selectedShipping.price) : 'Calcule o CEP';
+    document.getElementById('sumShipping').textContent = selectedShipping ? (selectedShipping.price === 0 ? 'Grátis' : formatBRL(selectedShipping.price)) : 'Calcule o CEP';
     document.getElementById('sumTotal').textContent = formatBRL(total());
   }
 
@@ -290,7 +309,23 @@
 
     document.getElementById('applyCouponBtn').addEventListener('click', applyCoupon);
     document.getElementById('payBtn').addEventListener('click', goToPayment);
+
+    const methodLabels = {
+      credit_card: 'Finalizar pedido no Cartão',
+      pix: 'Finalizar pedido no Pix',
+      boleto: 'Finalizar pedido no Boleto',
+    };
+    document.querySelectorAll('.pay-pill').forEach(pill=>{
+      pill.addEventListener('click', ()=>{
+        document.querySelectorAll('.pay-pill').forEach(p=>p.classList.remove('selected'));
+        pill.classList.add('selected');
+        selectedPaymentMethod = pill.dataset.method;
+        document.getElementById('payBtn').textContent = methodLabels[selectedPaymentMethod];
+      });
+    });
   }
+
+  const FREE_SHIPPING_THRESHOLD = 300;
 
   async function calculateShipping(cep){
     const msgEl = document.getElementById('shippingMsg');
@@ -308,12 +343,17 @@
         msgEl.textContent = data.error || 'Não foi possível calcular o frete. Tente novamente.';
         return;
       }
-      shippingOptions = data.options;
-      msgEl.textContent = '';
+
+      const freeShipping = subtotal() >= FREE_SHIPPING_THRESHOLD;
+      shippingOptions = data.options.map(opt => freeShipping ? { ...opt, price: 0 } : opt);
+
+      msgEl.textContent = freeShipping
+        ? `🎉 Frete grátis! Sua compra passou de ${formatBRL(FREE_SHIPPING_THRESHOLD)}.`
+        : '';
       optsEl.innerHTML = shippingOptions.map((opt, i) => `
         <div class="shipping-opt" data-idx="${i}">
           <span>${opt.service} — até ${opt.days} dia(s)</span>
-          <span class="price">${formatBRL(opt.price)}</span>
+          <span class="price">${opt.price === 0 ? 'Grátis' : formatBRL(opt.price)}</span>
         </div>
       `).join('');
       optsEl.querySelectorAll('.shipping-opt').forEach(el=>{
@@ -391,6 +431,9 @@
     if (!selectedShipping){
       showFormError('Calcule e selecione uma opção de frete.'); return;
     }
+    if (!selectedPaymentMethod){
+      showFormError('Escolha uma forma de pagamento (Cartão, Pix ou Boleto).'); return;
+    }
 
     const payBtn = document.getElementById('payBtn');
     payBtn.disabled = true;
@@ -402,6 +445,7 @@
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({
           customer, address,
+          preferredMethod: selectedPaymentMethod,
           items: cart.map(i => ({ id: i.id, quantity: i.qty, size: i.size })),
           shipping: selectedShipping,
           couponCode: coupon.code,
@@ -411,7 +455,7 @@
       if (!res.ok){
         showFormError(data.error || 'Não foi possível iniciar o pagamento.');
         payBtn.disabled = false;
-        payBtn.textContent = 'Ir para pagamento';
+        payBtn.textContent = selectedPaymentMethod ? {credit_card:'Finalizar pedido no Cartão',pix:'Finalizar pedido no Pix',boleto:'Finalizar pedido no Boleto'}[selectedPaymentMethod] : 'Escolha uma forma de pagamento';
         return;
       }
       localStorage.removeItem('ja_cart');
@@ -420,7 +464,7 @@
       console.error(err);
       showFormError('Erro de conexão. Tente novamente.');
       payBtn.disabled = false;
-      payBtn.textContent = 'Ir para pagamento';
+      payBtn.textContent = selectedPaymentMethod ? {credit_card:'Finalizar pedido no Cartão',pix:'Finalizar pedido no Pix',boleto:'Finalizar pedido no Boleto'}[selectedPaymentMethod] : 'Escolha uma forma de pagamento';
     }
   }
 
