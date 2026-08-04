@@ -99,6 +99,7 @@
         <button class="tab-btn active" data-tab="products">Produtos</button>
         <button class="tab-btn" data-tab="orders">Pedidos</button>
         <button class="tab-btn" data-tab="summary">Resumo</button>
+        <button class="tab-btn" data-tab="coupons">Cupons</button>
       </div>
       <button id="logoutBtn">Sair</button>
     </div>
@@ -150,6 +151,42 @@
       </div>
       <canvas id="revenueChart" height="90"></canvas>
     </div>
+
+    <div id="couponsTab" class="panel" style="display:none;">
+      <div class="panel-head">
+        <h2>Cupons de desconto</h2>
+        <button class="btn btn-primary" id="newCouponBtn">+ Novo cupom</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Código</th><th>Desconto</th><th>Ativo</th><th>Usos</th><th>Validade</th><th></th></tr>
+        </thead>
+        <tbody id="couponsBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de cupom -->
+<div class="overlay" id="couponOverlay">
+  <div class="modal">
+    <h3 class="serif" id="couponModalTitle">Novo cupom</h3>
+    <input type="hidden" id="coupId">
+    <div class="field"><label>Código (ex: BEMVINDO10)</label><input id="coupCode" style="text-transform:uppercase;"></div>
+    <div class="field"><label>Tipo de desconto</label>
+      <select id="coupType">
+        <option value="percent">Percentual (%)</option>
+        <option value="fixed">Valor fixo (R$)</option>
+      </select>
+    </div>
+    <div class="field"><label>Valor do desconto</label><input id="coupValue" type="number" step="0.01"></div>
+    <div class="field"><label>Limite de usos (opcional)</label><input id="coupLimit" type="number" step="1"></div>
+    <div class="field"><label>Válido até (opcional)</label><input id="coupExpires" type="date"></div>
+    <div class="field"><label><input type="checkbox" id="coupActive" style="width:auto;display:inline-block;margin-right:6px;">Cupom ativo</label></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="saveCouponBtn" style="flex:1">Salvar</button>
+      <button class="btn btn-ghost" id="cancelCouponBtn">Cancelar</button>
+    </div>
   </div>
 </div>
 
@@ -181,6 +218,7 @@
       </select>
     </div>
     <div class="field"><label>Preço de venda (R$)</label><input id="prodPrice" type="number" step="0.01"></div>
+    <div class="field"><label>Preço promocional (R$, opcional — deixe vazio se não estiver em oferta)</label><input id="prodSalePrice" type="number" step="0.01"></div>
     <div class="field"><label>Custo (R$, opcional)</label><input id="prodCost" type="number" step="0.01"></div>
     <div class="field"><label>Estoque</label><input id="prodStock" type="number" step="1"></div>
     <div class="field"><label>URL da foto de capa (ex: assets/products/nome.jpg)</label><input id="prodImage"></div>
@@ -255,8 +293,10 @@ assets/products/nome-modelo.jpg"></textarea>
       document.getElementById('productsTab').style.display = tab === 'products' ? 'block' : 'none';
       document.getElementById('ordersTab').style.display = tab === 'orders' ? 'block' : 'none';
       document.getElementById('summaryTab').style.display = tab === 'summary' ? 'block' : 'none';
+      document.getElementById('couponsTab').style.display = tab === 'coupons' ? 'block' : 'none';
       if (tab === 'orders') loadOrders();
       if (tab === 'summary') loadSummary();
+      if (tab === 'coupons') loadCoupons();
     });
   });
 
@@ -268,7 +308,7 @@ assets/products/nome-modelo.jpg"></textarea>
       <tr>
         <td>${p.name}</td>
         <td>${p.category}</td>
-        <td>R$ ${Number(p.price).toFixed(2)}</td>
+        <td>${p.sale_price && Number(p.sale_price) < Number(p.price) ? `<span style="text-decoration:line-through;color:var(--ink-soft);">R$ ${Number(p.price).toFixed(2)}</span> <b style="color:var(--rust);">R$ ${Number(p.sale_price).toFixed(2)}</b>` : `R$ ${Number(p.price).toFixed(2)}`}</td>
         <td>${p.stock}</td>
         <td>${p.active ? '✅' : '—'}</td>
         <td style="text-align:right; white-space:nowrap;">
@@ -309,6 +349,7 @@ assets/products/nome-modelo.jpg"></textarea>
     document.getElementById('prodCategory').value = product?.category || 'camisetas';
     document.getElementById('prodSizeType').value = product?.size_type || 'clothing';
     document.getElementById('prodPrice').value = product?.price || '';
+    document.getElementById('prodSalePrice').value = product?.sale_price || '';
     document.getElementById('prodCost').value = product?.cost || '';
     document.getElementById('prodStock').value = product?.stock ?? 0;
     document.getElementById('prodImage').value = product?.image_url || '';
@@ -328,6 +369,7 @@ assets/products/nome-modelo.jpg"></textarea>
       category: document.getElementById('prodCategory').value,
       size_type: document.getElementById('prodSizeType').value,
       price: Number(document.getElementById('prodPrice').value || 0),
+      sale_price: Number(document.getElementById('prodSalePrice').value || 0) || null,
       cost: Number(document.getElementById('prodCost').value || 0) || null,
       stock: Number(document.getElementById('prodStock').value || 0),
       image_url: document.getElementById('prodImage').value.trim() || null,
@@ -446,6 +488,88 @@ assets/products/nome-modelo.jpg"></textarea>
       }
     });
   }
+
+  // ---------------- cupons ----------------
+  async function loadCoupons(){
+    const { data, error } = await sb.from('coupons').select('*').order('created_at', { ascending: false });
+    if (error){ showToast('Erro ao carregar cupons'); console.error(error); return; }
+
+    document.getElementById('couponsBody').innerHTML = data.map(c => {
+      const desconto = c.discount_type === 'percent' ? `${Number(c.discount_value)}%` : `R$ ${Number(c.discount_value).toFixed(2)}`;
+      const validade = c.expires_at ? new Date(c.expires_at).toLocaleDateString('pt-BR') : '—';
+      const usos = c.usage_limit ? `${c.used_count || 0} / ${c.usage_limit}` : `${c.used_count || 0}`;
+      return `
+        <tr>
+          <td><b>${c.code}</b></td>
+          <td>${desconto}</td>
+          <td>${c.active ? '✅' : '—'}</td>
+          <td>${usos}</td>
+          <td>${validade}</td>
+          <td style="text-align:right; white-space:nowrap;">
+            <button class="btn btn-ghost" data-edit-coupon="${c.id}">Editar</button>
+            <button class="btn btn-danger" data-delete-coupon="${c.id}">Excluir</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    document.querySelectorAll('[data-edit-coupon]').forEach(btn=>{
+      btn.addEventListener('click', ()=> openCouponModal(data.find(c=>c.id===btn.dataset.editCoupon)));
+    });
+    document.querySelectorAll('[data-delete-coupon]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        if (!confirm('Excluir este cupom?')) return;
+        const { error } = await sb.from('coupons').delete().eq('id', btn.dataset.deleteCoupon);
+        if (error){ showToast('Erro ao excluir'); return; }
+        showToast('Cupom excluído');
+        loadCoupons();
+      });
+    });
+  }
+
+  const couponOverlay = document.getElementById('couponOverlay');
+
+  document.getElementById('newCouponBtn').addEventListener('click', ()=> openCouponModal(null));
+  document.getElementById('cancelCouponBtn').addEventListener('click', ()=> couponOverlay.classList.remove('open'));
+
+  function openCouponModal(coupon){
+    document.getElementById('couponModalTitle').textContent = coupon ? 'Editar cupom' : 'Novo cupom';
+    document.getElementById('coupId').value = coupon?.id || '';
+    document.getElementById('coupCode').value = coupon?.code || '';
+    document.getElementById('coupType').value = coupon?.discount_type || 'percent';
+    document.getElementById('coupValue').value = coupon?.discount_value || '';
+    document.getElementById('coupLimit').value = coupon?.usage_limit || '';
+    document.getElementById('coupExpires').value = coupon?.expires_at ? coupon.expires_at.slice(0,10) : '';
+    document.getElementById('coupActive').checked = coupon ? coupon.active : true;
+    couponOverlay.classList.add('open');
+  }
+
+  document.getElementById('saveCouponBtn').addEventListener('click', async ()=>{
+    const id = document.getElementById('coupId').value;
+    const code = document.getElementById('coupCode').value.trim().toUpperCase();
+    if (!code){ showToast('Informe o código do cupom'); return; }
+
+    const payload = {
+      code,
+      discount_type: document.getElementById('coupType').value,
+      discount_value: Number(document.getElementById('coupValue').value || 0),
+      usage_limit: Number(document.getElementById('coupLimit').value || 0) || null,
+      expires_at: document.getElementById('coupExpires').value || null,
+      active: document.getElementById('coupActive').checked,
+    };
+
+    let error;
+    if (id){
+      ({ error } = await sb.from('coupons').update(payload).eq('id', id));
+    } else {
+      ({ error } = await sb.from('coupons').insert(payload));
+    }
+
+    if (error){ showToast('Erro ao salvar: ' + error.message); return; }
+    showToast('Cupom salvo!');
+    couponOverlay.classList.remove('open');
+    loadCoupons();
+  });
 
   let toastTimer;
   function showToast(msg){
