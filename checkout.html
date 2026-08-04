@@ -145,14 +145,20 @@
   let selectedPaymentMethod = null;
   let coupon = { code: null, discount: 0 };
 
+  const PIX_DISCOUNT_RATE = 0.05;
+
   function formatBRL(v){ return Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
 
   function subtotal(){
     return cart.reduce((s,i)=> s + (i.price * i.qty), 0);
   }
+  function pixDiscountValue(){
+    if (selectedPaymentMethod !== 'pix') return 0;
+    return Math.round(subtotal() * PIX_DISCOUNT_RATE * 100) / 100;
+  }
   function total(){
     const shippingPrice = selectedShipping ? selectedShipping.price : 0;
-    return Math.max(0, subtotal() - coupon.discount + shippingPrice);
+    return Math.max(0, subtotal() - coupon.discount - pixDiscountValue() + shippingPrice);
   }
 
   function render(){
@@ -210,13 +216,14 @@
           <div class="card" style="position:sticky; top:20px;">
             <h2>Resumo do pedido</h2>
             <div class="summary-row"><span>Subtotal</span><span id="sumSubtotal"></span></div>
-            <div class="summary-row"><span>Desconto</span><span id="sumDiscount">R$ 0,00</span></div>
+            <div class="summary-row"><span>Desconto (cupom)</span><span id="sumDiscount">R$ 0,00</span></div>
+            <div class="summary-row" id="sumPixRow" style="display:none;"><span>Desconto Pix (5%)</span><span id="sumPixDiscount"></span></div>
             <div class="summary-row"><span>Frete</span><span id="sumShipping">Calcule o CEP</span></div>
             <div class="summary-row total"><span>Total</span><span id="sumTotal"></span></div>
 
             <div class="pay-methods" id="payMethods" style="margin-top:18px;">
               <div class="pay-pill" data-method="credit_card">💳 Cartão</div>
-              <div class="pay-pill" data-method="pix">Pix</div>
+              <div class="pay-pill" data-method="pix">Pix <span style="color:var(--rust); font-weight:800;">-5%</span></div>
               <div class="pay-pill" data-method="boleto">Boleto</div>
             </div>
             <p class="pay-note">Escolha a forma de pagamento — você conclui com segurança na página do Mercado Pago.</p>
@@ -284,6 +291,9 @@
   function updateSummary(){
     document.getElementById('sumSubtotal').textContent = formatBRL(subtotal());
     document.getElementById('sumDiscount').textContent = '- ' + formatBRL(coupon.discount);
+    const pixDiscount = pixDiscountValue();
+    document.getElementById('sumPixRow').style.display = pixDiscount > 0 ? 'flex' : 'none';
+    if (pixDiscount > 0) document.getElementById('sumPixDiscount').textContent = '- ' + formatBRL(pixDiscount);
     document.getElementById('sumShipping').textContent = selectedShipping ? (selectedShipping.price === 0 ? 'Grátis' : formatBRL(selectedShipping.price)) : 'Calcule o CEP';
     document.getElementById('sumTotal').textContent = formatBRL(total());
   }
@@ -321,6 +331,7 @@
         pill.classList.add('selected');
         selectedPaymentMethod = pill.dataset.method;
         document.getElementById('payBtn').textContent = methodLabels[selectedPaymentMethod];
+        updateSummary();
       });
     });
   }
