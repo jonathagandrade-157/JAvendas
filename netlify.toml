@@ -5,9 +5,12 @@
 [functions]
   node_bundler = "esbuild"
 
-# As funções ficam acessíveis em /.netlify/functions/<nome>
-# Redirects amigáveis (opcional, deixa as URLs mais curtas)
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/.netlify/functions/sitemap"
   status = 200
