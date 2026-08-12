@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">Produto | JA Store</title>
+<meta id="pageDescription" name="description" content="Confira esse produto na JA Store.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF; --ink:#111111; --ink-soft:#6E6E73; --line:#E4E4E4;
+    --card:#FFFFFF; --accent:#111111; --accent-dark:#000000; --rust:#8B3A2B; --green:#1F7A44;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif; font-size:14px;}
+  .serif{font-family:'Inter',sans-serif; font-weight:800; letter-spacing:-0.02em;}
+  a{color:inherit; text-decoration:none;}
+  button{cursor:pointer; font-family:inherit;}
+  .container{width:100%; max-width:1160px; margin:0 auto; padding:0 20px;}
+
+  header{background:var(--accent); padding:0;}
+  header .container{max-width:1160px; margin:0 auto; display:flex; align-items:center; gap:16px; padding:14px 20px;}
+  header .brand{display:flex; align-items:center; gap:8px; color:#fff; font-weight:800; font-size:16px;}
+  header .icon-btn{width:36px; height:36px; border-radius:50%; border:none; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; position:relative;}
+  header .right{margin-left:auto; display:flex; align-items:center; gap:8px;}
+  header .back-link{color:#fff; font-size:13px; font-weight:600; opacity:.9;}
+  .cart-count{position:absolute; top:-6px; right:-6px; width:16px; height:16px; border-radius:50%; background:var(--rust); color:#fff; font-size:9.5px; display:flex; align-items:center; justify-content:center;}
+
+  .breadcrumb{font-size:12.5px; color:var(--ink-soft); padding:16px 20px 0; max-width:1160px; margin:0 auto;}
+  .breadcrumb a:hover{color:var(--ink);}
+
+  .product-layout{display:grid; grid-template-columns:1fr; gap:36px; padding:20px 20px 50px; max-width:1160px; margin:0 auto;}
+  @media (min-width:900px){ .product-layout{grid-template-columns:1.1fr 1fr;} }
+
+  .gallery-main{
+    width:100%; aspect-ratio:1/1; border-radius:12px; overflow:hidden; border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; background:var(--bg); cursor:zoom-in;
+  }
+  .gallery-main img{width:100%; height:100%; object-fit:cover; transition:transform .3s ease;}
+  .gallery-main:hover img{transform:scale(1.08);}
+  .gallery-thumbs{display:flex; gap:8px; margin-top:10px; overflow-x:auto;}
+  .gallery-thumb{width:64px; height:64px; flex-shrink:0; border-radius:8px; overflow:hidden; border:2px solid transparent; opacity:.6; cursor:pointer;}
+  .gallery-thumb.active{border-color:var(--ink); opacity:1;}
+  .gallery-thumb img{width:100%; height:100%; object-fit:cover;}
+
+  .product-info .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 8px;}
+  .product-info h1{font-size:24px; line-height:1.25; margin:0 0 12px;}
+  .price-row{display:flex; align-items:baseline; gap:10px; margin-bottom:6px;}
+  .price-old{font-size:15px; color:var(--ink-soft); text-decoration:line-through;}
+  .price-now{font-size:26px; font-weight:800;}
+  .price-now.on-sale{color:var(--rust);}
+  .price-notes{font-size:12.5px; color:var(--ink-soft); margin:0 0 22px; line-height:1.6;}
+  .price-notes b{color:var(--rust);}
+
+  .stock-badge{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; margin-bottom:18px;}
+  .stock-dot{width:7px; height:7px; border-radius:50%;}
+
+  .opt-label{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin-bottom:8px; display:block;}
+  .size-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px;}
+  .size-btn{min-width:44px; height:44px; padding:0 12px; border-radius:8px; border:1.5px solid var(--line); background:#fff; font-size:13.5px; font-weight:600;}
+  .size-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+  .qty-row{display:flex; align-items:center; gap:10px; margin-bottom:24px;}
+  .qty-btn{width:34px; height:34px; border-radius:8px; border:1.5px solid var(--line); background:#fff; font-size:16px;}
+  .qty-value{font-size:15px; font-weight:700; width:24px; text-align:center;}
+
+  .action-row{display:flex; flex-direction:column; gap:10px; margin-bottom:26px;}
+  .btn-add{padding:15px; border:1.5px solid var(--ink); background:#fff; color:var(--ink); border-radius:8px; font-size:14px; font-weight:800; text-transform:uppercase; letter-spacing:.02em;}
+  .btn-buy{padding:15px; border:none; background:var(--ink); color:#fff; border-radius:8px; font-size:14px; font-weight:800; text-transform:uppercase; letter-spacing:.02em;}
+  .btn-fav{display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border:1.5px solid var(--line); background:#fff; border-radius:8px; font-size:13px; font-weight:600; color:var(--ink-soft);}
+  .btn-fav.active{border-color:var(--rust); color:var(--rust);}
+  .btn-fav svg{flex-shrink:0;}
+
+  .trust-mini{display:flex; flex-direction:column; gap:8px; font-size:12.5px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:18px;}
+  .trust-mini span{display:flex; align-items:center; gap:8px;}
+
+  .tabs-section{max-width:1160px; margin:0 auto; padding:0 20px 60px;}
+  .tabs-nav{display:flex; gap:4px; border-bottom:1px solid var(--line); margin-bottom:20px; overflow-x:auto;}
+  .tab-btn{padding:12px 16px; border:none; background:none; font-size:13.5px; font-weight:600; color:var(--ink-soft); border-bottom:2px solid transparent; white-space:nowrap; margin-bottom:-1px;}
+  .tab-btn.active{color:var(--ink); border-bottom-color:var(--ink);}
+  .tab-panel{display:none; max-width:720px;}
+  .tab-panel.active{display:block;}
+  .tab-panel p{font-size:14.5px; line-height:1.75; color:var(--ink-soft);}
+  .size-table{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:10px;}
+  .size-table th, .size-table td{padding:9px 12px; border:1px solid var(--line); text-align:center;}
+  .size-table th{background:var(--bg); font-weight:700;}
+
+  .review-card{border-bottom:1px solid var(--line); padding:16px 0;}
+  .review-card:first-child{padding-top:0;}
+  .review-stars{color:var(--rust); font-size:13px; margin-bottom:6px;}
+  .review-name{font-size:12.5px; font-weight:700; color:var(--ink-soft); margin-top:6px;}
+  .review-empty{font-size:13.5px; color:var(--ink-soft);}
+
+  .related-section{max-width:1160px; margin:0 auto; padding:0 20px 60px;}
+  .related-section h2{font-size:19px; margin:0 0 16px;}
+  .related-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px;}
+  @media (min-width:640px){ .related-grid{grid-template-columns:repeat(4,1fr);} }
+  .related-card{background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; text-align:left; width:100%;}
+  .related-thumb{width:100%; aspect-ratio:1/1; object-fit:cover; background:var(--bg); display:block;}
+  .related-info{padding:10px;}
+  .related-info h3{font-size:12.5px; margin:0 0 4px; font-weight:600; line-height:1.3;}
+  .related-info p{font-size:12.5px; color:var(--ink-soft); margin:0;}
+
+  footer{border-top:1px solid var(--line);}
+  .footer-inner{display:flex; flex-direction:column; gap:8px; padding:32px 20px; font-size:13.5px; color:var(--ink-soft);}
+  @media (min-width:640px){ .footer-inner{flex-direction:row; justify-content:space-between; align-items:center;} }
+  .footer-links a{color:var(--ink-soft);}
+  .footer-links a:hover{color:var(--ink);}
+
+  #toast{
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff;
+    padding:10px 18px; border-radius:8px; font-size:13.5px; display:none; z-index:60;
+  }
+  #toast.show{display:block;}
+
+  .loading-msg, .notfound-msg{max-width:1160px; margin:0 auto; padding:80px 20px; text-align:center; color:var(--ink-soft); font-size:14px;}
+
+  @keyframes skeleton-pulse{ 0%,100%{opacity:1;} 50%{opacity:.55;} }
+  .skel-layout{display:grid; grid-template-columns:1fr; gap:36px; padding:20px 20px 50px; max-width:1160px; margin:0 auto;}
+  @media (min-width:900px){ .skel-layout{grid-template-columns:1.1fr 1fr;} }
+  .skel-img{width:100%; aspect-ratio:1/1; border-radius:12px; background:var(--line); animation:skeleton-pulse 1.4s ease-in-out infinite;}
+  .skel-line{height:14px; border-radius:4px; background:var(--line); animation:skeleton-pulse 1.4s ease-in-out infinite; margin-bottom:12px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <span class="brand serif">JA STORE</span>
+    <div class="right">
+      <a href="index.html" class="back-link">← Voltar à loja</a>
+      <button class="icon-btn" id="openCartBtn" aria-label="Carrinho">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 2L4 6M18 2l2 4M3 8h18l-1.5 12a2 2 0 01-2 1.8H6.5a2 2 0 01-2-1.8L3 8z" stroke="#fff" stroke-width="1.8"/></svg>
+        <span class="cart-count" id="cartCount" style="display:none">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="breadcrumb" id="breadcrumb"></nav>
+
+<div id="productRoot">
+  <div class="skel-layout">
+    <div class="skel-img"></div>
+    <div>
+      <div class="skel-line" style="width:40%;"></div>
+      <div class="skel-line" style="width:80%; height:22px;"></div>
+      <div class="skel-line" style="width:30%; height:22px;"></div>
+      <div class="skel-line" style="width:60%;"></div>
+      <div class="skel-line" style="width:90%;"></div>
+    </div>
+  </div>
+</div>
+
+<section class="related-section" id="relatedSection" style="display:none;">
+  <h2 class="serif">Você também pode gostar</h2>
+  <div class="related-grid" id="relatedGrid"></div>
+</section>
+
+<footer>
+  <div class="container footer-inner">
+    <span>© 2026 JA Store</span>
+    <span class="footer-links"><a href="troca-e-devolucao.html">Troca e Devolução</a></span>
+    <span>Preços de venda rápida — ajuste no catálogo sempre que o custo do fornecedor mudar.</span>
+  </div>
+</footer>
+
+<div id="toast"></div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabase-client.js"></script>
+<script src="assets/js/cart.js"></script>
+<script>
+(function(){
+  const sb = window.getSupabaseClient();
+  const params = new URLSearchParams(window.location.search);
+  const slugParam = params.get('slug');
+  const idParam = params.get('id');
+
+  const SWATCHES = ["#111111", "#3D3D3D", "#6E6E73", "#A3A3A3", "#D4D4D4"];
+  const SIZE_SETS = { clothing: ['PP','P','M','G','GG'], shoe: ['38','39','40','41','42','43'], none: ['Único'] };
+  const FREE_SHIPPING_THRESHOLD = 300;
+
+  let cart = window.CartStore.load();
+  let wishlist = JSON.parse(localStorage.getItem('ja_wishlist') || '[]');
+  let product = null;
+  let allProducts = [];
+  let selectedSize = null;
+  let qty = 1;
+  let galleryImages = [];
+
+  function formatBRL(v){ return Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+  function effectivePrice(p){ return (p.sale_price && Number(p.sale_price) > 0 && Number(p.sale_price) < Number(p.price)) ? Number(p.sale_price) : Number(p.price); }
+  function isOnSale(p){ return p.sale_price && Number(p.sale_price) > 0 && Number(p.sale_price) < Number(p.price); }
+
+  function updateCartCount(){
+    const el = document.getElementById('cartCount');
+    const count = window.CartStore.count(cart);
+    if (count > 0){ el.style.display = 'flex'; el.textContent = count; }
+    else { el.style.display = 'none'; }
+  }
+  updateCartCount();
+
+  document.getElementById('openCartBtn').addEventListener('click', ()=>{
+    window.location.href = 'index.html#produtos';
+  });
+
+  let toastTimer;
+  function showToast(msg){
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=> toast.classList.remove('show'), 2400);
+  }
+
+  function persistCart(){
+    window.CartStore.save(cart);
+    updateCartCount();
+  }
+
+  async function init(){
+    try {
+      let query = sb.from('products').select('*').eq('active', true);
+      if (slugParam) query = query.eq('slug', slugParam);
+      else if (idParam) query = query.eq('id', idParam);
+      else { renderNotFound(); return; }
+
+      const { data, error } = await query.maybeSingle();
+      if (error) throw error;
+      if (!data){ renderNotFound(); return; }
+
+      product = data;
+      selectedSize = (SIZE_SETS[product.size_type] || SIZE_SETS.clothing)[0];
+
+      document.getElementById('pageTitle').textContent = `${product.name} | JA Store`;
+      document.getElementById('pageDescription').setAttribute('content', (product.description || product.name).slice(0,155));
+
+      document.getElementById('breadcrumb').innerHTML = `<a href="index.html">Início</a> / <a href="index.html">${product.category}</a> / <span style="color:var(--ink);">${product.name}</span>`;
+
+      renderProduct();
+      loadReviews();
+      loadRelated();
+
+      const { data: allData } = await sb.from('products').select('*').eq('active', true);
+      allProducts = allData || [];
+    } catch (err) {
+      console.error(err);
+      renderNotFound();
+    }
+  }
+
+  function renderNotFound(){
+    document.getElementById('productRoot').innerHTML = `
+      <div class="notfound-msg">
+        <p>Não encontramos esse produto — ele pode ter sido removido ou o link está incorreto.</p>
+        <a href="index.html" style="color:var(--ink); font-weight:700;">← Voltar à loja</a>
+      </div>
+    `;
+  }
+
+  function placeholderSVG(tone){
+    const color = SWATCHES[tone % SWATCHES.length];
+    return `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:${color}0F;">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none"><path d="M8 3L3 7l2 3 2-1v11h10V9l2 1 2-3-5-4-1.5 1.5a2.5 2.5 0 01-3 0L8 3z" stroke="${color}" stroke-width="1.2"/></svg>
+    </div>`;
+  }
+
+  function renderProduct(){
+    galleryImages = [product.image_url, ...(product.images||[])].filter(Boolean);
+    const onSale = isOnSale(product);
+    const soldOut = product.stock <= 0;
+    const isFav = wishlist.includes(product.id);
+    const sizeType = product.size_type || 'clothing';
+    const sizes = SIZE_SETS[sizeType] || SIZE_SETS.clothing;
+
+    document.getElementById('productRoot').innerHTML = `
+      <div class="product-layout">
+        <div class="gallery">
+          <div class="gallery-main" id="galleryMain"></div>
+          <div class="gallery-thumbs" id="galleryThumbs"></div>
+        </div>
+        <div class="product-info">
+          <p class="eyebrow">${product.category}</p>
+          <h1 class="serif">${product.name}</h1>
+          <div class="price-row">
+            ${onSale ? `<span class="price-old">${formatBRL(product.price)}</span>` : ''}
+            <span class="price-now ${onSale?'on-sale':''}">${soldOut ? 'Indisponível' : formatBRL(effectivePrice(product))}</span>
+          </div>
+          <p class="price-notes">Em até <b>12x</b> no cartão · <b>5% de desconto</b> pagando no Pix no checkout</p>
+
+          <span class="stock-badge" style="color:${soldOut?'var(--rust)':'var(--green)'};">
+            <span class="stock-dot" style="background:${soldOut?'var(--rust)':'var(--green)'};"></span>
+            ${soldOut ? 'Esgotado' : (product.stock <= 5 ? `Últimas ${product.stock} unidades` : 'Em estoque')}
+          </span>
+
+          ${sizeType !== 'none' ? `
+            <label class="opt-label">${sizeType === 'shoe' ? 'Numeração' : 'Tamanho'}</label>
+            <div class="size-row" id="sizeRow">
+              ${sizes.map(s => `<button class="size-btn ${s===selectedSize?'active':''}" data-size="${s}">${s}</button>`).join('')}
+            </div>
+          ` : ''}
+
+          <label class="opt-label">Quantidade</label>
+          <div class="qty-row">
+            <button class="qty-btn" id="qtyDec">−</button>
+            <span class="qty-value" id="qtyValue">1</span>
+            <button class="qty-btn" id="qtyInc">+</button>
+          </div>
+
+          <div class="action-row">
+            <button class="btn-buy" id="buyNowBtn" ${soldOut?'disabled style="opacity:.5;"':''}>Comprar agora</button>
+            <button class="btn-add" id="addToCartBtn" ${soldOut?'disabled style="opacity:.5;"':''}>Adicionar à sacola</button>
+            <button class="btn-fav ${isFav?'active':''}" id="favBtn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav?'currentColor':'none'}"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z" stroke="currentColor" stroke-width="1.8"/></svg>
+              ${isFav ? 'Nos favoritos' : 'Favoritar'}
+            </button>
+          </div>
+
+          <div class="trust-mini">
+            <span>🚚 Frete grátis acima de ${formatBRL(FREE_SHIPPING_THRESHOLD)}</span>
+            <span>🛵 Entrega por motoboy disponível para regiões próximas (calculado no checkout)</span>
+            <span>🔒 Compra 100% segura via Mercado Pago</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="tabs-section">
+        <div class="tabs-nav" id="tabsNav">
+          <button class="tab-btn active" data-tab="descricao">Descrição</button>
+          <button class="tab-btn" data-tab="medidas">Tabela de medidas</button>
+          <button class="tab-btn" data-tab="entrega">Entrega</button>
+          <button class="tab-btn" data-tab="troca">Troca e devolução</button>
+          <button class="tab-btn" data-tab="avaliacoes">Avaliações</button>
+        </div>
+
+        <div class="tab-panel active" data-panel="descricao">
+          <p>${product.description ? product.description.replace(/\n/g,'<br>') : 'Sem descrição cadastrada para este produto.'}</p>
+        </div>
+
+        <div class="tab-panel" data-panel="medidas">
+          ${sizeType === 'shoe' ? `
+            <table class="size-table">
+              <thead><tr><th>BR</th><th>CM</th></tr></thead>
+              <tbody>
+                <tr><td>38</td><td>24,5</td></tr><tr><td>39</td><td>25,0</td></tr><tr><td>40</td><td>25,7</td></tr>
+                <tr><td>41</td><td>26,5</td></tr><tr><td>42</td><td>27,2</td></tr><tr><td>43</td><td>28,0</td></tr>
+              </tbody>
+            </table>
+          ` : sizeType === 'clothing' ? `
+            <table class="size-table">
+              <thead><tr><th>Tam.</th><th>Tórax (cm)</th><th>Comprimento (cm)</th></tr></thead>
+              <tbody>
+                <tr><td>PP</td><td>88–92</td><td>66</td></tr>
+                <tr><td>P</td><td>92–96</td><td>68</td></tr>
+                <tr><td>M</td><td>96–102</td><td>70</td></tr>
+                <tr><td>G</td><td>102–108</td><td>72</td></tr>
+                <tr><td>GG</td><td>108–114</td><td>74</td></tr>
+              </tbody>
+            </table>
+          ` : `<p>Este produto tem tamanho único.</p>`}
+          <p style="margin-top:12px; font-size:12.5px;">Medidas de referência — pode haver pequena variação entre peças.</p>
+        </div>
+
+        <div class="tab-panel" data-panel="entrega">
+          <p>Calculamos o frete (Correios, transportadora ou motoboy) direto no checkout, a partir do seu CEP.</p>
+          <p>Frete grátis em compras acima de ${formatBRL(FREE_SHIPPING_THRESHOLD)}.</p>
+        </div>
+
+        <div class="tab-panel" data-panel="troca">
+          <p>Trocas e devoluções em até 7 dias corridos após o recebimento, com o produto sem uso e com etiqueta.</p>
+          <a href="troca-e-devolucao.html" style="color:var(--ink); font-weight:700; text-decoration:underline;">Ver a política completa →</a>
+        </div>
+
+        <div class="tab-panel" data-panel="avaliacoes">
+          <div id="reviewsList"><p class="review-empty">Carregando avaliações...</p></div>
+        </div>
+      </section>
+    `;
+
+    renderGallery();
+    bindProductEvents();
+  }
+
+  function renderGallery(){
+    const mainEl = document.getElementById('galleryMain');
+    const thumbsEl = document.getElementById('galleryThumbs');
+
+    function setMain(url){
+      mainEl.innerHTML = url ? `<img src="${url}" alt="${product.name}" onerror="this.parentElement.innerHTML=window.__phSVG;">` : placeholderSVG(product.tone||0);
+    }
+    window.__phSVG = placeholderSVG(product.tone||0);
+
+    setMain(galleryImages[0]);
+
+    if (galleryImages.length > 1){
+      thumbsEl.innerHTML = galleryImages.map((url,i) => `
+        <div class="gallery-thumb ${i===0?'active':''}" data-thumb="${i}"><img src="${url}" loading="lazy" onerror="this.style.display='none'"></div>
+      `).join('');
+      thumbsEl.querySelectorAll('.gallery-thumb').forEach(t=>{
+        t.addEventListener('click', ()=>{
+          thumbsEl.querySelectorAll('.gallery-thumb').forEach(x=>x.classList.remove('active'));
+          t.classList.add('active');
+          setMain(galleryImages[Number(t.dataset.thumb)]);
+        });
+      });
+    }
+  }
+
+  function bindProductEvents(){
+    document.querySelectorAll('#sizeRow .size-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('#sizeRow .size-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedSize = btn.dataset.size;
+      });
+    });
+
+    document.getElementById('qtyDec').addEventListener('click', ()=>{
+      qty = Math.max(1, qty-1);
+      document.getElementById('qtyValue').textContent = qty;
+    });
+    document.getElementById('qtyInc').addEventListener('click', ()=>{
+      qty = Math.min(product.stock || 99, qty+1);
+      document.getElementById('qtyValue').textContent = qty;
+    });
+
+    document.getElementById('addToCartBtn').addEventListener('click', ()=> addToCart(false));
+    document.getElementById('buyNowBtn').addEventListener('click', ()=> addToCart(true));
+
+    document.getElementById('favBtn').addEventListener('click', ()=>{
+      const idx = wishlist.indexOf(product.id);
+      if (idx>=0) wishlist.splice(idx,1); else wishlist.push(product.id);
+      localStorage.setItem('ja_wishlist', JSON.stringify(wishlist));
+      renderProduct();
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelector(`.tab-panel[data-panel="${btn.dataset.tab}"]`).classList.add('active');
+      });
+    });
+  }
+
+  function addToCart(buyNow){
+    const idx = cart.findIndex(i=>i.id===product.id && i.size===selectedSize);
+    const currentQty = idx>=0 ? cart[idx].qty : 0;
+    if (currentQty + qty > product.stock){
+      showToast('Sem estoque suficiente');
+      return;
+    }
+    if (idx>=0){ cart[idx].qty += qty; }
+    else { cart.push({ id:product.id, size:selectedSize, qty, name:product.name, price:effectivePrice(product), image:product.image_url }); }
+    persistCart();
+
+    if (buyNow){
+      window.location.href = 'checkout.html';
+    } else {
+      showToast(`${product.name} adicionado à sacola`);
+    }
+  }
+
+  async function loadReviews(){
+    try {
+      const { data, error } = await sb.from('product_reviews').select('*').eq('product_id', product.id).eq('active', true).order('created_at', { ascending:false });
+      if (error) throw error;
+      const el = document.getElementById('reviewsList');
+      if (!el) return;
+      el.innerHTML = (data && data.length)
+        ? data.map(r => `
+          <div class="review-card">
+            <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+            <p style="font-size:14px; margin:0; color:var(--ink-soft);">${r.comment || ''}</p>
+            <p class="review-name">${r.customer_name}</p>
+          </div>
+        `).join('')
+        : `<p class="review-empty">Ainda não há avaliações para este produto.</p>`;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function loadRelated(){
+    try {
+      const { data, error } = await sb.from('products').select('*').eq('active', true).eq('category', product.category).neq('id', product.id).limit(4);
+      if (error) throw error;
+      if (!data || !data.length) return;
+      document.getElementById('relatedSection').style.display = 'block';
+      document.getElementById('relatedGrid').innerHTML = data.map(p => `
+        <a class="related-card" href="produto.html?slug=${encodeURIComponent(p.slug||p.id)}">
+          <img class="related-thumb" src="${p.image_url||''}" loading="lazy" onerror="this.style.background='var(--bg)';this.src='';">
+          <div class="related-info">
+            <h3>${p.name}</h3>
+            <p>${formatBRL(effectivePrice(p))}</p>
+          </div>
+        </a>
+      `).join('');
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  init();
+})();
+</script>
+
+</body>
+</html>
