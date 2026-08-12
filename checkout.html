@@ -41,7 +41,7 @@
   .layout{display:grid; grid-template-columns:1fr; gap:28px; padding:32px 0 80px;}
   @media (min-width:900px){ .layout{grid-template-columns:1.5fr 1fr;} }
 
-  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px; margin-bottom:20px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px; margin-bottom:20px; box-shadow:0 1px 3px rgba(0,0,0,0.04), 0 6px 16px rgba(0,0,0,0.03);}
   .card h2{font-size:16px; margin:0 0 16px; display:flex; align-items:center; gap:8px;}
   .step-num{
     width:22px; height:22px; border-radius:50%; background:var(--ink); color:#fff;
@@ -96,6 +96,8 @@
   .status-screen a{display:inline-block; margin-top:22px; padding:12px 24px; background:var(--ink); color:var(--bg); border-radius:8px; font-size:14px; font-weight:600; text-decoration:none;}
 
   .empty-cart{text-align:center; padding:60px 20px; color:var(--ink-soft);}
+  .empty-cart svg{margin-bottom:14px; opacity:.6;}
+  .empty-cart a{display:inline-block; margin-top:14px; font-weight:700; color:var(--ink); text-decoration:underline;}
 </style>
 </head>
 <body>
@@ -136,7 +138,7 @@
 
   const cart = JSON.parse(localStorage.getItem('ja_cart') || '[]');
   if (!cart.length){
-    app.innerHTML = `<div class="container"><div class="empty-cart"><p>Sua sacola está vazia.</p><a href="index.html">Voltar à loja</a></div></div>`;
+    app.innerHTML = `<div class="container"><div class="empty-cart"><svg width="56" height="56" viewBox="0 0 24 24" fill="none"><path d="M6 2L4 6M18 2l2 4M3 8h18l-1.5 12a2 2 0 01-2 1.8H6.5a2 2 0 01-2-1.8L3 8z" stroke="var(--line)" stroke-width="1.6"/></svg><p>Sua sacola está vazia.</p><a href="index.html">Voltar à loja</a></div></div>`;
     return;
   }
 
@@ -243,7 +245,7 @@
   function renderCartLines(){
     document.getElementById('cartLines').innerHTML = cart.map((item, idx) => `
       <div class="cart-line" data-idx="${idx}">
-        <img src="${item.image || ''}" onerror="this.style.visibility='hidden'">
+        <img src="${item.image || ''}" loading="lazy" onerror="this.style.visibility='hidden'">
         <div style="flex:1">
           <p class="name">${item.name}</p>
           <p class="meta">${item.size ? `Tam ${item.size} · ` : ''}${formatBRL(item.price)}</p>
@@ -265,7 +267,7 @@
         if (cart[idx].qty <= 0) cart.splice(idx,1);
         if (cart.length === 0){
           localStorage.removeItem('ja_cart');
-          app.innerHTML = `<div class="container"><div class="empty-cart"><p>Sua sacola está vazia.</p><a href="index.html">Voltar à loja</a></div></div>`;
+          app.innerHTML = `<div class="container"><div class="empty-cart"><svg width="56" height="56" viewBox="0 0 24 24" fill="none"><path d="M6 2L4 6M18 2l2 4M3 8h18l-1.5 12a2 2 0 01-2 1.8H6.5a2 2 0 01-2-1.8L3 8z" stroke="var(--line)" stroke-width="1.6"/></svg><p>Sua sacola está vazia.</p><a href="index.html">Voltar à loja</a></div></div>`;
           return;
         }
         localStorage.setItem('ja_cart', JSON.stringify(cart));
@@ -279,7 +281,7 @@
         cart.splice(idx,1);
         localStorage.setItem('ja_cart', JSON.stringify(cart));
         if (cart.length === 0){
-          app.innerHTML = `<div class="container"><div class="empty-cart"><p>Sua sacola está vazia.</p><a href="index.html">Voltar à loja</a></div></div>`;
+          app.innerHTML = `<div class="container"><div class="empty-cart"><svg width="56" height="56" viewBox="0 0 24 24" fill="none"><path d="M6 2L4 6M18 2l2 4M3 8h18l-1.5 12a2 2 0 01-2 1.8H6.5a2 2 0 01-2-1.8L3 8z" stroke="var(--line)" stroke-width="1.6"/></svg><p>Sua sacola está vazia.</p><a href="index.html">Voltar à loja</a></div></div>`;
           return;
         }
         renderCartLines();
