@@ -79,7 +79,35 @@
 
   header{position:sticky; top:0; z-index:40;}
   .header-top{background:var(--accent);}
-  .mobile-logo-row{display:none; align-items:center; justify-content:center; gap:8px; padding:10px 20px 0;}
+  .mobile-logo-row{display:none; align-items:center; justify-content:center; gap:8px; padding:10px 20px 0; position:relative;}
+  .menu-toggle-btn{position:absolute; left:20px; background:none; border:none; padding:4px; display:flex;}
+
+  .mobile-menu-overlay{position:fixed; inset:0; z-index:70; background:rgba(0,0,0,0.5); display:none;}
+  .mobile-menu-overlay.open{display:block;}
+  .mobile-menu-panel{
+    position:absolute; top:0; left:0; bottom:0; width:82%; max-width:320px; background:#fff;
+    display:flex; flex-direction:column; transform:translateX(-100%); transition:transform .25s ease;
+  }
+  .mobile-menu-overlay.open .mobile-menu-panel{transform:translateX(0);}
+  .mobile-menu-head{display:flex; justify-content:space-between; align-items:center; padding:18px 20px; border-bottom:1px solid var(--line);}
+  .mobile-menu-head button{background:none; border:none; color:var(--ink);}
+  .mobile-menu-links{display:flex; flex-direction:column; padding:8px 0; flex:1;}
+  .mobile-menu-link{padding:14px 20px; font-size:14.5px; font-weight:600; color:var(--ink); border-bottom:1px solid var(--line);}
+  .mobile-menu-foot{padding:16px 20px; border-top:1px solid var(--line);}
+  .mobile-menu-whatsapp{display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:700; color:var(--green);}
+
+  .floating-cart-btn{
+    position:fixed; bottom:20px; right:18px; z-index:45; width:54px; height:54px; border-radius:50%;
+    background:var(--ink); border:none; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+  }
+  .floating-cart-count{
+    position:absolute; top:-4px; right:-4px; width:20px; height:20px; border-radius:50%;
+    background:var(--rust); color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center;
+  }
+  @media (min-width:900px){ .floating-cart-btn{display:none !important;} }
+
+
   .header-main{display:flex; align-items:center; gap:16px; padding:14px 20px;}
   .main-nav{display:none; align-items:center; gap:26px; flex-shrink:0;}
   .main-nav a{color:#fff; font-size:13.5px; font-weight:600; opacity:.88; white-space:nowrap;}
@@ -176,7 +204,17 @@
   .products-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px; padding-bottom:80px;}
   @media (min-width:640px){ .products-grid{grid-template-columns:repeat(3,1fr);} }
 
-  .tag-card{background:var(--card); border:1px solid var(--line); position:relative; text-align:left; width:100%; padding:0;}
+  @keyframes skeleton-pulse{ 0%,100%{opacity:1;} 50%{opacity:.55;} }
+  .skeleton-card{background:var(--card); border:1px solid var(--line); overflow:hidden;}
+  .skeleton-thumb{width:100%; height:180px; background:var(--line); animation:skeleton-pulse 1.4s ease-in-out infinite;}
+  .skeleton-lines{padding:14px;}
+  .skeleton-line{height:11px; border-radius:4px; background:var(--line); animation:skeleton-pulse 1.4s ease-in-out infinite;}
+  .skeleton-line.w-70{width:70%; margin-bottom:8px;}
+  .skeleton-line.w-40{width:40%;}
+  .skeleton-row-card{min-width:180px; max-width:180px; flex-shrink:0;}
+
+  .tag-card{background:var(--card); border:1px solid var(--line); position:relative; text-align:left; width:100%; padding:0; box-shadow:0 1px 2px rgba(0,0,0,0.03); transition:box-shadow .2s ease, transform .2s ease;}
+  .tag-card:hover{box-shadow:0 8px 20px rgba(0,0,0,0.08); transform:translateY(-2px);}
   .tag-hole{position:absolute; left:50%; top:-8px; transform:translateX(-50%); width:16px; height:16px; border-radius:50%; background:var(--bg); border:1px solid var(--line); z-index:2;}
   .product-thumb{width:100%; height:180px; display:flex; align-items:center; justify-content:center; border-bottom:1px solid var(--line); overflow:hidden;}
   .product-thumb img{width:100%; height:100%; object-fit:cover;}
@@ -221,6 +259,9 @@
   .cart-head button{background:none; border:none; color:var(--ink-soft);}
   .cart-items{flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:16px;}
   .cart-empty{font-size:14px; color:var(--ink-soft);}
+  .cart-empty-state{display:flex; flex-direction:column; align-items:center; text-align:center; padding:40px 10px; gap:6px;}
+  .cart-empty-state svg{margin-bottom:8px; opacity:.7;}
+  .cart-empty-cta{margin-top:10px; font-size:13px; font-weight:700; color:var(--ink); text-decoration:underline;}
   .cart-row{display:flex; gap:12px;}
   .cart-thumb{width:64px; height:64px; flex-shrink:0; object-fit:cover; background:var(--line);}
   .cart-row .name{font-size:14px; margin:0 0 4px; font-family:'Inter',sans-serif; font-weight:800;}
@@ -259,6 +300,9 @@
 <header id="topo">
   <div class="header-top">
     <div class="mobile-logo-row">
+      <button class="menu-toggle-btn" id="mobileMenuBtn" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
       <img src="assets/logo.png" alt="JA Store" style="height:26px;width:auto" onerror="this.replaceWith(fallbackLogoNode(26))">
       <span style="color:#fff;font-weight:700;font-family:'Inter',sans-serif;font-weight:800;font-size:16px;">JA Store</span>
     </div>
@@ -310,7 +354,38 @@
   </div>
 </header>
 
-<section class="hero-dark">
+<div class="mobile-menu-overlay" id="mobileMenuOverlay">
+  <div class="mobile-menu-panel">
+    <div class="mobile-menu-head">
+      <span class="serif" style="font-size:16px;">Menu</span>
+      <button id="closeMobileMenuBtn" aria-label="Fechar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <nav class="mobile-menu-links">
+      <a href="#topo" class="mobile-menu-link">Início</a>
+      <a href="#produtos" class="mobile-menu-link">Produtos</a>
+      <a href="#categorias" class="mobile-menu-link">Categorias</a>
+      <a href="#ofertas" class="mobile-menu-link">Ofertas</a>
+      <a href="#sobre" class="mobile-menu-link">Sobre nós</a>
+      <a href="#contato" class="mobile-menu-link">Contato</a>
+      <a href="troca-e-devolucao.html" class="mobile-menu-link">Troca e Devolução</a>
+    </nav>
+    <div class="mobile-menu-foot">
+      <a href="https://wa.me/5511946790983" target="_blank" rel="noopener" class="mobile-menu-whatsapp">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20.5 3.5A11 11 0 003.8 17.4L2 22l4.7-1.7A11 11 0 1020.5 3.5z" stroke="currentColor" stroke-width="1.8"/></svg>
+        Falar no WhatsApp
+      </a>
+    </div>
+  </div>
+</div>
+
+<button class="floating-cart-btn" id="floatingCartBtn" aria-label="Ver carrinho" style="display:none;">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 2L4 6M18 2l2 4M3 8h18l-1.5 12a2 2 0 01-2 1.8H6.5a2 2 0 01-2-1.8L3 8z" stroke="#fff" stroke-width="1.8"/></svg>
+  <span class="floating-cart-count" id="floatingCartCount">0</span>
+</button>
+
+<section class="hero-dark" id="heroDark">
   <div class="container">
     <div class="hero-copy">
       <p class="eyebrow">JA Store · coleção atual</p>
@@ -320,15 +395,24 @@
             <text x="20" y="27" text-anchor="middle" font-family="Inter, sans-serif" font-weight="800" font-size="17" fill="#fff">JA</text>
           </svg>
         </span>
-        <h1 class="serif">Estilo que te representa.</h1>
+        <h1 class="serif" id="heroTitle">Estilo que te representa.</h1>
       </div>
-      <p class="lead">Calçados, camisetas, conjuntos, moletons e mais — peças pensadas pro seu dia a dia, com envio para todo o Brasil.</p>
+      <p class="lead" id="heroSubtitle">Calçados, camisetas, conjuntos, moletons e mais — peças pensadas pro seu dia a dia, com envio para todo o Brasil.</p>
       <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-        <a href="#produtos" class="hero-cta">Comprar agora</a>
+        <a href="#produtos" class="hero-cta" id="heroCtaBtn">Comprar agora</a>
         <a href="#ofertas" class="hero-cta hero-cta-ghost">Ver ofertas</a>
       </div>
     </div>
   </div>
+</section>
+
+<section class="container" id="secondaryBannerSection" style="padding:20px 20px 0; display:none;">
+  <a id="secondaryBannerLink" href="#" style="display:block; position:relative; border-radius:14px; overflow:hidden; min-height:140px; background-size:cover; background-position:center;">
+    <div style="position:absolute; inset:0; background:linear-gradient(90deg, rgba(0,0,0,0.55), rgba(0,0,0,0.1));"></div>
+    <div style="position:relative; padding:28px; display:flex; align-items:center; min-height:140px;">
+      <h3 id="secondaryBannerTitle" class="serif" style="color:#fff; font-size:19px; margin:0;"></h3>
+    </div>
+  </a>
 </section>
 
 <section class="container" style="padding:44px 20px 0;">
@@ -601,12 +685,55 @@
   async function loadStoreSettingsPublic(){
     try {
       const sb = window.getSupabaseClient();
-      const { data, error } = await sb.from('store_settings').select('instagram_url').eq('id', 1).maybeSingle();
+      const { data, error } = await sb.from('store_settings').select('*').eq('id', 1).maybeSingle();
       if (error) throw error;
-      if (data && data.instagram_url){
+      if (!data) return;
+
+      if (data.instagram_url){
         document.getElementById('instagramLink').href = data.instagram_url;
         document.getElementById('instagramLink').style.display = 'flex';
         document.getElementById('instagramCta').href = data.instagram_url;
+      }
+
+      // ---------- banner principal ----------
+      if (data.banner_main_title) document.getElementById('heroTitle').textContent = data.banner_main_title;
+      if (data.banner_main_subtitle) document.getElementById('heroSubtitle').textContent = data.banner_main_subtitle;
+      if (data.banner_main_cta_text) document.getElementById('heroCtaBtn').textContent = data.banner_main_cta_text;
+      if (data.banner_main_cta_link) document.getElementById('heroCtaBtn').href = data.banner_main_cta_link;
+      if (data.banner_main_image){
+        const heroEl = document.getElementById('heroDark');
+        heroEl.style.backgroundImage = `linear-gradient(rgba(11,11,12,0.55), rgba(11,11,12,0.75)), url('${data.banner_main_image}')`;
+        heroEl.style.backgroundSize = 'cover';
+        heroEl.style.backgroundPosition = 'center';
+      }
+
+      // ---------- banner secundário ----------
+      if (data.banner_secondary_title && data.banner_secondary_image){
+        document.getElementById('secondaryBannerSection').style.display = 'block';
+        document.getElementById('secondaryBannerTitle').textContent = data.banner_secondary_title;
+        document.getElementById('secondaryBannerLink').href = data.banner_secondary_link || '#produtos';
+        document.getElementById('secondaryBannerLink').style.backgroundImage = `url('${data.banner_secondary_image}')`;
+      }
+
+      // ---------- SEO ----------
+      if (data.seo_title) document.title = data.seo_title;
+      if (data.seo_description){
+        let metaDesc = document.querySelector('meta[name="description"]');
+        if (!metaDesc){
+          metaDesc = document.createElement('meta');
+          metaDesc.setAttribute('name', 'description');
+          document.head.appendChild(metaDesc);
+        }
+        metaDesc.setAttribute('content', data.seo_description);
+      }
+      if (data.seo_keywords){
+        let metaKw = document.querySelector('meta[name="keywords"]');
+        if (!metaKw){
+          metaKw = document.createElement('meta');
+          metaKw.setAttribute('name', 'keywords');
+          document.head.appendChild(metaKw);
+        }
+        metaKw.setAttribute('content', data.seo_keywords);
       }
     } catch (err) {
       console.error('Erro ao carregar configurações públicas:', err);
@@ -634,7 +761,21 @@
     }
   });
 
+  function skeletonCards(n, rowStyle){
+    const cls = rowStyle ? 'skeleton-card skeleton-row-card' : 'skeleton-card';
+    return Array.from({length:n}).map(()=>`
+      <div class="${cls}">
+        <div class="skeleton-thumb"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton-line w-70"></div>
+          <div class="skeleton-line w-40"></div>
+        </div>
+      </div>
+    `).join('');
+  }
+
   async function loadProducts(){
+    grid.innerHTML = skeletonCards(6);
     try {
       const sb = window.getSupabaseClient();
       const { data, error } = await sb
@@ -854,7 +995,7 @@
 
   function imageOrPlaceholder(url, tone, category, big){
     if(!url) return placeholderHTML(tone, category, big);
-    return `<img src="${url}" alt="" onerror="this.parentElement.innerHTML=window.__jaPlaceholder(${tone},'${category}',${big});">`;
+    return `<img src="${url}" alt="" loading="lazy" onerror="this.parentElement.innerHTML=window.__jaPlaceholder(${tone},'${category}',${big});">`;
   }
 
   function openQuickView(id){
@@ -871,7 +1012,7 @@
       qvGallery.style.display = 'flex';
       qvGallery.innerHTML = uniqueGallery.map((url, i) => `
         <div class="qv-gallery-item ${i===0?'active':''}" data-url="${url}">
-          <img src="${url}" onerror="this.closest('.qv-gallery-item').style.display='none'">
+          <img src="${url}" loading="lazy" onerror="this.closest('.qv-gallery-item').style.display='none'">
         </div>
       `).join('');
       qvGallery.querySelectorAll('.qv-gallery-item').forEach(item=>{
@@ -938,6 +1079,16 @@
   const cartCountEl = document.getElementById('cartCount');
 
   document.getElementById('openCartBtn').addEventListener('click', ()=> cartOverlay.classList.add('open'));
+  document.getElementById('floatingCartBtn').addEventListener('click', ()=> cartOverlay.classList.add('open'));
+
+  const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+  document.getElementById('mobileMenuBtn').addEventListener('click', ()=> mobileMenuOverlay.classList.add('open'));
+  document.getElementById('closeMobileMenuBtn').addEventListener('click', ()=> mobileMenuOverlay.classList.remove('open'));
+  mobileMenuOverlay.addEventListener('click', (e)=>{ if(e.target===mobileMenuOverlay) mobileMenuOverlay.classList.remove('open'); });
+  document.querySelectorAll('.mobile-menu-link').forEach(link=>{
+    link.addEventListener('click', ()=> mobileMenuOverlay.classList.remove('open'));
+  });
+
   document.getElementById('cartCloseBtn').addEventListener('click', ()=> cartOverlay.classList.remove('open'));
   cartOverlay.addEventListener('click', (e)=>{ if(e.target===cartOverlay) cartOverlay.classList.remove('open'); });
 
@@ -969,8 +1120,19 @@
     if (count>0){ cartCountEl.style.display='flex'; cartCountEl.textContent = count; }
     else { cartCountEl.style.display='none'; }
 
+    const floatBtn = document.getElementById('floatingCartBtn');
+    const floatCount = document.getElementById('floatingCartCount');
+    if (count>0){ floatBtn.style.display='flex'; floatCount.textContent = count; }
+    else { floatBtn.style.display='none'; }
+
     if (cart.length===0){
-      cartItemsEl.innerHTML = `<p class="cart-empty">Sua sacola está vazia.</p>`;
+      cartItemsEl.innerHTML = `
+        <div class="cart-empty-state">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none"><path d="M6 2L4 6M18 2l2 4M3 8h18l-1.5 12a2 2 0 01-2 1.8H6.5a2 2 0 01-2-1.8L3 8z" stroke="var(--line)" stroke-width="1.6"/></svg>
+          <p class="cart-empty">Sua sacola está vazia.</p>
+          <a href="#produtos" onclick="document.getElementById('cartOverlay').classList.remove('open')" class="cart-empty-cta">Ver produtos</a>
+        </div>
+      `;
       cartFoot.style.display = "none";
       return;
     }
@@ -981,7 +1143,7 @@
       const sizeLabel = p.sizeType !== "none" ? `Tam ${item.size} · ` : "";
       return `
         <div class="cart-row" data-idx="${idx}">
-          <img class="cart-thumb" src="${p.image}" onerror="this.outerHTML='<div class=\\'cart-thumb\\' style=\\'background:${SWATCHES[p.tone%SWATCHES.length]}18\\'></div>'">
+          <img class="cart-thumb" src="${p.image}" loading="lazy" onerror="this.outerHTML='<div class=\\'cart-thumb\\' style=\\'background:${SWATCHES[p.tone%SWATCHES.length]}18\\'></div>'">
           <div style="flex:1">
             <p class="name">${p.name}</p>
             <p class="meta">${sizeLabel}${formatBRL(effectivePrice(p))}</p>
