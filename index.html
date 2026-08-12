@@ -187,7 +187,9 @@
   /* ---------- FOOTER ---------- */
   footer{border-top:1px solid var(--line);}
   .footer-inner{display:flex; flex-direction:column; gap:8px; padding:32px 20px; font-size:13.5px; color:var(--ink-soft);}
-  @media (min-width:640px){ .footer-inner{flex-direction:row; justify-content:space-between;} }
+  @media (min-width:640px){ .footer-inner{flex-direction:row; justify-content:space-between; align-items:center;} }
+  .footer-links a{color:var(--ink-soft);}
+  .footer-links a:hover{color:var(--ink);}
 
   /* ---------- QUICK VIEW MODAL ---------- */
   .overlay{position:fixed; inset:0; z-index:60; background:rgba(34,31,27,0.69); display:none; align-items:center; justify-content:center;}
@@ -433,6 +435,7 @@
 <footer>
   <div class="container footer-inner">
     <span>© 2026 JA Store</span>
+    <span class="footer-links"><a href="troca-e-devolucao.html">Troca e Devolução</a></span>
     <span>Preços de venda rápida — ajuste no catálogo sempre que o custo do fornecedor mudar.</span>
   </div>
 </footer>
@@ -481,6 +484,7 @@
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="assets/js/supabase-client.js"></script>
+<script src="assets/js/cart.js"></script>
 <script>
 (function(){
   const WHATSAPP_NUMBER = "5511946790983"; // (11) 94679-0983
@@ -654,6 +658,8 @@
         images: p.images || [],
         featured: !!p.featured,
         createdAt: p.created_at,
+        slug: p.slug,
+        description: p.description || '',
       }));
     } catch (err) {
       console.error("Não foi possível carregar produtos do Supabase:", err);
@@ -711,7 +717,7 @@
   let category = "todos";
   let search = "";
   let showFavoritesOnly = false;
-  let cart = []; // {id, size, qty}
+  let cart = window.CartStore.load(); // {id, size, qty}
   let quickView = null;
   let selectedSize = null;
 
@@ -815,7 +821,9 @@
     container.querySelectorAll('.tag-card').forEach(card=>{
       card.addEventListener('click', (e)=>{
         if (e.target.closest('[data-fav-toggle]')) return;
-        openQuickView(card.dataset.id);
+        const p = PRODUCTS.find(p=>p.id===card.dataset.id);
+        const url = p && p.slug ? `produto.html?slug=${encodeURIComponent(p.slug)}` : `produto.html?id=${encodeURIComponent(card.dataset.id)}`;
+        window.location.href = url;
       });
     });
     container.querySelectorAll('[data-fav-toggle]').forEach(btn=>{
@@ -916,6 +924,7 @@
     const currentQty = idx>=0 ? cart[idx].qty : 0;
     if (currentQty + 1 > quickView.stock){ showToast('Sem mais estoque deste produto'); return; }
     if (idx>=0){ cart[idx].qty++; } else { cart.push({ id:quickView.id, size:selectedSize, qty:1 }); }
+    persistCart();
     showToast(`${quickView.name} adicionado`);
     qvOverlay.classList.remove('open');
     renderCartUI();
@@ -938,6 +947,21 @@
       const p = PRODUCTS.find(p=>p.id===i.id);
       return s + (p ? effectivePrice(p)*i.qty : 0);
     },0);
+  }
+
+  function persistCart(){
+    const enriched = cart.map(item=>{
+      const p = PRODUCTS.find(p=>p.id===item.id);
+      return {
+        id: item.id,
+        size: item.size,
+        qty: item.qty,
+        name: p ? p.name : '',
+        price: p ? effectivePrice(p) : 0,
+        image: p ? p.image : '',
+      };
+    });
+    window.CartStore.save(enriched);
   }
 
   function renderCartUI(){
@@ -977,6 +1001,7 @@
         const delta = btn.dataset.action === 'inc' ? 1 : -1;
         cart[idx].qty += delta;
         if (cart[idx].qty <= 0) cart.splice(idx,1);
+        persistCart();
         renderCartUI();
       });
     });
@@ -987,20 +1012,8 @@
 
   document.getElementById('checkoutBtn').addEventListener('click', ()=>{
     if (cart.length === 0) return;
-    // Salva o carrinho (com preço e nome, só para exibição — o checkout
-    // sempre RECALCULA tudo no servidor antes de cobrar) e manda para o checkout.
-    const cartForCheckout = cart.map(item=>{
-      const p = PRODUCTS.find(p=>p.id===item.id);
-      return {
-        id: item.id,
-        size: item.size,
-        qty: item.qty,
-        name: p ? p.name : "",
-        price: p ? effectivePrice(p) : 0,
-        image: p ? p.image : "",
-      };
-    });
-    localStorage.setItem('ja_cart', JSON.stringify(cartForCheckout));
+    // O carrinho já fica salvo continuamente (persistCart), então só precisa navegar.
+    persistCart();
     window.location.href = 'checkout.html';
   });
 
