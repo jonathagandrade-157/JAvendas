@@ -373,6 +373,7 @@
                 <div class="field"><label>E-mail</label><input id="setStoreEmail" type="email"></div>
                 <div class="field"><label>Telefone</label><input id="setStorePhone"></div>
                 <div class="field"><label>Endereço</label><input id="setStoreAddress"></div>
+                <div class="field"><label>CNPJ (opcional)</label><input id="setCnpj" placeholder="00.000.000/0001-00"></div>
               </div>
               <div class="field"><label>Descrição da loja</label><textarea id="setStoreDescription" rows="3"></textarea></div>
               <div class="settings-grid">
@@ -469,6 +470,7 @@
     <div class="field"><label>Preço de venda (R$)</label><input id="prodPrice" type="number" step="0.01"></div>
     <div class="field"><label>Preço promocional (R$, opcional)</label><input id="prodSalePrice" type="number" step="0.01"></div>
     <div class="field"><label>Custo (R$, opcional)</label><input id="prodCost" type="number" step="0.01"></div>
+    <div class="field"><label>Descrição (aparece na página do produto)</label><textarea id="prodDescription" rows="3" style="width:100%; padding:9px 11px; border-radius:6px; border:1.5px solid var(--line); font-size:13px; font-family:inherit;"></textarea></div>
     <div class="field"><label>Estoque</label><input id="prodStock" type="number" step="1"></div>
     <div class="field"><label>URL da imagem de capa</label><input id="prodImage"></div>
     <div class="field"><label>Fotos adicionais (uma URL por linha)</label><textarea id="prodImages" rows="3"></textarea></div>
@@ -928,12 +930,13 @@
     document.getElementById('prodPrice').value = product?.price || '';
     document.getElementById('prodSalePrice').value = product?.sale_price || '';
     document.getElementById('prodCost').value = product?.cost || '';
+    document.getElementById('prodDescription').value = product?.description || '';
     document.getElementById('prodStock').value = product?.stock ?? 0;
     document.getElementById('prodImage').value = product?.image_url || '';
     document.getElementById('prodImages').value = (product?.images || []).join('\n');
     document.getElementById('prodActive').checked = product ? product.active : true;
 
-    const fieldIds = ['prodName','prodCategory','prodSizeType','prodPrice','prodSalePrice','prodCost','prodStock','prodImage','prodImages','prodActive'];
+    const fieldIds = ['prodName','prodCategory','prodSizeType','prodPrice','prodSalePrice','prodCost','prodDescription','prodStock','prodImage','prodImages','prodActive'];
     fieldIds.forEach(id => { document.getElementById(id).disabled = !!readOnly; });
     document.getElementById('saveProductBtn').style.display = readOnly ? 'none' : 'block';
 
@@ -1045,6 +1048,7 @@
       price: Number(document.getElementById('prodPrice').value || 0),
       sale_price: Number(document.getElementById('prodSalePrice').value || 0) || null,
       cost: Number(document.getElementById('prodCost').value || 0) || null,
+      description: document.getElementById('prodDescription').value.trim() || null,
       stock: Number(document.getElementById('prodStock').value || 0),
       image_url: document.getElementById('prodImage').value.trim() || null,
       images: document.getElementById('prodImages').value.split('\n').map(s=>s.trim()).filter(Boolean),
@@ -1465,6 +1469,7 @@
     document.getElementById('setStoreEmail').value = data.store_email || '';
     document.getElementById('setStorePhone').value = data.store_phone || '';
     document.getElementById('setStoreAddress').value = data.store_address || '';
+    document.getElementById('setCnpj').value = data.cnpj || '';
     document.getElementById('setStoreDescription').value = data.store_description || '';
     document.getElementById('setInstagramUrl').value = data.instagram_url || '';
     document.getElementById('setTiktokUrl').value = data.tiktok_url || '';
@@ -1493,6 +1498,7 @@
       store_email: document.getElementById('setStoreEmail').value.trim(),
       store_phone: document.getElementById('setStorePhone').value.trim(),
       store_address: document.getElementById('setStoreAddress').value.trim(),
+      cnpj: document.getElementById('setCnpj').value.trim() || null,
       store_description: document.getElementById('setStoreDescription').value.trim(),
       instagram_url: document.getElementById('setInstagramUrl').value.trim() || null,
       tiktok_url: document.getElementById('setTiktokUrl').value.trim() || null,
