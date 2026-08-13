@@ -124,11 +124,14 @@
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="assets/js/supabase-client.js"></script>
+<script src="assets/js/tracking.js"></script>
 <script>
 (function(){
   const app = document.getElementById('app');
   const urlParams = new URLSearchParams(window.location.search);
   const status = urlParams.get('status');
+
+  window.JATracking.init();
 
   // ---------- Se voltou do Mercado Pago, mostra a tela de status ----------
   if (status){
@@ -534,6 +537,15 @@
         return;
       }
       localStorage.removeItem('ja_cart');
+      // Guarda os dados desse pedido pra disparar o evento de "compra
+      // concluída" quando o cliente voltar pra tela de sucesso — sem
+      // precisar reconsultar o pedido no banco (o carrinho já tinha
+      // tudo que precisamos pra isso).
+      sessionStorage.setItem('ja_purchase_pending', JSON.stringify({
+        orderId: data.orderId,
+        total: total(),
+        items: cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty })),
+      }));
       window.location.href = data.initPoint;
     } catch(err){
       console.error(err);
@@ -566,10 +578,30 @@
         <a href="index.html">Voltar à loja</a>
       </div>
     `;
+
+    // Dispara o evento de "compra concluída" só na tela de sucesso, e só
+    // uma vez (limpa o dado salvo depois, pra não contar de novo se a
+    // pessoa atualizar a página).
+    if (status === 'success'){
+      try {
+        const pending = JSON.parse(sessionStorage.getItem('ja_purchase_pending') || 'null');
+        const orderIdFromUrl = urlParams.get('order');
+        if (pending && (!orderIdFromUrl || pending.orderId === orderIdFromUrl)){
+          window.JATracking.trackPurchase(pending.orderId, pending.items, pending.total);
+          sessionStorage.removeItem('ja_purchase_pending');
+        }
+      } catch (err) {
+        console.error('Erro ao registrar evento de compra:', err);
+      }
+    }
   }
 
   render();
   loadStoreConfig().then(()=> updateSummary());
+  window.JATracking.trackBeginCheckout(
+    cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty })),
+    subtotal()
+  );
 })();
 </script>
 
