@@ -445,7 +445,9 @@
   </a>
 </section>
 
-<section class="container" style="padding:44px 20px 0;">
+<div id="layoutAnchor" style="display:none;"></div>
+
+<section class="container" id="categoriasDestaqueSection" style="padding:44px 20px 0;">
   <h2 class="serif" style="font-size:20px; margin:0 0 16px;">Categorias em destaque</h2>
   <div id="categoryTiles" class="category-tiles"></div>
 </section>
@@ -471,7 +473,7 @@
   <div id="newArrivalsRow" class="scroll-row"></div>
 </section>
 
-<section class="trust">
+<section class="trust" id="trustSection">
   <div class="container">
     <div class="trust-grid trust-grid-4">
       <div class="trust-item">
@@ -808,12 +810,54 @@
     marqueeResizeTimer = setTimeout(applyMarqueeSpeed, 250);
   });
 
+  // ---------------- modelos de layout da Home (Etapa 4) ----------------
+  // Cada modelo é só uma LISTA DE IDS de seções que já existem na página —
+  // não duplica nada, só decide quais aparecem e em que ordem.
+  const LAYOUT_SECTIONS = {
+    minimal: ['heroDark', 'categoriasDestaqueSection', 'produtos', 'trustSection'],
+    highlights: ['heroDark', 'categoriasDestaqueSection', 'ofertas', 'mais-vendidos', 'produtos', 'depoimentos'],
+    catalog: ['categoriasDestaqueSection', 'produtos'],
+  };
+  // Todas as seções que algum modelo pode esconder — as que NÃO fazem
+  // parte de nenhum modelo (Novidades, Instagram, Newsletter, Sobre,
+  // Contato, banner secundário) ficam de fora dessa lista de propósito:
+  // elas continuam aparecendo do jeito que já apareciam, independente do
+  // modelo escolhido — só as seções realmente "concorrentes" entre os 3
+  // modelos são controladas aqui.
+  const ALL_CONTROLLABLE_SECTIONS = ['heroDark', 'categoriasDestaqueSection', 'ofertas', 'mais-vendidos', 'produtos', 'trustSection', 'depoimentos'];
+
+  function applyHomeLayout(layoutKey){
+    const sections = LAYOUT_SECTIONS[layoutKey];
+    if (!sections) return; // valor vazio/inválido: não mexe em nada — mantém o visual atual
+
+    ALL_CONTROLLABLE_SECTIONS.forEach(id=>{
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+
+    const anchor = document.getElementById('layoutAnchor');
+    if (!anchor) return;
+    let insertionPoint = anchor;
+    sections.forEach(id=>{
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.display = '';
+      insertionPoint.parentNode.insertBefore(el, insertionPoint.nextSibling);
+      insertionPoint = el;
+    });
+  }
+
   async function loadStoreSettingsPublic(){
     try {
       const sb = window.getSupabaseClient();
       const { data, error } = await sb.from('store_settings').select('*').eq('id', 1).maybeSingle();
       if (error) throw error;
       if (!data) return;
+
+      // ---------- modelo de layout da Home ----------
+      // Se vazio/inválido, applyHomeLayout() não faz nada — a Home
+      // continua exatamente como está hoje (todas as seções, ordem atual).
+      applyHomeLayout(data.selected_layout);
 
       // ---------- nome da loja (com fallback "JA Store") ----------
       // O próprio HTML já traz "JA Store" escrito em cada um desses spans,
