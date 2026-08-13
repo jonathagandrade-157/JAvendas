@@ -541,8 +541,28 @@
     <div class="field"><label>Custo (R$, opcional)</label><input id="prodCost" type="number" step="0.01"></div>
     <div class="field"><label>Descrição (aparece na página do produto)</label><textarea id="prodDescription" rows="3" style="width:100%; padding:9px 11px; border-radius:6px; border:1.5px solid var(--line); font-size:13px; font-family:inherit;"></textarea></div>
     <div class="field"><label>Estoque</label><input id="prodStock" type="number" step="1"></div>
-    <div class="field"><label>URL da imagem de capa</label><input id="prodImage"></div>
-    <div class="field"><label>Fotos adicionais (uma URL por linha)</label><textarea id="prodImages" rows="3"></textarea></div>
+    <div class="field">
+      <label>Foto de capa</label>
+      <div id="coverPreviewWrap" style="display:none; margin-bottom:8px;">
+        <img id="coverPreview" style="width:90px; height:90px; object-fit:cover; border-radius:8px; border:1px solid var(--line);">
+      </div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+        <input type="file" id="coverFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:180px; font-size:12.5px;">
+        <button class="btn btn-ghost" id="removeCoverBtn" type="button">Remover</button>
+      </div>
+      <p id="coverUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:0 0 8px;"></p>
+      <label style="font-size:11.5px; color:var(--ink-soft);">Ou cole uma URL manualmente:</label>
+      <input id="prodImage" placeholder="assets/products/nome.jpg ou link direto">
+    </div>
+    <div class="field">
+      <label>Fotos adicionais</label>
+      <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+        <input type="file" id="extraFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; font-size:12.5px;">
+      </div>
+      <p id="extraUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:0 0 8px;"></p>
+      <label style="font-size:11.5px; color:var(--ink-soft);">Uma URL por linha (a foto enviada acima é adicionada automaticamente aqui):</label>
+      <textarea id="prodImages" rows="3"></textarea>
+    </div>
     <div class="field"><label><input type="checkbox" id="prodActive" style="width:auto;display:inline-block;margin-right:6px;">Produto ativo (visível na loja)</label></div>
 
     <div id="variantsSection" style="border-top:1px solid var(--line); margin-top:6px; padding-top:16px;">
@@ -1118,6 +1138,133 @@
   document.getElementById('newProductBtn').addEventListener('click', ()=> openProductModal(null));
   document.getElementById('cancelProductBtn').addEventListener('click', ()=> productOverlay.classList.remove('open'));
 
+  // ================= UPLOAD DE IMAGENS (Supabase Storage) =================
+  const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  const MAX_FILE_SIZE_MB = 8;
+  const STORAGE_BUCKET = 'product-images';
+
+  function updateCoverPreview(){
+    const url = document.getElementById('prodImage').value.trim();
+    const wrap = document.getElementById('coverPreviewWrap');
+    const img = document.getElementById('coverPreview');
+    if (url){
+      img.src = url;
+      img.onerror = ()=>{ wrap.style.display = 'none'; };
+      img.onload = ()=>{ wrap.style.display = 'block'; };
+      wrap.style.display = 'block';
+    } else {
+      wrap.style.display = 'none';
+    }
+  }
+
+  // Redimensiona/comprime a imagem no navegador antes de enviar, pra não
+  // subir arquivos gigantes de celular sem necessidade. Simples: sem
+  // biblioteca externa, só canvas.
+  function compressImage(file, maxDimension = 1600, quality = 0.82){
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = (e) => { img.src = e.target.result; };
+      reader.onerror = reject;
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDimension || height > maxDimension){
+          if (width > height){ height = Math.round(height * (maxDimension/width)); width = maxDimension; }
+          else { width = Math.round(width * (maxDimension/height)); height = maxDimension; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => blob ? resolve(blob) : reject(new Error('Falha ao processar imagem')),
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function validateImageFile(file, statusEl){
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)){
+      statusEl.textContent = 'Formato não permitido. Use JPG, PNG ou WEBP.';
+      statusEl.style.color = 'var(--red)';
+      return false;
+    }
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024){
+      statusEl.textContent = `Arquivo muito grande (máx. ${MAX_FILE_SIZE_MB}MB).`;
+      statusEl.style.color = 'var(--red)';
+      return false;
+    }
+    return true;
+  }
+
+  async function uploadProductImage(file, statusEl){
+    statusEl.style.color = 'var(--ink-soft)';
+    statusEl.textContent = 'Enviando imagem...';
+    try {
+      const compressed = await compressImage(file);
+      const fileName = `${Date.now()}-${slugify(file.name.replace(/\.[^.]+$/, ''))}.jpg`;
+      const { error: uploadError } = await sb.storage
+        .from(STORAGE_BUCKET)
+        .upload(fileName, compressed, { contentType: 'image/jpeg', upsert: false });
+      if (uploadError) throw uploadError;
+
+      const { data: publicData } = sb.storage.from(STORAGE_BUCKET).getPublicUrl(fileName);
+      statusEl.style.color = 'var(--green)';
+      statusEl.textContent = 'Imagem enviada!';
+      return publicData.publicUrl;
+    } catch (err) {
+      console.error(err);
+      statusEl.style.color = 'var(--red)';
+      statusEl.textContent = 'Erro ao enviar imagem: ' + (err.message || 'tente novamente.');
+      return null;
+    }
+  }
+
+  document.getElementById('coverFileInput').addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('coverUploadStatus');
+    if (!validateImageFile(file, statusEl)) return;
+    const url = await uploadProductImage(file, statusEl);
+    if (url){
+      document.getElementById('prodImage').value = url;
+      updateCoverPreview();
+    }
+    e.target.value = '';
+  });
+
+  document.getElementById('removeCoverBtn').addEventListener('click', async ()=>{
+    const currentUrl = document.getElementById('prodImage').value.trim();
+    document.getElementById('prodImage').value = '';
+    updateCoverPreview();
+    document.getElementById('coverUploadStatus').textContent = '';
+    // Se a imagem era do nosso Storage (não uma URL externa/antiga), tenta
+    // apagar o arquivo de lá também — sem travar a interface se falhar.
+    if (currentUrl.includes(`/storage/v1/object/public/${STORAGE_BUCKET}/`)){
+      const fileName = currentUrl.split(`/${STORAGE_BUCKET}/`).pop();
+      sb.storage.from(STORAGE_BUCKET).remove([fileName]).catch(()=>{});
+    }
+  });
+
+  document.getElementById('extraFileInput').addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('extraUploadStatus');
+    if (!validateImageFile(file, statusEl)) return;
+    const url = await uploadProductImage(file, statusEl);
+    if (url){
+      const textarea = document.getElementById('prodImages');
+      textarea.value = textarea.value.trim() ? textarea.value.trim() + '\n' + url : url;
+    }
+    e.target.value = '';
+  });
+
+  document.getElementById('prodImage').addEventListener('input', updateCoverPreview);
+
   function openProductModal(product, readOnly){
     document.getElementById('productModalTitle').textContent = readOnly ? 'Visualizar produto' : (product ? 'Editar produto' : 'Novo produto');
     document.getElementById('prodId').value = product?.id || '';
@@ -1132,8 +1279,13 @@
     document.getElementById('prodImage').value = product?.image_url || '';
     document.getElementById('prodImages').value = (product?.images || []).join('\n');
     document.getElementById('prodActive').checked = product ? product.active : true;
+    document.getElementById('coverFileInput').value = '';
+    document.getElementById('extraFileInput').value = '';
+    document.getElementById('coverUploadStatus').textContent = '';
+    document.getElementById('extraUploadStatus').textContent = '';
+    updateCoverPreview();
 
-    const fieldIds = ['prodName','prodCategory','prodSizeType','prodPrice','prodSalePrice','prodCost','prodDescription','prodStock','prodImage','prodImages','prodActive'];
+    const fieldIds = ['prodName','prodCategory','prodSizeType','prodPrice','prodSalePrice','prodCost','prodDescription','prodStock','prodImage','prodImages','prodActive','coverFileInput','extraFileInput','removeCoverBtn'];
     fieldIds.forEach(id => { document.getElementById(id).disabled = !!readOnly; });
     document.getElementById('saveProductBtn').style.display = readOnly ? 'none' : 'block';
 
