@@ -599,6 +599,7 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="assets/js/supabase-client.js"></script>
 <script src="assets/js/cart.js"></script>
+<script src="assets/js/tracking.js"></script>
 <script>
 (function(){
   const WHATSAPP_NUMBER = "5511946790983"; // (11) 94679-0983
@@ -1199,6 +1200,7 @@
     if (currentQty + 1 > quickView.stock){ showToast('Sem mais estoque deste produto'); return; }
     if (idx>=0){ cart[idx].qty++; } else { cart.push({ id:quickView.id, size:selectedSize, qty:1 }); }
     persistCart();
+    window.JATracking.trackAddToCart({ id: quickView.id, name: quickView.name, price: effectivePrice(quickView) }, 1);
     showToast(`${quickView.name} adicionado`);
     qvOverlay.classList.remove('open');
     renderCartUI();
@@ -1329,6 +1331,7 @@
   loadTestimonials();
   loadStoreSettingsPublic();
   loadAnnouncements();
+  window.JATracking.init();
 })();
 </script>
 
