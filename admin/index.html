@@ -364,12 +364,24 @@
         <div class="panel" data-panel="announcements">
           <div class="card">
             <div class="panel-head">
-              <h2>Avisos (carrossel do topo)</h2>
+              <h2>Avisos (faixa em movimento no topo)</h2>
               <button class="btn btn-primary" id="newAnnouncementBtn">+ Novo aviso</button>
             </div>
             <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 16px;">
-              Se houver mais de um aviso ativo, eles se alternam automaticamente na loja. Se não houver nenhum ativo, a faixa some por completo.
+              Todos os avisos ativos se movem juntos, numa faixa contínua (estilo painel de notícias). Se não houver nenhum ativo, a faixa some por completo.
             </p>
+
+            <div style="display:flex; align-items:flex-end; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+              <div class="field" style="margin-bottom:0; max-width:260px;">
+                <label>Direção do movimento</label>
+                <select id="setAnnouncementsDirection">
+                  <option value="rtl">Direita → Esquerda</option>
+                  <option value="ltr">Esquerda → Direita</option>
+                </select>
+              </div>
+              <button class="btn btn-ghost" id="saveAnnouncementsDirectionBtn">Salvar direção</button>
+            </div>
+
             <table>
               <thead><tr><th>Ordem</th><th>Ícone</th><th>Texto</th><th>Link</th><th>Status</th><th></th></tr></thead>
               <tbody id="announcementsBody"></tbody>
@@ -1760,7 +1772,17 @@
     if (error){ showToast('Erro ao carregar avisos'); console.error(error); return; }
     allAnnouncements = data;
     renderAnnouncementsTable();
+
+    const { data: settingsData } = await sb.from('store_settings').select('announcements_direction').eq('id', 1).maybeSingle();
+    document.getElementById('setAnnouncementsDirection').value = settingsData?.announcements_direction || 'rtl';
   }
+
+  document.getElementById('saveAnnouncementsDirectionBtn').addEventListener('click', async ()=>{
+    const direction = document.getElementById('setAnnouncementsDirection').value;
+    const { error } = await sb.from('store_settings').update({ announcements_direction: direction, updated_at: new Date().toISOString() }).eq('id', 1);
+    if (error){ showToast('Erro ao salvar: ' + error.message); return; }
+    showToast('Direção salva!');
+  });
 
   function renderAnnouncementsTable(){
     document.getElementById('announcementsBody').innerHTML = allAnnouncements.map((a, i) => `
