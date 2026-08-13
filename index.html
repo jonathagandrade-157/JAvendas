@@ -69,8 +69,18 @@
 
   .promo-bar{
     background:var(--ink); color:#fff; font-size:11.5px; font-weight:600;
-    display:flex; justify-content:center; gap:24px; padding:7px 16px; flex-wrap:wrap; text-align:center;
+    align-items:center; justify-content:center; padding:8px 16px; text-align:center;
+    min-height:34px;
   }
+  .promo-slide{
+    display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:center;
+    transition:opacity .35s ease;
+    opacity:1;
+    max-width:100%;
+    padding:0 8px;
+  }
+  .promo-slide.fade{ opacity:0; }
+  .promo-slide a{ color:#fff; text-decoration:underline; font-weight:700; }
   .fav-count{
     position:absolute; top:-6px; right:-6px; width:16px; height:16px; border-radius:50%;
     background:var(--rust); color:#fff; font-size:9.5px; display:flex; align-items:center; justify-content:center;
@@ -292,9 +302,8 @@
   <rect width="100%" height="100%" filter="url(#jaGrain)"/>
 </svg>
 
-<div class="promo-bar" id="promoBar">
-  <span id="promoFreeShipping">🚚 Frete grátis acima de R$ 300</span>
-  <span id="promoPix">💸 5% de desconto pagando no Pix</span>
+<div class="promo-bar" id="promoBar" style="display:none;">
+  <span class="promo-slide" id="promoSlide"></span>
 </div>
 
 <header id="topo">
@@ -695,6 +704,65 @@
   }
 
   // ---------------- configurações da loja (Instagram etc.) ----------------
+  // ---------------- carrossel de avisos ----------------
+  let announcements = [];
+  let announcementIndex = 0;
+  let announcementTimer = null;
+
+  async function loadAnnouncements(){
+    try {
+      const sb = window.getSupabaseClient();
+      const { data, error } = await sb
+        .from('announcements')
+        .select('*')
+        .eq('active', true)
+        .order('display_order', { ascending: true });
+      if (error) throw error;
+      announcements = data || [];
+    } catch (err) {
+      console.error('Erro ao carregar avisos:', err);
+      announcements = [];
+    }
+    renderAnnouncementBar();
+  }
+
+  function renderAnnouncementBar(){
+    const bar = document.getElementById('promoBar');
+    clearInterval(announcementTimer);
+
+    if (!announcements.length){
+      bar.style.display = 'none';
+      return;
+    }
+
+    bar.style.display = 'flex';
+    announcementIndex = 0;
+    renderAnnouncementSlide();
+
+    // Só anima/alterna se tiver mais de um aviso ativo — com um só, fica
+    // parado (sem necessidade de transição, como pedido).
+    if (announcements.length > 1){
+      announcementTimer = setInterval(()=>{
+        const slide = document.getElementById('promoSlide');
+        slide.classList.add('fade');
+        setTimeout(()=>{
+          announcementIndex = (announcementIndex + 1) % announcements.length;
+          renderAnnouncementSlide();
+          slide.classList.remove('fade');
+        }, 350);
+      }, 4200);
+    }
+  }
+
+  function renderAnnouncementSlide(){
+    const slide = document.getElementById('promoSlide');
+    const a = announcements[announcementIndex];
+    if (!a) return;
+    const iconHtml = a.icon ? `<span>${a.icon}</span>` : '';
+    const linkHtml = a.link_url ? ` <a href="${a.link_url}">${a.link_text || 'Saiba mais'}</a>` : '';
+    slide.innerHTML = `${iconHtml}<span>${a.text}</span>${linkHtml}`;
+  }
+
   async function loadStoreSettingsPublic(){
     try {
       const sb = window.getSupabaseClient();
@@ -708,16 +776,8 @@
         document.getElementById('instagramCta').href = data.instagram_url;
       }
 
-      // ---------- frete grátis e Pix: fonte única de verdade ----------
+      // ---------- frete grátis: usado na faixa de confiança (não relacionado ao carrossel de avisos) ----------
       const freeShippingValue = data.free_shipping_threshold != null ? Number(data.free_shipping_threshold) : 300;
-      const pixPercent = data.pix_discount_percent != null ? Number(data.pix_discount_percent) : 5;
-      const freeShippingText = `🚚 Frete grátis acima de ${formatBRL(freeShippingValue)}`;
-      const pixText = `💸 ${pixPercent}% de desconto pagando no Pix`;
-
-      const promoFreeEl = document.getElementById('promoFreeShipping');
-      const promoPixEl = document.getElementById('promoPix');
-      if (promoFreeEl) promoFreeEl.textContent = freeShippingText;
-      if (promoPixEl) promoPixEl.textContent = pixText;
 
       const trustFreeShippingEl = document.getElementById('trustFreeShippingValue');
       if (trustFreeShippingEl) trustFreeShippingEl.textContent = `Acima de ${formatBRL(freeShippingValue)}`;
@@ -1224,6 +1284,7 @@
   loadProducts();
   loadTestimonials();
   loadStoreSettingsPublic();
+  loadAnnouncements();
 })();
 </script>
 
