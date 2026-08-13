@@ -324,6 +324,21 @@
               <tbody id="categoriesBody"></tbody>
             </table>
           </div>
+
+          <div class="card">
+            <div class="panel-head">
+              <h2>Subcategorias</h2>
+              <button class="btn btn-primary" id="newSubcategoryBtn">+ Nova subcategoria</button>
+            </div>
+            <div class="field" style="max-width:280px; margin-bottom:16px;">
+              <label>Ver subcategorias de:</label>
+              <select id="subcatFilterCategory"></select>
+            </div>
+            <table>
+              <thead><tr><th>Ordem</th><th>Nome</th><th>Slug</th><th>Status</th><th></th></tr></thead>
+              <tbody id="subcategoriesBody"></tbody>
+            </table>
+          </div>
         </div>
 
         <!-- ---------- PEDIDOS ---------- -->
@@ -424,6 +439,7 @@
                 <div class="field"><label>E-mail</label><input id="setStoreEmail" type="email"></div>
                 <div class="field"><label>Telefone</label><input id="setStorePhone"></div>
                 <div class="field"><label>Endereço</label><input id="setStoreAddress"></div>
+                <div class="field"><label>CEP da loja</label><input id="setStoreZipCode" placeholder="00000-000" maxlength="9"></div>
                 <div class="field"><label>CNPJ (opcional)</label><input id="setCnpj" placeholder="00.000.000/0001-00"></div>
               </div>
               <div class="field"><label>Descrição da loja</label><textarea id="setStoreDescription" rows="3"></textarea></div>
@@ -509,6 +525,10 @@
                 <label>Endereço da loja (usado para calcular a distância)</label>
                 <p style="font-size:12px; color:var(--ink-soft); margin:0 0 10px;">
                   Esse é o mesmo endereço da aba "Geral". Depois de preenchê-lo lá, clique no botão abaixo para localizar as coordenadas da loja.
+                </p>
+                <p style="font-size:12.5px; margin:0 0 10px;">
+                  <b>CEP de origem:</b> <span id="motoboyZipDisplay">não cadastrado</span><br>
+                  <span style="font-size:11.5px; color:var(--ink-soft);">Para alterar o CEP de origem, altere o CEP na aba Geral.</span>
                 </p>
                 <button class="btn btn-ghost" id="verifyMotoboyOriginBtn" type="button">Verificar coordenadas da loja</button>
                 <p id="motoboyOriginStatus" style="font-size:12.5px; margin-top:10px;"></p>
@@ -609,13 +629,44 @@
 </div>
 
 <!-- Modal de produto -->
+<div class="overlay" id="subcategoryOverlay">
+  <div class="modal">
+    <h3 id="subcategoryModalTitle">Nova subcategoria</h3>
+    <input type="hidden" id="subcatId">
+    <div class="field"><label>Categoria pai</label>
+      <select id="subcatCategoryId"></select>
+    </div>
+    <div class="field"><label>Nome</label><input id="subcatName" placeholder="Ex: Importados"></div>
+    <div class="field"><label>Slug (gerado automático, mas você pode ajustar)</label><input id="subcatSlug" placeholder="importados"></div>
+    <div class="field"><label>Ordem de exibição</label><input id="subcatOrder" type="number" step="1" value="0"></div>
+    <div class="field"><label><input type="checkbox" id="subcatActive" style="width:auto;display:inline-block;margin-right:6px;" checked>Subcategoria ativa</label></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="saveSubcategoryBtn" style="flex:1">Salvar</button>
+      <button class="btn btn-ghost" id="cancelSubcategoryBtn">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="categoryOverlay">
   <div class="modal">
     <h3 id="categoryModalTitle">Nova categoria</h3>
     <input type="hidden" id="catId">
     <div class="field"><label>Nome</label><input id="catName" placeholder="Ex: Bermudas"></div>
     <div class="field"><label>Slug (usado internamente — gerado automático, mas você pode ajustar)</label><input id="catSlug" placeholder="ex-bermudas"></div>
-    <div class="field"><label>URL da imagem (opcional)</label><input id="catImage" placeholder="assets/categories/bermudas.jpg"></div>
+
+    <div class="field">
+      <label>Imagem da categoria</label>
+      <div id="catImagePreviewWrap" style="display:none; margin-bottom:8px;">
+        <img id="catImagePreview" style="width:70px; height:70px; object-fit:cover; border-radius:8px; border:1px solid var(--line);">
+      </div>
+      <input type="hidden" id="catImage">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <input type="file" id="catImageFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:160px; font-size:12.5px;">
+        <button class="btn btn-ghost" id="removeCatImageBtn" type="button">Remover</button>
+      </div>
+      <p id="catImageUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:6px 0 0;"></p>
+    </div>
+
     <div class="field"><label>Ordem de exibição</label><input id="catOrder" type="number" step="1" value="0"></div>
     <div class="field"><label><input type="checkbox" id="catActive" style="width:auto;display:inline-block;margin-right:6px;" checked>Categoria ativa (visível na loja)</label></div>
     <p id="categoryDeleteWarning" style="font-size:12.5px; color:var(--red); display:none; margin-bottom:12px;"></p>
@@ -633,6 +684,11 @@
     <div class="field"><label>Nome</label><input id="prodName"></div>
     <div class="field"><label>Categoria</label>
       <select id="prodCategory"></select>
+    </div>
+    <div class="field"><label>Subcategoria (opcional)</label>
+      <select id="prodSubcategory">
+        <option value="">Nenhuma</option>
+      </select>
     </div>
     <div class="field"><label>Tipo de tamanho</label>
       <select id="prodSizeType">
@@ -1030,6 +1086,7 @@
     if (error){ showToast('Erro ao carregar categorias'); console.error(error); return; }
     allCategoriesAdmin = data;
     renderCategoriesTable();
+    loadSubcategoriesAdmin();
   }
 
   function renderCategoriesTable(){
@@ -1102,8 +1159,49 @@
     // Categoria já existente: trava o slug automático (evita desconectar
     // produtos que já usam esse slug, caso o admin só queira corrigir o nome).
     catSlugManuallyEdited = !!cat;
+    document.getElementById('catImageFileInput').value = '';
+    document.getElementById('catImageUploadStatus').textContent = '';
+    updateCatImagePreview();
     categoryOverlay.classList.add('open');
   }
+
+  function updateCatImagePreview(){
+    const url = document.getElementById('catImage').value.trim();
+    const wrap = document.getElementById('catImagePreviewWrap');
+    const img = document.getElementById('catImagePreview');
+    if (url){
+      img.src = url;
+      img.onerror = ()=>{ wrap.style.display = 'none'; };
+      img.onload = ()=>{ wrap.style.display = 'block'; };
+      wrap.style.display = 'block';
+    } else {
+      wrap.style.display = 'none';
+    }
+  }
+
+  document.getElementById('catImageFileInput').addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('catImageUploadStatus');
+    if (!validateImageFile(file, statusEl)) return;
+    const url = await uploadProductImage(file, statusEl);
+    if (url){
+      document.getElementById('catImage').value = url;
+      updateCatImagePreview();
+    }
+    e.target.value = '';
+  });
+
+  document.getElementById('removeCatImageBtn').addEventListener('click', ()=>{
+    const currentUrl = document.getElementById('catImage').value.trim();
+    document.getElementById('catImage').value = '';
+    updateCatImagePreview();
+    document.getElementById('catImageUploadStatus').textContent = '';
+    if (currentUrl.includes(`/storage/v1/object/public/${STORAGE_BUCKET}/`)){
+      const fileName = currentUrl.split(`/${STORAGE_BUCKET}/`).pop();
+      sb.storage.from(STORAGE_BUCKET).remove([fileName]).catch(()=>{});
+    }
+  });
 
   // Gera o slug automaticamente a partir do nome, só quando o campo de
   // slug ainda não foi editado manualmente pelo usuário nesse formulário.
@@ -1147,8 +1245,184 @@
     loadCategoriesAdmin();
   });
 
+  // ================= SUBCATEGORIAS =================
+  let allSubcategoriesAdmin = [];
+  let subcatSlugManuallyEdited = false;
+
+  function populateCategorySelects(){
+    const options = allCategoriesAdmin.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    const filterEl = document.getElementById('subcatFilterCategory');
+    const modalEl = document.getElementById('subcatCategoryId');
+    const prevFilterValue = filterEl.value;
+    filterEl.innerHTML = `<option value="">Todas as categorias</option>${options}`;
+    modalEl.innerHTML = options;
+    if (prevFilterValue) filterEl.value = prevFilterValue;
+  }
+
+  async function loadSubcategoriesAdmin(){
+    populateCategorySelects();
+    const { data, error } = await sb.from('subcategories').select('*').order('display_order', { ascending: true });
+    if (error){ showToast('Erro ao carregar subcategorias'); console.error(error); return; }
+    allSubcategoriesAdmin = data;
+    renderSubcategoriesTable();
+  }
+
+  function renderSubcategoriesTable(){
+    const filterCategoryId = document.getElementById('subcatFilterCategory').value;
+    const list = filterCategoryId ? allSubcategoriesAdmin.filter(s=>s.category_id===filterCategoryId) : allSubcategoriesAdmin;
+
+    document.getElementById('subcategoriesBody').innerHTML = list.map(s => {
+      const parentCat = allCategoriesAdmin.find(c=>c.id===s.category_id);
+      return `
+      <tr>
+        <td>${s.display_order}</td>
+        <td>${s.name} <span style="font-size:11px; color:var(--ink-soft);">(${parentCat?.name || '—'})</span></td>
+        <td><code style="font-size:12px;">${s.slug}</code></td>
+        <td>${s.active ? '<span class="badge badge-green">Ativa</span>' : '<span class="badge badge-red">Inativa</span>'}</td>
+        <td style="text-align:right; white-space:nowrap;">
+          <button class="icon-btn" data-toggle-subcat="${s.id}" title="${s.active ? 'Desativar' : 'Ativar'}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">${s.active
+              ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>'
+              : '<path d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.6 21.6 0 015.06-6.06M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a21.6 21.6 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24M1 1l22 22" stroke="currentColor" stroke-width="1.7"/>'}
+            </svg>
+          </button>
+          <button class="icon-btn" data-edit-subcat="${s.id}" title="Editar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="1.7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+          <button class="icon-btn" data-delete-subcat="${s.id}" title="Excluir">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+        </td>
+      </tr>
+    `;
+    }).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--ink-soft);padding:20px;">Nenhuma subcategoria encontrada.</td></tr>`;
+
+    document.querySelectorAll('[data-edit-subcat]').forEach(btn=>{
+      btn.addEventListener('click', ()=> openSubcategoryModal(allSubcategoriesAdmin.find(s=>s.id===btn.dataset.editSubcat)));
+    });
+    document.querySelectorAll('[data-toggle-subcat]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const s = allSubcategoriesAdmin.find(x=>x.id===btn.dataset.toggleSubcat);
+        const { error } = await sb.from('subcategories').update({ active: !s.active, updated_at: new Date().toISOString() }).eq('id', s.id);
+        if (error){ showToast('Erro ao atualizar'); return; }
+        showToast(s.active ? 'Subcategoria desativada' : 'Subcategoria ativada');
+        loadSubcategoriesAdmin();
+      });
+    });
+    document.querySelectorAll('[data-delete-subcat]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const s = allSubcategoriesAdmin.find(x=>x.id===btn.dataset.deleteSubcat);
+        const { count, error: countErr } = await sb.from('products').select('id', { count:'exact', head:true }).eq('subcategory_id', s.id);
+        if (countErr){ showToast('Erro ao verificar produtos da subcategoria'); return; }
+        if (count > 0){
+          alert(`Não é possível excluir "${s.name}" — existem ${count} produto(s) usando essa subcategoria. Mude a subcategoria desses produtos primeiro, ou apenas desative essa subcategoria.`);
+          return;
+        }
+        if (!confirm(`Excluir a subcategoria "${s.name}"?`)) return;
+        const { error } = await sb.from('subcategories').delete().eq('id', s.id);
+        if (error){ showToast('Erro ao excluir'); return; }
+        showToast('Subcategoria excluída');
+        loadSubcategoriesAdmin();
+      });
+    });
+  }
+
+  document.getElementById('subcatFilterCategory').addEventListener('change', renderSubcategoriesTable);
+
+  const subcategoryOverlay = document.getElementById('subcategoryOverlay');
+  document.getElementById('newSubcategoryBtn').addEventListener('click', ()=> openSubcategoryModal(null));
+  document.getElementById('cancelSubcategoryBtn').addEventListener('click', ()=> subcategoryOverlay.classList.remove('open'));
+
+  function openSubcategoryModal(sub){
+    if (allCategoriesAdmin.length === 0){
+      showToast('Cadastre uma categoria antes de criar subcategorias');
+      return;
+    }
+    document.getElementById('subcategoryModalTitle').textContent = sub ? 'Editar subcategoria' : 'Nova subcategoria';
+    document.getElementById('subcatId').value = sub?.id || '';
+    document.getElementById('subcatCategoryId').value = sub?.category_id || document.getElementById('subcatFilterCategory').value || allCategoriesAdmin[0].id;
+    document.getElementById('subcatName').value = sub?.name || '';
+    document.getElementById('subcatSlug').value = sub?.slug || '';
+    document.getElementById('subcatOrder').value = sub?.display_order ?? (allSubcategoriesAdmin.length + 1) * 10;
+    document.getElementById('subcatActive').checked = sub ? sub.active : true;
+    subcatSlugManuallyEdited = !!sub;
+    subcategoryOverlay.classList.add('open');
+  }
+
+  document.getElementById('subcatSlug').addEventListener('input', ()=>{ subcatSlugManuallyEdited = true; });
+  document.getElementById('subcatName').addEventListener('input', (e)=>{
+    if (!subcatSlugManuallyEdited){
+      document.getElementById('subcatSlug').value = slugify(e.target.value);
+    }
+  });
+
+  document.getElementById('saveSubcategoryBtn').addEventListener('click', async ()=>{
+    const id = document.getElementById('subcatId').value;
+    const categoryId = document.getElementById('subcatCategoryId').value;
+    const name = document.getElementById('subcatName').value.trim();
+    const slug = slugify(document.getElementById('subcatSlug').value.trim() || name);
+    if (!categoryId || !name || !slug){ showToast('Preencha categoria pai e nome'); return; }
+
+    const duplicate = allSubcategoriesAdmin.some(s => s.category_id===categoryId && s.slug===slug && s.id!==id);
+    if (duplicate){
+      showToast('Já existe uma subcategoria com esse slug nessa categoria.');
+      return;
+    }
+
+    const payload = {
+      category_id: categoryId,
+      name,
+      slug,
+      display_order: Number(document.getElementById('subcatOrder').value || 0),
+      active: document.getElementById('subcatActive').checked,
+      updated_at: new Date().toISOString(),
+    };
+
+    let error;
+    if (id){ ({ error } = await sb.from('subcategories').update(payload).eq('id', id)); }
+    else { ({ error } = await sb.from('subcategories').insert(payload)); }
+
+    if (error){ showToast('Erro ao salvar: ' + error.message); return; }
+    showToast('Subcategoria salva!');
+    subcategoryOverlay.classList.remove('open');
+    loadSubcategoriesAdmin();
+  });
+
+
+  let productFormCategories = [];
+  let productFormSubcategories = [];
+
+  async function loadProductFormTaxonomy(){
+    const [catRes, subRes] = await Promise.all([
+      sb.from('categories').select('id, name, slug').eq('active', true).order('display_order', { ascending: true }),
+      sb.from('subcategories').select('id, category_id, name, slug').eq('active', true).order('display_order', { ascending: true }),
+    ]);
+    productFormCategories = catRes.data || [];
+    productFormSubcategories = subRes.data || [];
+
+    const catOptions = productFormCategories.map(c => `<option value="${c.slug}">${c.name}</option>`).join('');
+    document.getElementById('prodCategory').innerHTML = catOptions;
+    document.getElementById('prodCategoryFilter').innerHTML = `<option value="">Todas as categorias</option>${catOptions}`;
+  }
+
+  function populateProdSubcategoryOptions(categorySlug, selectedId){
+    const subEl = document.getElementById('prodSubcategory');
+    const cat = productFormCategories.find(c => c.slug === categorySlug);
+    if (!cat){
+      subEl.innerHTML = '<option value="">Nenhuma</option>';
+      return;
+    }
+    const filtered = productFormSubcategories.filter(s => s.category_id === cat.id);
+    subEl.innerHTML = '<option value="">Nenhuma</option>' + filtered.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    if (selectedId) subEl.value = selectedId;
+  }
+
+  document.getElementById('prodCategory').addEventListener('change', ()=>{
+    populateProdSubcategoryOptions(document.getElementById('prodCategory').value, null);
+  });
 
   async function loadProducts(){
+    await loadProductFormTaxonomy();
     const { data, error } = await sb.from('products').select('*').order('created_at', { ascending:false });
     if (error){ showToast('Erro ao carregar produtos'); console.error(error); return; }
     allProducts = data;
@@ -1437,7 +1711,8 @@
     document.getElementById('productModalTitle').textContent = readOnly ? 'Visualizar produto' : (product ? 'Editar produto' : 'Novo produto');
     document.getElementById('prodId').value = product?.id || '';
     document.getElementById('prodName').value = product?.name || '';
-    document.getElementById('prodCategory').value = product?.category || 'camisetas';
+    document.getElementById('prodCategory').value = product?.category || (productFormCategories[0]?.slug || '');
+    populateProdSubcategoryOptions(document.getElementById('prodCategory').value, product?.subcategory_id || null);
     document.getElementById('prodSizeType').value = product?.size_type || 'clothing';
     document.getElementById('prodPrice').value = product?.price || '';
     document.getElementById('prodSalePrice').value = product?.sale_price || '';
@@ -1453,7 +1728,7 @@
     document.getElementById('extraUploadStatus').textContent = '';
     updateCoverPreview();
 
-    const fieldIds = ['prodName','prodCategory','prodSizeType','prodPrice','prodSalePrice','prodCost','prodDescription','prodStock','prodImage','prodImages','prodActive','coverFileInput','extraFileInput','removeCoverBtn'];
+    const fieldIds = ['prodName','prodCategory','prodSubcategory','prodSizeType','prodPrice','prodSalePrice','prodCost','prodDescription','prodStock','prodImage','prodImages','prodActive','coverFileInput','extraFileInput','removeCoverBtn'];
     fieldIds.forEach(id => { document.getElementById(id).disabled = !!readOnly; });
     document.getElementById('saveProductBtn').style.display = readOnly ? 'none' : 'block';
 
@@ -1561,6 +1836,7 @@
       name,
       slug: slugify(name),
       category: document.getElementById('prodCategory').value,
+      subcategory_id: document.getElementById('prodSubcategory').value || null,
       size_type: document.getElementById('prodSizeType').value,
       price: Number(document.getElementById('prodPrice').value || 0),
       sale_price: Number(document.getElementById('prodSalePrice').value || 0) || null,
@@ -2127,6 +2403,7 @@
     document.getElementById('setStoreEmail').value = data.store_email || '';
     document.getElementById('setStorePhone').value = data.store_phone || '';
     document.getElementById('setStoreAddress').value = data.store_address || '';
+    document.getElementById('setStoreZipCode').value = data.store_zip_code || '';
     document.getElementById('setCnpj').value = data.cnpj || '';
     document.getElementById('setStoreDescription').value = data.store_description || '';
     document.getElementById('setInstagramUrl').value = data.instagram_url || '';
@@ -2139,6 +2416,7 @@
     document.getElementById('setMotoboyRadius').value = data.motoboy_radius_km ?? 15;
     document.getElementById('setMotoboyBaseFee').value = data.motoboy_base_fee ?? 9.90;
     document.getElementById('setMotoboyPerKm').value = data.motoboy_per_km ?? 2.50;
+    document.getElementById('motoboyZipDisplay').textContent = data.store_zip_code || 'não cadastrado';
     const originStatusEl = document.getElementById('motoboyOriginStatus');
     if (data.motoboy_origin_lat && data.motoboy_origin_lng){
       originStatusEl.innerHTML = `<span style="color:var(--green);">✅ Coordenadas salvas (${Number(data.motoboy_origin_lat).toFixed(4)}, ${Number(data.motoboy_origin_lng).toFixed(4)})</span>`;
@@ -2165,12 +2443,21 @@
     updateLogoPreview();
   }
 
+  // Máscara simples de CEP (00000-000) — só formata visualmente, não
+  // impede colar/digitar de outros jeitos.
+  document.getElementById('setStoreZipCode').addEventListener('input', (e)=>{
+    let v = e.target.value.replace(/\D/g, '').slice(0, 8);
+    if (v.length > 5) v = v.slice(0,5) + '-' + v.slice(5);
+    e.target.value = v;
+  });
+
   document.getElementById('saveSettingsBtn').addEventListener('click', async ()=>{
     const payload = {
       store_name: document.getElementById('setStoreName').value.trim(),
       store_email: document.getElementById('setStoreEmail').value.trim(),
       store_phone: document.getElementById('setStorePhone').value.trim(),
       store_address: document.getElementById('setStoreAddress').value.trim(),
+      store_zip_code: document.getElementById('setStoreZipCode').value.trim() || null,
       cnpj: document.getElementById('setCnpj').value.trim() || null,
       store_description: document.getElementById('setStoreDescription').value.trim(),
       instagram_url: document.getElementById('setInstagramUrl').value.trim() || null,
@@ -2180,6 +2467,7 @@
     const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
     if (error){ showToast('Erro ao salvar: ' + error.message); return; }
     showToast('Configurações salvas!');
+    document.getElementById('motoboyZipDisplay').textContent = document.getElementById('setStoreZipCode').value.trim() || 'não cadastrado';
   });
 
   document.getElementById('saveLogoBtn').addEventListener('click', async ()=>{
@@ -2226,21 +2514,26 @@
 
   document.getElementById('verifyMotoboyOriginBtn').addEventListener('click', async ()=>{
     const address = document.getElementById('setStoreAddress').value.trim();
+    const zipCode = document.getElementById('setStoreZipCode').value.trim();
     const statusEl = document.getElementById('motoboyOriginStatus');
     if (!address){
       statusEl.innerHTML = `<span style="color:var(--red);">Preencha o endereço da loja na aba "Geral" primeiro.</span>`;
       return;
     }
+    // Se tiver CEP cadastrado, manda junto com o endereço pra geocodificação
+    // ficar mais precisa. Sem CEP, mantém o comportamento de sempre (só o
+    // endereço) — nunca quebra por falta desse dado.
+    const fullAddress = zipCode ? `${address}, ${zipCode}` : address;
     statusEl.textContent = 'Verificando endereço...';
     try {
       const res = await fetch('/.netlify/functions/geocode-address', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ address })
+        body: JSON.stringify({ address: fullAddress })
       });
       const data = await res.json();
       if (!data.found){
-        statusEl.innerHTML = `<span style="color:var(--red);">Não foi possível localizar esse endereço. Tente deixá-lo mais completo (rua, número, cidade, estado).</span>`;
+        statusEl.innerHTML = `<span style="color:var(--red);">Não foi possível localizar esse endereço. Tente deixá-lo mais completo (rua, número, cidade, estado)${zipCode?'':' ou cadastre o CEP na aba Geral para melhorar a precisão'}.</span>`;
         return;
       }
       const { error } = await sb.from('store_settings').update({
@@ -2249,7 +2542,7 @@
         updated_at: new Date().toISOString(),
       }).eq('id', 1);
       if (error){ statusEl.innerHTML = `<span style="color:var(--red);">Erro ao salvar coordenadas.</span>`; return; }
-      statusEl.innerHTML = `<span style="color:var(--green);">✅ Coordenadas salvas (${data.lat.toFixed(4)}, ${data.lng.toFixed(4)})</span>`;
+      statusEl.innerHTML = `<span style="color:var(--green);">✅ Coordenadas salvas (${data.lat.toFixed(4)}, ${data.lng.toFixed(4)})</span>${!zipCode ? '<br><span style="color:var(--ink-soft);">Dica: cadastre o CEP na aba Geral para uma localização ainda mais precisa.</span>' : ''}`;
       showToast('Endereço da loja verificado e salvo!');
     } catch (err) {
       console.error(err);
