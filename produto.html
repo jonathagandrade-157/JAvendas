@@ -247,10 +247,19 @@
       product = data;
       selectedSize = (SIZE_SETS[product.size_type] || SIZE_SETS.clothing)[0];
 
+      // Busca o nome "bonito" da categoria (ex: "Camisetas") pra mostrar
+      // no lugar do slug cru salvo no produto (ex: "camisetas").
+      let categoryLabel = product.category;
+      try {
+        const { data: catData } = await sb.from('categories').select('name').eq('slug', product.category).maybeSingle();
+        if (catData?.name) categoryLabel = catData.name;
+      } catch (err) { /* mantém o slug como reserva, sem quebrar a página */ }
+      product.categoryLabel = categoryLabel;
+
       document.getElementById('pageTitle').textContent = `${product.name} | JA Store`;
       document.getElementById('pageDescription').setAttribute('content', (product.description || product.name).slice(0,155));
 
-      document.getElementById('breadcrumb').innerHTML = `<a href="index.html">Início</a> / <a href="index.html">${product.category}</a> / <span style="color:var(--ink);">${product.name}</span>`;
+      document.getElementById('breadcrumb').innerHTML = `<a href="index.html">Início</a> / <a href="index.html">${categoryLabel}</a> / <span style="color:var(--ink);">${product.name}</span>`;
 
       renderProduct();
       loadReviews();
@@ -295,7 +304,7 @@
           <div class="gallery-thumbs" id="galleryThumbs"></div>
         </div>
         <div class="product-info">
-          <p class="eyebrow">${product.category}</p>
+          <p class="eyebrow">${product.categoryLabel || product.category}</p>
           <h1 class="serif">${product.name}</h1>
           <div class="price-row">
             ${onSale ? `<span class="price-old">${formatBRL(product.price)}</span>` : ''}
