@@ -132,13 +132,27 @@ exports.handler = async (event) => {
       }
     }
 
-    const FREE_SHIPPING_THRESHOLD = 300;
-    const shippingPrice = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : Number(shipping?.price || 0);
+    // ---------- busca as configurações reais (fonte única de verdade) ----------
+    const { data: settings } = await supabase
+      .from("store_settings")
+      .select("free_shipping_threshold, pix_discount_percent, motoboy_free_shipping")
+      .eq("id", 1)
+      .maybeSingle();
 
-    // Desconto de 5% para pagamento via Pix — calculado aqui no servidor
-    // (nunca a partir de um valor vindo do navegador), com base no método
-    // que o cliente escolheu no checkout.
-    const PIX_DISCOUNT_RATE = 0.05;
+    const FREE_SHIPPING_THRESHOLD = settings?.free_shipping_threshold != null ? Number(settings.free_shipping_threshold) : 300;
+    const PIX_DISCOUNT_RATE = settings?.pix_discount_percent != null ? Number(settings.pix_discount_percent) / 100 : 0.05;
+    const MOTOBOY_FREE_SHIPPING = !!settings?.motoboy_free_shipping;
+
+    const qualifiesForFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
+    const isMotoboy = !!shipping?.isMotoboy;
+    // Regra específica do Motoboy: só entra no frete grátis geral se a
+    // opção "Frete grátis para Motoboy" estiver ativada nas configurações.
+    const shippingPrice = (qualifiesForFreeShipping && (!isMotoboy || MOTOBOY_FREE_SHIPPING))
+      ? 0
+      : Number(shipping?.price || 0);
+
+    // Desconto no Pix — calculado aqui no servidor (nunca a partir de um
+    // valor vindo do navegador), com base no método que o cliente escolheu.
     const pixDiscount = preferredMethod === "pix" ? Math.round(subtotal * PIX_DISCOUNT_RATE * 100) / 100 : 0;
 
     const total = Math.max(0, subtotal - discount - pixDiscount + shippingPrice);
