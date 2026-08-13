@@ -365,6 +365,8 @@
               <button class="settings-tab" data-stab="pagamento">Pagamento</button>
               <button class="settings-tab" data-stab="envio">Envio</button>
               <button class="settings-tab" data-stab="motoboy">Motoboy</button>
+              <button class="settings-tab" data-stab="banners">Banners</button>
+              <button class="settings-tab" data-stab="seo">SEO</button>
             </div>
 
             <div class="settings-panel active" data-spanel="geral">
@@ -393,7 +395,16 @@
             </div>
 
             <div class="settings-panel" data-spanel="pagamento">
-              <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.6;max-width:520px;">
+              <div class="field" style="max-width:280px;">
+                <label>Desconto no Pix (%)</label>
+                <input id="setPixDiscount" type="number" step="0.5" min="0" max="100">
+              </div>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px;">
+                Esse valor é usado de verdade no cálculo do checkout — não é só um texto.
+              </p>
+              <button class="btn btn-primary" id="savePaymentBtn" style="margin-bottom:20px;">Salvar</button>
+
+              <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.6;max-width:520px; border-top:1px solid var(--line); padding-top:16px;">
                 As chaves do Mercado Pago são configuradas como variáveis de ambiente na Netlify
                 (<code>MERCADOPAGO_ACCESS_TOKEN</code>) — por segurança, não ficam editáveis por aqui,
                 já que são credenciais sensíveis. Para trocar, acesse
@@ -402,7 +413,16 @@
             </div>
 
             <div class="settings-panel" data-spanel="envio">
-              <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.6;max-width:520px;">
+              <div class="field" style="max-width:280px;">
+                <label>Frete grátis acima de (R$)</label>
+                <input id="setFreeShippingThreshold" type="number" step="1" min="0">
+              </div>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px;">
+                Esse valor é a fonte única de verdade — usado no carrossel de avisos, no checkout e na cobrança real.
+              </p>
+              <button class="btn btn-primary" id="saveShippingBtn" style="margin-bottom:20px;">Salvar</button>
+
+              <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.6;max-width:520px; border-top:1px solid var(--line); padding-top:16px;">
                 As credenciais do Melhor Envio (<code>MELHORENVIO_TOKEN</code>, <code>STORE_ORIGIN_CEP</code>)
                 também ficam nas variáveis de ambiente da Netlify, pelo mesmo motivo de segurança.
               </p>
@@ -412,6 +432,12 @@
               <div class="field">
                 <label><input type="checkbox" id="setMotoboyEnabled" style="width:auto;display:inline-block;margin-right:6px;">Ativar entrega por Motoboy</label>
               </div>
+              <div class="field">
+                <label><input type="checkbox" id="setMotoboyFreeShipping" style="width:auto;display:inline-block;margin-right:6px;">Permitir frete grátis para Motoboy</label>
+              </div>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 16px; max-width:520px;">
+                Se <b>desmarcado</b>: mesmo que a compra ultrapasse o valor de frete grátis geral, a entrega por Motoboy continua sendo cobrada normalmente. Se <b>marcado</b>: o Motoboy também vira grátis nesses casos.
+              </p>
               <div class="settings-grid">
                 <div class="field"><label>Raio máximo de atendimento (km)</label><input id="setMotoboyRadius" type="number" step="0.1"></div>
                 <div class="field"><label>Taxa base (R$)</label><input id="setMotoboyBaseFee" type="number" step="0.01"></div>
@@ -431,6 +457,39 @@
               </div>
 
               <button class="btn btn-primary" id="saveMotoboySettingsBtn" style="margin-top:16px;">Salvar configuração de Motoboy</button>
+            </div>
+
+            <div class="settings-panel" data-spanel="banners">
+              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Banner principal (topo da home)</p>
+              <div class="settings-grid">
+                <div class="field"><label>Título</label><input id="setBannerMainTitle" placeholder="Ex: Estilo que te representa."></div>
+                <div class="field"><label>Subtítulo</label><input id="setBannerMainSubtitle" placeholder="Texto curto abaixo do título"></div>
+              </div>
+              <div class="settings-grid">
+                <div class="field"><label>Texto do botão</label><input id="setBannerMainCtaText" placeholder="Comprar agora"></div>
+                <div class="field"><label>Link do botão</label><input id="setBannerMainCtaLink" placeholder="#produtos"></div>
+              </div>
+              <div class="field"><label>URL da imagem de fundo (opcional — deixe vazio pra manter o fundo preto liso)</label><input id="setBannerMainImage" placeholder="assets/banners/principal.jpg"></div>
+
+              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:26px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Banner secundário (entre as seções da home)</p>
+              <div class="settings-grid">
+                <div class="field"><label>Título</label><input id="setBannerSecondaryTitle" placeholder="Ex: Nova coleção de inverno"></div>
+                <div class="field"><label>Link (pra onde leva ao clicar)</label><input id="setBannerSecondaryLink" placeholder="#produtos"></div>
+              </div>
+              <div class="field"><label>URL da imagem</label><input id="setBannerSecondaryImage" placeholder="assets/banners/secundario.jpg"></div>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 16px;">Deixe o título e a imagem em branco pra esse banner não aparecer na loja.</p>
+
+              <button class="btn btn-primary" id="saveBannersBtn">Salvar banners</button>
+            </div>
+
+            <div class="settings-panel" data-spanel="seo">
+              <div class="field"><label>Título da loja (aba do navegador e Google)</label><input id="setSeoTitle" placeholder="JA Store — Streetwear, esporte e casual"></div>
+              <div class="field"><label>Descrição (aparece no Google, embaixo do título)</label><textarea id="setSeoDescription" rows="3" placeholder="Calçados, camisetas, conjuntos e mais, com envio para todo o Brasil."></textarea></div>
+              <div class="field"><label>Palavras-chave (separadas por vírgula)</label><input id="setSeoKeywords" placeholder="streetwear, tênis, camisetas, moda masculina"></div>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 16px; line-height:1.6;">
+                O título e a descrição já atualizam de verdade no Google e na aba do navegador. O <b>preview ao compartilhar no WhatsApp/Instagram</b> usa uma versão fixa (não muda sozinho com isso aqui) — se quiser trocar essa prévia, é um ajuste separado, direto no código.
+              </p>
+              <button class="btn btn-primary" id="saveSeoBtn">Salvar SEO</button>
             </div>
           </div>
         </div>
@@ -1475,6 +1534,9 @@
     document.getElementById('setTiktokUrl').value = data.tiktok_url || '';
     document.getElementById('setLogoUrl').value = data.logo_url || '';
     document.getElementById('setMotoboyEnabled').checked = !!data.motoboy_enabled;
+    document.getElementById('setMotoboyFreeShipping').checked = !!data.motoboy_free_shipping;
+    document.getElementById('setPixDiscount').value = data.pix_discount_percent ?? 5;
+    document.getElementById('setFreeShippingThreshold').value = data.free_shipping_threshold ?? 300;
     document.getElementById('setMotoboyRadius').value = data.motoboy_radius_km ?? 15;
     document.getElementById('setMotoboyBaseFee').value = data.motoboy_base_fee ?? 9.90;
     document.getElementById('setMotoboyPerKm').value = data.motoboy_per_km ?? 2.50;
@@ -1484,6 +1546,20 @@
     } else {
       originStatusEl.innerHTML = `<span style="color:var(--amber);">⚠️ Coordenadas da loja ainda não verificadas — clique no botão acima.</span>`;
     }
+
+    document.getElementById('setBannerMainTitle').value = data.banner_main_title || '';
+    document.getElementById('setBannerMainSubtitle').value = data.banner_main_subtitle || '';
+    document.getElementById('setBannerMainCtaText').value = data.banner_main_cta_text || '';
+    document.getElementById('setBannerMainCtaLink').value = data.banner_main_cta_link || '';
+    document.getElementById('setBannerMainImage').value = data.banner_main_image || '';
+    document.getElementById('setBannerSecondaryTitle').value = data.banner_secondary_title || '';
+    document.getElementById('setBannerSecondaryLink').value = data.banner_secondary_link || '';
+    document.getElementById('setBannerSecondaryImage').value = data.banner_secondary_image || '';
+
+    document.getElementById('setSeoTitle').value = data.seo_title || '';
+    document.getElementById('setSeoDescription').value = data.seo_description || '';
+    document.getElementById('setSeoKeywords').value = data.seo_keywords || '';
+
     const preview = document.getElementById('logoPreview');
     if (data.logo_url){
       preview.innerHTML = `<img src="${data.logo_url}" onerror="this.parentElement.innerHTML='<span style=\\'color:#7A7A7E;font-size:12px;\\'>Não foi possível carregar</span>'">`;
@@ -1520,6 +1596,7 @@
   document.getElementById('saveMotoboySettingsBtn').addEventListener('click', async ()=>{
     const payload = {
       motoboy_enabled: document.getElementById('setMotoboyEnabled').checked,
+      motoboy_free_shipping: document.getElementById('setMotoboyFreeShipping').checked,
       motoboy_radius_km: Number(document.getElementById('setMotoboyRadius').value || 15),
       motoboy_base_fee: Number(document.getElementById('setMotoboyBaseFee').value || 9.90),
       motoboy_per_km: Number(document.getElementById('setMotoboyPerKm').value || 2.50),
@@ -1528,6 +1605,26 @@
     const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
     if (error){ showToast('Erro ao salvar: ' + error.message); return; }
     showToast('Configuração de Motoboy salva!');
+  });
+
+  document.getElementById('savePaymentBtn').addEventListener('click', async ()=>{
+    const payload = {
+      pix_discount_percent: Number(document.getElementById('setPixDiscount').value || 5),
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
+    if (error){ showToast('Erro ao salvar: ' + error.message); return; }
+    showToast('Desconto do Pix salvo!');
+  });
+
+  document.getElementById('saveShippingBtn').addEventListener('click', async ()=>{
+    const payload = {
+      free_shipping_threshold: Number(document.getElementById('setFreeShippingThreshold').value || 300),
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
+    if (error){ showToast('Erro ao salvar: ' + error.message); return; }
+    showToast('Valor de frete grátis salvo!');
   });
 
   document.getElementById('verifyMotoboyOriginBtn').addEventListener('click', async ()=>{
@@ -1561,6 +1658,35 @@
       console.error(err);
       statusEl.innerHTML = `<span style="color:var(--red);">Erro ao verificar endereço.</span>`;
     }
+  });
+
+  document.getElementById('saveBannersBtn').addEventListener('click', async ()=>{
+    const payload = {
+      banner_main_title: document.getElementById('setBannerMainTitle').value.trim() || null,
+      banner_main_subtitle: document.getElementById('setBannerMainSubtitle').value.trim() || null,
+      banner_main_cta_text: document.getElementById('setBannerMainCtaText').value.trim() || null,
+      banner_main_cta_link: document.getElementById('setBannerMainCtaLink').value.trim() || null,
+      banner_main_image: document.getElementById('setBannerMainImage').value.trim() || null,
+      banner_secondary_title: document.getElementById('setBannerSecondaryTitle').value.trim() || null,
+      banner_secondary_link: document.getElementById('setBannerSecondaryLink').value.trim() || null,
+      banner_secondary_image: document.getElementById('setBannerSecondaryImage').value.trim() || null,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
+    if (error){ showToast('Erro ao salvar: ' + error.message); return; }
+    showToast('Banners salvos!');
+  });
+
+  document.getElementById('saveSeoBtn').addEventListener('click', async ()=>{
+    const payload = {
+      seo_title: document.getElementById('setSeoTitle').value.trim() || null,
+      seo_description: document.getElementById('setSeoDescription').value.trim() || null,
+      seo_keywords: document.getElementById('setSeoKeywords').value.trim() || null,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
+    if (error){ showToast('Erro ao salvar: ' + error.message); return; }
+    showToast('SEO salvo!');
   });
 
   // ---------------- toast ----------------
