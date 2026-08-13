@@ -171,6 +171,7 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="assets/js/supabase-client.js"></script>
 <script src="assets/js/cart.js"></script>
+<script src="assets/js/tracking.js"></script>
 <script>
 (function(){
   const sb = window.getSupabaseClient();
@@ -233,6 +234,7 @@
 
   async function init(){
     try {
+      window.JATracking.init();
       await loadFreeShippingConfig();
 
       let query = sb.from('products').select('*').eq('active', true);
@@ -262,6 +264,7 @@
       document.getElementById('breadcrumb').innerHTML = `<a href="index.html">Início</a> / <a href="index.html">${categoryLabel}</a> / <span style="color:var(--ink);">${product.name}</span>`;
 
       renderProduct();
+      window.JATracking.trackViewItem({ id: product.id, name: product.name, price: effectivePrice(product) });
       loadReviews();
       loadRelated();
 
@@ -478,6 +481,7 @@
     if (idx>=0){ cart[idx].qty += qty; }
     else { cart.push({ id:product.id, size:selectedSize, qty, name:product.name, price:effectivePrice(product), image:product.image_url }); }
     persistCart();
+    window.JATracking.trackAddToCart({ id: product.id, name: product.name, price: effectivePrice(product) }, qty);
 
     if (buyNow){
       window.location.href = 'checkout.html';
