@@ -277,16 +277,6 @@
               <input type="text" id="prodSearch" placeholder="Buscar produto...">
               <select id="prodCategoryFilter">
                 <option value="">Todas as categorias</option>
-                <option value="calcados">Calçados</option>
-                <option value="camisas">Camisas</option>
-                <option value="camisetas">Camisetas</option>
-                <option value="conjuntos">Conjuntos</option>
-                <option value="tactel">Conjunto Tactel</option>
-                <option value="cortavento">Corta-Vento</option>
-                <option value="meias">Meias</option>
-                <option value="moletom">Moletom</option>
-                <option value="shorts">Shorts</option>
-                <option value="sueter">Suéter</option>
               </select>
               <select id="prodStatusFilter">
                 <option value="">Todos os status</option>
@@ -305,6 +295,20 @@
               <tbody id="productsBody"></tbody>
             </table>
             <div class="pagination" id="productsPagination"></div>
+          </div>
+        </div>
+
+        <!-- ---------- CATEGORIAS ---------- -->
+        <div class="panel" data-panel="categories">
+          <div class="card">
+            <div class="panel-head">
+              <h2>Categorias</h2>
+              <button class="btn btn-primary" id="newCategoryBtn">+ Nova categoria</button>
+            </div>
+            <table>
+              <thead><tr><th>Ordem</th><th>Imagem</th><th>Nome</th><th>Slug</th><th>Status</th><th></th></tr></thead>
+              <tbody id="categoriesBody"></tbody>
+            </table>
           </div>
         </div>
 
@@ -500,24 +504,30 @@
 </div>
 
 <!-- Modal de produto -->
+<div class="overlay" id="categoryOverlay">
+  <div class="modal">
+    <h3 id="categoryModalTitle">Nova categoria</h3>
+    <input type="hidden" id="catId">
+    <div class="field"><label>Nome</label><input id="catName" placeholder="Ex: Bermudas"></div>
+    <div class="field"><label>Slug (usado internamente — gerado automático, mas você pode ajustar)</label><input id="catSlug" placeholder="ex-bermudas"></div>
+    <div class="field"><label>URL da imagem (opcional)</label><input id="catImage" placeholder="assets/categories/bermudas.jpg"></div>
+    <div class="field"><label>Ordem de exibição</label><input id="catOrder" type="number" step="1" value="0"></div>
+    <div class="field"><label><input type="checkbox" id="catActive" style="width:auto;display:inline-block;margin-right:6px;" checked>Categoria ativa (visível na loja)</label></div>
+    <p id="categoryDeleteWarning" style="font-size:12.5px; color:var(--red); display:none; margin-bottom:12px;"></p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="saveCategoryBtn" style="flex:1">Salvar</button>
+      <button class="btn btn-ghost" id="cancelCategoryBtn">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="productOverlay">
   <div class="modal">
     <h3 id="productModalTitle">Novo produto</h3>
     <input type="hidden" id="prodId">
     <div class="field"><label>Nome</label><input id="prodName"></div>
     <div class="field"><label>Categoria</label>
-      <select id="prodCategory">
-        <option value="calcados">Calçados</option>
-        <option value="camisas">Camisas</option>
-        <option value="camisetas">Camisetas</option>
-        <option value="conjuntos">Conjuntos</option>
-        <option value="tactel">Conjunto Tactel</option>
-        <option value="cortavento">Corta-Vento</option>
-        <option value="meias">Meias</option>
-        <option value="moletom">Moletom</option>
-        <option value="shorts">Shorts</option>
-        <option value="sueter">Suéter</option>
-      </select>
+      <select id="prodCategory"></select>
     </div>
     <div class="field"><label>Tipo de tamanho</label>
       <select id="prodSizeType">
@@ -644,6 +654,7 @@
   const NAV_ITEMS = [
     { id:'dashboard', label:'Dashboard', icon:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z' },
     { id:'products', label:'Produtos', icon:'M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8' },
+    { id:'categories', label:'Categorias', icon:'M3 7a4 4 0 014-4h3l2 2h5a4 4 0 014 4v6a4 4 0 01-4 4H7a4 4 0 01-4-4V7z' },
     { id:'orders', label:'Pedidos', icon:'M6 2L4 6M18 2l2 4M3 8h18l-1.5 12a2 2 0 01-2 1.8H6.5a2 2 0 01-2-1.8L3 8z' },
     { id:'customers', label:'Clientes', icon:'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75' },
     { id:'coupons', label:'Cupons', icon:'M20.59 13.41L13.41 20.6a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82zM7 7h.01' },
@@ -670,6 +681,7 @@
 
     if (id === 'dashboard') loadDashboard();
     if (id === 'products') loadProducts();
+    if (id === 'categories') loadCategoriesAdmin();
     if (id === 'orders') loadOrders();
     if (id === 'customers') loadCustomers();
     if (id === 'coupons') loadCoupons();
@@ -861,6 +873,132 @@
   let allProducts = [];
   let productsPage = 1;
   const PAGE_SIZE = 8;
+
+  // ================= CATEGORIAS =================
+  let allCategoriesAdmin = [];
+
+  async function loadCategoriesAdmin(){
+    const { data, error } = await sb.from('categories').select('*').order('display_order', { ascending: true });
+    if (error){ showToast('Erro ao carregar categorias'); console.error(error); return; }
+    allCategoriesAdmin = data;
+    renderCategoriesTable();
+  }
+
+  function renderCategoriesTable(){
+    document.getElementById('categoriesBody').innerHTML = allCategoriesAdmin.map(c => `
+      <tr>
+        <td>${c.display_order}</td>
+        <td><img class="thumb" src="${c.image_url||''}" onerror="this.style.background='var(--bg)';this.src='';"></td>
+        <td>${c.name}</td>
+        <td><code style="font-size:12px;">${c.slug}</code></td>
+        <td>${c.active ? '<span class="badge badge-green">Ativa</span>' : '<span class="badge badge-red">Inativa</span>'}</td>
+        <td style="text-align:right; white-space:nowrap;">
+          <button class="icon-btn" data-toggle-cat="${c.id}" title="${c.active ? 'Desativar' : 'Ativar'}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">${c.active
+              ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>'
+              : '<path d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.6 21.6 0 015.06-6.06M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a21.6 21.6 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24M1 1l22 22" stroke="currentColor" stroke-width="1.7"/>'}
+            </svg>
+          </button>
+          <button class="icon-btn" data-edit-cat="${c.id}" title="Editar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="1.7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+          <button class="icon-btn" data-delete-cat="${c.id}" title="Excluir">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+        </td>
+      </tr>
+    `).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhuma categoria cadastrada.</td></tr>`;
+
+    document.querySelectorAll('[data-edit-cat]').forEach(btn=>{
+      btn.addEventListener('click', ()=> openCategoryModal(allCategoriesAdmin.find(c=>c.id===btn.dataset.editCat)));
+    });
+    document.querySelectorAll('[data-toggle-cat]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const cat = allCategoriesAdmin.find(c=>c.id===btn.dataset.toggleCat);
+        const { error } = await sb.from('categories').update({ active: !cat.active, updated_at: new Date().toISOString() }).eq('id', cat.id);
+        if (error){ showToast('Erro ao atualizar'); return; }
+        showToast(cat.active ? 'Categoria desativada' : 'Categoria ativada');
+        loadCategoriesAdmin();
+      });
+    });
+    document.querySelectorAll('[data-delete-cat]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const cat = allCategoriesAdmin.find(c=>c.id===btn.dataset.deleteCat);
+        // Excluir só é seguro se nenhum produto ainda usa essa categoria.
+        const { count, error: countErr } = await sb.from('products').select('id', { count:'exact', head:true }).eq('category', cat.slug);
+        if (countErr){ showToast('Erro ao verificar produtos da categoria'); return; }
+        if (count > 0){
+          alert(`Não é possível excluir "${cat.name}" — existem ${count} produto(s) usando essa categoria. Mude a categoria desses produtos primeiro, ou apenas desative essa categoria.`);
+          return;
+        }
+        if (!confirm(`Excluir a categoria "${cat.name}"?`)) return;
+        const { error } = await sb.from('categories').delete().eq('id', cat.id);
+        if (error){ showToast('Erro ao excluir'); return; }
+        showToast('Categoria excluída');
+        loadCategoriesAdmin();
+      });
+    });
+  }
+
+  const categoryOverlay = document.getElementById('categoryOverlay');
+  document.getElementById('newCategoryBtn').addEventListener('click', ()=> openCategoryModal(null));
+  document.getElementById('cancelCategoryBtn').addEventListener('click', ()=> categoryOverlay.classList.remove('open'));  function openCategoryModal(cat){
+    document.getElementById('categoryModalTitle').textContent = cat ? 'Editar categoria' : 'Nova categoria';
+    document.getElementById('catId').value = cat?.id || '';
+    document.getElementById('catName').value = cat?.name || '';
+    document.getElementById('catSlug').value = cat?.slug || '';
+    document.getElementById('catImage').value = cat?.image_url || '';
+    document.getElementById('catOrder').value = cat?.display_order ?? (allCategoriesAdmin.length + 1) * 10;
+    document.getElementById('catActive').checked = cat ? cat.active : true;
+    document.getElementById('categoryDeleteWarning').style.display = 'none';
+    // Categoria já existente: trava o slug automático (evita desconectar
+    // produtos que já usam esse slug, caso o admin só queira corrigir o nome).
+    catSlugManuallyEdited = !!cat;
+    categoryOverlay.classList.add('open');
+  }
+
+  // Gera o slug automaticamente a partir do nome, só quando o campo de
+  // slug ainda não foi editado manualmente pelo usuário nesse formulário.
+  let catSlugManuallyEdited = false;
+  document.getElementById('catSlug').addEventListener('input', ()=>{ catSlugManuallyEdited = true; });
+  document.getElementById('catName').addEventListener('input', (e)=>{
+    if (!catSlugManuallyEdited){
+      document.getElementById('catSlug').value = slugify(e.target.value);
+    }
+  });
+
+  document.getElementById('saveCategoryBtn').addEventListener('click', async ()=>{
+    const id = document.getElementById('catId').value;
+    const name = document.getElementById('catName').value.trim();
+    const slug = slugify(document.getElementById('catSlug').value.trim() || name);
+    if (!name || !slug){ showToast('Informe o nome da categoria'); return; }
+
+    // Evita categorias duplicadas: confere se já existe outro registro com esse slug.
+    const { data: existing } = await sb.from('categories').select('id').eq('slug', slug).neq('id', id || '00000000-0000-0000-0000-000000000000');
+    if (existing && existing.length > 0){
+      showToast('Já existe uma categoria com esse slug. Escolha outro.');
+      return;
+    }
+
+    const payload = {
+      name,
+      slug,
+      image_url: document.getElementById('catImage').value.trim() || null,
+      display_order: Number(document.getElementById('catOrder').value || 0),
+      active: document.getElementById('catActive').checked,
+      updated_at: new Date().toISOString(),
+    };
+
+    let error;
+    if (id){ ({ error } = await sb.from('categories').update(payload).eq('id', id)); }
+    else { ({ error } = await sb.from('categories').insert(payload)); }
+
+    if (error){ showToast('Erro ao salvar: ' + error.message); return; }
+    showToast('Categoria salva!');
+    categoryOverlay.classList.remove('open');
+    loadCategoriesAdmin();
+  });
+
 
   async function loadProducts(){
     const { data, error } = await sb.from('products').select('*').order('created_at', { ascending:false });
