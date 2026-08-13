@@ -69,17 +69,38 @@
 
   .promo-bar{
     background:var(--ink); color:#fff; font-size:11.5px; font-weight:600;
-    align-items:center; justify-content:center; padding:8px 16px; text-align:center;
+    padding:8px 0; overflow:hidden; white-space:nowrap; position:relative;
     min-height:34px;
   }
-  .promo-slide{
-    display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:center;
-    transition:opacity .35s ease;
-    opacity:1;
-    max-width:100%;
-    padding:0 8px;
+  .marquee-track{
+    display:inline-flex; align-items:center; width:max-content;
+    animation: marquee-scroll 30s linear infinite;
+    will-change: transform;
   }
-  .promo-slide.fade{ opacity:0; }
+  .marquee-track.direction-ltr{ animation-direction: reverse; }
+  .marquee-item{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:0 42px; white-space:nowrap;
+  }
+  .marquee-item a{ color:#fff; text-decoration:underline; font-weight:700; }
+
+  @keyframes marquee-scroll{
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* Sem movimento pra quem prefere — mostra os avisos parados, lado a lado. */
+  .marquee-track.no-motion{
+    animation: none !important;
+    white-space:normal;
+    flex-wrap:wrap;
+    justify-content:center;
+    width:100%;
+    gap:4px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .marquee-track{ animation: none !important; }
+  }
   .promo-slide a{ color:#fff; text-decoration:underline; font-weight:700; }
   .fav-count{
     position:absolute; top:-6px; right:-6px; width:16px; height:16px; border-radius:50%;
@@ -303,7 +324,7 @@
 </svg>
 
 <div class="promo-bar" id="promoBar" style="display:none;">
-  <span class="promo-slide" id="promoSlide"></span>
+  <div class="marquee-track" id="marqueeTrack"></div>
 </div>
 
 <header id="topo">
@@ -704,21 +725,21 @@
   }
 
   // ---------------- configurações da loja (Instagram etc.) ----------------
-  // ---------------- carrossel de avisos ----------------
+  // ---------------- faixa de avisos em movimento contínuo (marquee) ----------------
   let announcements = [];
-  let announcementIndex = 0;
-  let announcementTimer = null;
+  let marqueeDirection = 'rtl';
+  const MARQUEE_SPEED_PX_PER_SEC = 55; // ajuste fino de velocidade — maior número = mais rápido
 
   async function loadAnnouncements(){
     try {
       const sb = window.getSupabaseClient();
-      const { data, error } = await sb
-        .from('announcements')
-        .select('*')
-        .eq('active', true)
-        .order('display_order', { ascending: true });
-      if (error) throw error;
-      announcements = data || [];
+      const [annRes, dirRes] = await Promise.all([
+        sb.from('announcements').select('*').eq('active', true).order('display_order', { ascending: true }),
+        sb.from('store_settings').select('announcements_direction').eq('id', 1).maybeSingle(),
+      ]);
+      if (annRes.error) throw annRes.error;
+      announcements = annRes.data || [];
+      marqueeDirection = dirRes.data?.announcements_direction || 'rtl';
     } catch (err) {
       console.error('Erro ao carregar avisos:', err);
       announcements = [];
@@ -726,42 +747,65 @@
     renderAnnouncementBar();
   }
 
+  function announcementItemHTML(a){
+    const iconHtml = a.icon ? `<span>${a.icon}</span>` : '';
+    const linkHtml = a.link_url
+      ? ` <a href="${a.link_url}" onclick="event.stopPropagation()">${a.link_text || 'Saiba mais'}</a>`
+      : '';
+    return `<span class="marquee-item">${iconHtml}<span>${a.text}</span>${linkHtml}</span>`;
+  }
+
   function renderAnnouncementBar(){
     const bar = document.getElementById('promoBar');
-    clearInterval(announcementTimer);
+    const track = document.getElementById('marqueeTrack');
 
     if (!announcements.length){
       bar.style.display = 'none';
       return;
     }
+    bar.style.display = 'block';
 
-    bar.style.display = 'flex';
-    announcementIndex = 0;
-    renderAnnouncementSlide();
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Só anima/alterna se tiver mais de um aviso ativo — com um só, fica
-    // parado (sem necessidade de transição, como pedido).
-    if (announcements.length > 1){
-      announcementTimer = setInterval(()=>{
-        const slide = document.getElementById('promoSlide');
-        slide.classList.add('fade');
-        setTimeout(()=>{
-          announcementIndex = (announcementIndex + 1) % announcements.length;
-          renderAnnouncementSlide();
-          slide.classList.remove('fade');
-        }, 350);
-      }, 4200);
+    if (reducedMotion){
+      // Sem movimento: mostra os avisos parados, uma vez só (sem duplicar).
+      track.classList.add('no-motion');
+      track.style.animation = 'none';
+      track.innerHTML = announcements.map(announcementItemHTML).join('');
+      return;
     }
+
+    track.classList.remove('no-motion');
+    track.classList.toggle('direction-ltr', marqueeDirection === 'ltr');
+
+    // Duplica o conteúdo (2 cópias seguidas) — é isso que permite mover só
+    // 50% da largura total e o loop ficar perfeito, sem "salto" visível.
+    const itemsHTML = announcements.map(announcementItemHTML).join('');
+    track.innerHTML = itemsHTML + itemsHTML;
+
+    applyMarqueeSpeed();
   }
 
-  function renderAnnouncementSlide(){
-    const slide = document.getElementById('promoSlide');
-    const a = announcements[announcementIndex];
-    if (!a) return;
-    const iconHtml = a.icon ? `<span>${a.icon}</span>` : '';
-    const linkHtml = a.link_url ? ` <a href="${a.link_url}">${a.link_text || 'Saiba mais'}</a>` : '';
-    slide.innerHTML = `${iconHtml}<span>${a.text}</span>${linkHtml}`;
+  // Mede a largura de UMA cópia do conteúdo e ajusta a duração da animação
+  // pra manter a VELOCIDADE constante (em vez do tempo total constante) —
+  // assim, 1 aviso ou 10 avisos sempre se movem na mesma velocidade.
+  function applyMarqueeSpeed(){
+    const track = document.getElementById('marqueeTrack');
+    if (!track || track.classList.contains('no-motion') || !announcements.length) return;
+    requestAnimationFrame(()=>{
+      const oneCopyWidth = track.scrollWidth / 2;
+      const duration = Math.max(8, oneCopyWidth / MARQUEE_SPEED_PX_PER_SEC);
+      track.style.animation = `marquee-scroll ${duration}s linear infinite`;
+    });
   }
+
+  // Recalcula ao redimensionar a tela (troca de orientação, resize de
+  // janela) — sem refazer a busca no banco, só reajusta a velocidade.
+  let marqueeResizeTimer;
+  window.addEventListener('resize', ()=>{
+    clearTimeout(marqueeResizeTimer);
+    marqueeResizeTimer = setTimeout(applyMarqueeSpeed, 250);
+  });
 
   async function loadStoreSettingsPublic(){
     try {
