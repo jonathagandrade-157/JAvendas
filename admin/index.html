@@ -420,12 +420,21 @@
             </div>
 
             <div class="settings-panel" data-spanel="loja">
+              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Logo da loja</p>
+
               <div class="logo-preview" id="logoPreview"><span style="color:#7A7A7E;font-size:12px;">Sem logomarca</span></div>
-              <div class="field"><label>URL da logomarca (ex: assets/logo.png)</label><input id="setLogoUrl"></div>
-              <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;">
-                Upload direto de arquivo ainda não está disponível — suba a imagem na pasta <code>assets/</code> do site e cole o caminho aqui.
-              </p>
+
+              <input type="hidden" id="setLogoUrl">
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:12px 0 8px;">
+                <input type="file" id="logoFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:180px; font-size:12.5px;">
+                <button class="btn btn-ghost" id="removeLogoBtn" type="button">Remover</button>
+              </div>
+              <p id="logoUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:0 0 14px;"></p>
+
               <button class="btn btn-primary" id="saveLogoBtn">Salvar logomarca</button>
+              <p style="font-size:12px;color:var(--ink-soft);margin:12px 0 0;">
+                Formatos aceitos: JPG, PNG ou WEBP — até 8MB. A imagem é redimensionada automaticamente antes de salvar.
+              </p>
             </div>
 
             <div class="settings-panel" data-spanel="pagamento">
@@ -1344,6 +1353,46 @@
 
   document.getElementById('prodImage').addEventListener('input', updateCoverPreview);
 
+  // ================= UPLOAD DA LOGO (reaproveita o mesmo sistema dos produtos) =================
+  function updateLogoPreview(){
+    const url = document.getElementById('setLogoUrl').value.trim();
+    const preview = document.getElementById('logoPreview');
+    if (url){
+      preview.innerHTML = `<img src="${url}" style="max-width:80%;max-height:80%;object-fit:contain;" onerror="this.parentElement.innerHTML='<span style=\\'color:#7A7A7E;font-size:12px;\\'>Não foi possível carregar</span>'">`;
+    } else {
+      preview.innerHTML = `<span style="color:#7A7A7E;font-size:12px;">Sem logomarca</span>`;
+    }
+  }
+
+  document.getElementById('logoFileInput').addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('logoUploadStatus');
+    if (!validateImageFile(file, statusEl)) return;
+    const url = await uploadProductImage(file, statusEl);
+    if (url){
+      document.getElementById('setLogoUrl').value = url;
+      updateLogoPreview();
+    }
+    e.target.value = '';
+  });
+
+  document.getElementById('removeLogoBtn').addEventListener('click', ()=>{
+    const currentUrl = document.getElementById('setLogoUrl').value.trim();
+    document.getElementById('setLogoUrl').value = '';
+    updateLogoPreview();
+    document.getElementById('logoUploadStatus').textContent = '';
+    // Se a logo era do nosso Storage, tenta apagar o arquivo de lá também
+    // (sem travar a interface se falhar). Só remove a REFERÊNCIA aqui —
+    // salvar de verdade (e a loja voltar pra logo padrão) só acontece
+    // quando clicar em "Salvar logomarca".
+    if (currentUrl.includes(`/storage/v1/object/public/${STORAGE_BUCKET}/`)){
+      const fileName = currentUrl.split(`/${STORAGE_BUCKET}/`).pop();
+      sb.storage.from(STORAGE_BUCKET).remove([fileName]).catch(()=>{});
+    }
+  });
+
+
   function openProductModal(product, readOnly){
     document.getElementById('productModalTitle').textContent = readOnly ? 'Visualizar produto' : (product ? 'Editar produto' : 'Novo produto');
     document.getElementById('prodId').value = product?.id || '';
@@ -2072,12 +2121,7 @@
     document.getElementById('setGaId').value = data.ga_measurement_id || '';
     document.getElementById('setMetaPixelId').value = data.meta_pixel_id || '';
 
-    const preview = document.getElementById('logoPreview');
-    if (data.logo_url){
-      preview.innerHTML = `<img src="${data.logo_url}" onerror="this.parentElement.innerHTML='<span style=\\'color:#7A7A7E;font-size:12px;\\'>Não foi possível carregar</span>'">`;
-    } else {
-      preview.innerHTML = `<span style="color:#7A7A7E;font-size:12px;">Sem logomarca</span>`;
-    }
+    updateLogoPreview();
   }
 
   document.getElementById('saveSettingsBtn').addEventListener('click', async ()=>{
