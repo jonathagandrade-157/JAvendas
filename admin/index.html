@@ -106,6 +106,20 @@
   @media (min-width:900px){ .charts-grid{grid-template-columns:1fr 1fr;} }
 
   .settings-tabs{display:flex; gap:4px; margin-bottom:20px; border-bottom:1px solid var(--line); flex-wrap:wrap;}
+  .palette-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin-bottom:24px;}
+  .palette-card{border:1.5px solid var(--line); border-radius:10px; padding:12px; text-align:left; background:#fff; cursor:pointer; transition:border-color .15s;}
+  .palette-card:hover{border-color:var(--ink);}
+  .palette-card.selected{border-color:var(--ink); box-shadow:0 0 0 1.5px var(--ink) inset;}
+  .palette-swatches{display:flex; gap:4px; margin-bottom:8px;}
+  .palette-swatches span{width:20px; height:20px; border-radius:5px; border:1px solid rgba(0,0,0,0.08); display:block;}
+  .palette-card b{font-size:12.5px;}
+  .color-row{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--line);}
+  .color-row:last-child{border-bottom:none;}
+  .color-row label{flex:1; font-size:13px; font-weight:600;}
+  .color-row input[type="color"]{width:38px; height:38px; padding:2px; border:1.5px solid var(--line); border-radius:8px; cursor:pointer; background:none;}
+  .color-row input[type="text"]{width:100px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; text-transform:uppercase;}
+  .appearance-preview{border:1px solid var(--line); border-radius:12px; padding:24px; margin:20px 0; text-align:center;}
+  .appearance-preview button{padding:11px 22px; border:none; border-radius:6px; font-weight:700; font-size:13px; margin-top:12px;}
   .settings-tab{padding:10px 16px; border:none; background:none; font-size:13.5px; font-weight:600; color:var(--ink-soft); border-bottom:2px solid transparent; margin-bottom:-1px;}
   .settings-tab.active{color:var(--ink); border-bottom-color:var(--ink);}
   .settings-panel{display:none;}
@@ -401,6 +415,7 @@
               <button class="settings-tab" data-stab="banners">Banners</button>
               <button class="settings-tab" data-stab="seo">SEO</button>
               <button class="settings-tab" data-stab="integracoes">Integrações</button>
+              <button class="settings-tab" data-stab="aparencia">Aparência</button>
             </div>
 
             <div class="settings-panel active" data-spanel="geral">
@@ -559,6 +574,26 @@
               <p style="font-size:12px; color:var(--ink-soft); margin:16px 0 0; line-height:1.6; border-top:1px solid var(--line); padding-top:16px;">
                 Depois de salvar, os eventos já passam a ser enviados automaticamente: visualização de produto, adicionar ao carrinho, início do checkout e <b>compra concluída</b>. Deixe os campos vazios e salve pra desativar o rastreamento a qualquer momento.
               </p>
+            </div>
+
+            <div class="settings-panel" data-spanel="aparencia">
+              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Paletas prontas</p>
+              <div class="palette-grid" id="paletteGrid"></div>
+
+              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:24px 0 4px; border-top:1px solid var(--line); padding-top:20px;">Personalizar manualmente</p>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 10px;">Escolher uma cor aqui não some com a paleta acima — é só um ajuste fino por cima dela.</p>
+              <div id="colorRows"></div>
+
+              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 10px;">Prévia</p>
+              <div class="appearance-preview" id="appearancePreview">
+                <p style="font-size:13px; margin:0 0 4px;" id="previewText">Assim vai ficar o texto principal da loja.</p>
+                <button id="previewButton" style="color:#fff;">Comprar agora</button>
+              </div>
+
+              <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:20px;">
+                <button class="btn btn-primary" id="saveAppearanceBtn">Salvar alterações</button>
+                <button class="btn btn-ghost" id="resetAppearanceBtn">Restaurar padrão</button>
+              </div>
             </div>
           </div>
         </div>
@@ -734,7 +769,7 @@
       <label>Código de rastreio</label>
       <div style="display:flex; gap:8px;">
         <input id="orderTrackingCode" style="flex:1;" placeholder="Ex: BR123456789">
-        <button class="btn btn-ghost" id="saveTrackingBtn">Salvar</button>
+        <button class="btn btn-ghost" id="saveOrderTrackingBtn">Salvar</button>
       </div>
     </div>
     <div class="modal-actions" style="flex-wrap:wrap;">
@@ -1713,7 +1748,7 @@
     orderOverlay.classList.add('open');
   }
 
-  document.getElementById('saveTrackingBtn').addEventListener('click', async ()=>{
+  document.getElementById('saveOrderTrackingBtn').addEventListener('click', async ()=>{
     if (!currentOpenOrder) return;
     const code = document.getElementById('orderTrackingCode').value.trim();
     const { error } = await sb.from('orders').update({ tracking_code: code, updated_at: new Date().toISOString() }).eq('id', currentOpenOrder.id);
@@ -2075,6 +2110,7 @@
       document.querySelectorAll('.settings-tab').forEach(t=>t.classList.remove('active'));
       tab.classList.add('active');
       document.querySelectorAll('.settings-panel').forEach(p=> p.classList.toggle('active', p.dataset.spanel===tab.dataset.stab));
+      if (tab.dataset.stab === 'aparencia') loadAppearance();
     });
   });
 
@@ -2255,6 +2291,154 @@
     if (error){ showToast('Erro ao salvar: ' + error.message); return; }
     showToast('Integrações salvas! Recarregue a loja pra ativar.');
   });
+
+  // ================= APARÊNCIA (Etapa 3) =================
+  // Os valores abaixo são EXATAMENTE os mesmos defaults gravados no banco
+  // na Etapa 2 — usados tanto pra "Minimalista" (a aparência original da
+  // JA Store) quanto pro botão "Restaurar padrão".
+  const DEFAULT_APPEARANCE = {
+    color_background: '#FFFFFF',
+    color_text: '#111111',
+    color_primary: '#000000',
+    color_secondary: '#6E6E73',
+    color_accent: '#111111',
+    color_button: '#34493A',
+    color_link: '#8B3A2B',
+  };
+
+  const COLOR_FIELDS = [
+    { key:'color_primary', label:'Cor principal' },
+    { key:'color_secondary', label:'Cor secundária' },
+    { key:'color_accent', label:'Cor de destaque' },
+    { key:'color_button', label:'Cor dos botões' },
+    { key:'color_text', label:'Cor do texto' },
+    { key:'color_background', label:'Cor de fundo' },
+    { key:'color_link', label:'Cor dos links' },
+  ];
+
+  const PALETTES = [
+    { name:'Minimalista', colors: { ...DEFAULT_APPEARANCE } },
+    { name:'Azul Profissional', colors: {
+      color_primary:'#0F3D63', color_secondary:'#5A7A99', color_accent:'#1E6FB8',
+      color_button:'#1E6FB8', color_text:'#0F1A24', color_background:'#FFFFFF', color_link:'#1E6FB8',
+    }},
+    { name:'Elegante', colors: {
+      color_primary:'#1A1A1A', color_secondary:'#8A8A8A', color_accent:'#C79A3C',
+      color_button:'#1A1A1A', color_text:'#1A1A1A', color_background:'#FFFDF8', color_link:'#C79A3C',
+    }},
+    { name:'Natural', colors: {
+      color_primary:'#34493A', color_secondary:'#8C7A63', color_accent:'#6B8E4E',
+      color_button:'#34493A', color_text:'#2B2620', color_background:'#FAF7F2', color_link:'#6B8E4E',
+    }},
+    { name:'Moderno', colors: {
+      color_primary:'#111111', color_secondary:'#6E6E73', color_accent:'#E4572E',
+      color_button:'#111111', color_text:'#111111', color_background:'#FFFFFF', color_link:'#E4572E',
+    }},
+  ];
+
+  let currentAppearance = { ...DEFAULT_APPEARANCE };
+
+  function renderColorRows(){
+    document.getElementById('colorRows').innerHTML = COLOR_FIELDS.map(f => `
+      <div class="color-row">
+        <label>${f.label}</label>
+        <input type="color" id="picker_${f.key}" value="${currentAppearance[f.key]}">
+        <input type="text" id="hex_${f.key}" value="${currentAppearance[f.key]}" maxlength="7">
+      </div>
+    `).join('');
+
+    COLOR_FIELDS.forEach(f=>{
+      const picker = document.getElementById(`picker_${f.key}`);
+      const hex = document.getElementById(`hex_${f.key}`);
+      picker.addEventListener('input', ()=>{
+        hex.value = picker.value.toUpperCase();
+        currentAppearance[f.key] = picker.value;
+        updateAppearancePreview();
+      });
+      hex.addEventListener('input', ()=>{
+        const v = hex.value.trim();
+        if (/^#[0-9A-Fa-f]{6}$/.test(v)){
+          picker.value = v;
+          currentAppearance[f.key] = v;
+          updateAppearancePreview();
+        }
+      });
+    });
+  }
+
+  function renderPaletteGrid(){
+    document.getElementById('paletteGrid').innerHTML = PALETTES.map((p, i) => `
+      <button class="palette-card" type="button" data-palette="${i}">
+        <div class="palette-swatches">
+          <span style="background:${p.colors.color_primary}"></span>
+          <span style="background:${p.colors.color_accent}"></span>
+          <span style="background:${p.colors.color_button}"></span>
+          <span style="background:${p.colors.color_background}; border-color:var(--line);"></span>
+        </div>
+        <b>${p.name}</b>
+      </button>
+    `).join('');
+
+    document.querySelectorAll('[data-palette]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('.palette-card').forEach(c=>c.classList.remove('selected'));
+        btn.classList.add('selected');
+        const palette = PALETTES[Number(btn.dataset.palette)];
+        currentAppearance = { ...palette.colors };
+        renderColorRows();
+        updateAppearancePreview();
+      });
+    });
+  }
+
+  function updateAppearancePreview(){
+    const preview = document.getElementById('appearancePreview');
+    const text = document.getElementById('previewText');
+    const button = document.getElementById('previewButton');
+    if (!preview) return;
+    preview.style.background = currentAppearance.color_background;
+    text.style.color = currentAppearance.color_text;
+    button.style.background = currentAppearance.color_button;
+  }
+
+  async function loadAppearance(){
+    const { data, error } = await sb.from('store_settings').select('color_primary, color_secondary, color_accent, color_button, color_text, color_background, color_link').eq('id', 1).maybeSingle();
+    if (error){ console.error(error); return; }
+    currentAppearance = {
+      color_background: data?.color_background || DEFAULT_APPEARANCE.color_background,
+      color_text: data?.color_text || DEFAULT_APPEARANCE.color_text,
+      color_primary: data?.color_primary || DEFAULT_APPEARANCE.color_primary,
+      color_secondary: data?.color_secondary || DEFAULT_APPEARANCE.color_secondary,
+      color_accent: data?.color_accent || DEFAULT_APPEARANCE.color_accent,
+      color_button: data?.color_button || DEFAULT_APPEARANCE.color_button,
+      color_link: data?.color_link || DEFAULT_APPEARANCE.color_link,
+    };
+    renderPaletteGrid();
+    renderColorRows();
+    updateAppearancePreview();
+  }
+
+  document.getElementById('saveAppearanceBtn').addEventListener('click', async ()=>{
+    const payload = { ...currentAppearance, updated_at: new Date().toISOString() };
+    const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
+    if (error){ showToast('Erro ao salvar: ' + error.message); return; }
+    showToast('Aparência salva! Atualize a loja pra ver as novas cores.');
+  });
+
+  document.getElementById('resetAppearanceBtn').addEventListener('click', async ()=>{
+    if (!confirm('Tem certeza que deseja restaurar a aparência padrão?')) return;
+    currentAppearance = { ...DEFAULT_APPEARANCE };
+    const payload = { ...DEFAULT_APPEARANCE, updated_at: new Date().toISOString() };
+    const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
+    if (error){ showToast('Erro ao restaurar: ' + error.message); return; }
+    document.querySelectorAll('.palette-card').forEach(c=>c.classList.remove('selected'));
+    const firstCard = document.querySelector('[data-palette="0"]');
+    if (firstCard) firstCard.classList.add('selected');
+    renderColorRows();
+    updateAppearancePreview();
+    showToast('Aparência padrão restaurada!');
+  });
+
 
   // ---------------- toast ----------------
   let toastTimer;
