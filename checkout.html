@@ -147,7 +147,32 @@
   let selectedPaymentMethod = null;
   let coupon = { code: null, discount: 0 };
 
-  const PIX_DISCOUNT_RATE = 0.05;
+  // ---------- fonte única de verdade: valores vêm do banco (Configurações no admin) ----------
+  // Esses valores abaixo são só um "padrão de segurança" caso a busca no
+  // banco falhe — assim que loadStoreConfig() rodar, eles são substituídos
+  // pelos valores reais configurados no admin.
+  let PIX_DISCOUNT_RATE = 0.05;
+  let FREE_SHIPPING_THRESHOLD = 300;
+  let MOTOBOY_FREE_SHIPPING = false;
+
+  async function loadStoreConfig(){
+    try {
+      const sb = window.getSupabaseClient();
+      const { data, error } = await sb
+        .from('store_settings')
+        .select('free_shipping_threshold, pix_discount_percent, motoboy_free_shipping')
+        .eq('id', 1)
+        .maybeSingle();
+      if (error) throw error;
+      if (data){
+        if (data.free_shipping_threshold != null) FREE_SHIPPING_THRESHOLD = Number(data.free_shipping_threshold);
+        if (data.pix_discount_percent != null) PIX_DISCOUNT_RATE = Number(data.pix_discount_percent) / 100;
+        MOTOBOY_FREE_SHIPPING = !!data.motoboy_free_shipping;
+      }
+    } catch (err) {
+      console.error('Não foi possível carregar configurações da loja — usando padrões.', err);
+    }
+  }
 
   function formatBRL(v){ return Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
 
@@ -338,8 +363,6 @@
     });
   }
 
-  const FREE_SHIPPING_THRESHOLD = 300;
-
   async function calculateShipping(cep){
     const msgEl = document.getElementById('shippingMsg');
     const optsEl = document.getElementById('shippingOptions');
@@ -385,16 +408,22 @@
           price: motoboyData.price,
           days: 0,
           etaText: motoboyData.etaText,
+          isMotoboy: true,
         });
       } else if (motoboyData.reason === 'out_of_range'){
         motoboyNote = motoboyData.message || 'Entrega por motoboy indisponível para este endereço.';
       }
 
       const freeShipping = subtotal() >= FREE_SHIPPING_THRESHOLD;
-      shippingOptions = options.map(opt => freeShipping ? { ...opt, price: 0 } : opt);
+      // Regra específica do Motoboy: só entra no frete grátis geral se
+      // a opção "Frete grátis para Motoboy" estiver ativada nas configurações.
+      shippingOptions = options.map(opt => {
+        const appliesFree = freeShipping && (!opt.isMotoboy || MOTOBOY_FREE_SHIPPING);
+        return appliesFree ? { ...opt, price: 0 } : opt;
+      });
 
       msgEl.textContent = freeShipping
-        ? `🎉 Frete grátis! Sua compra passou de ${formatBRL(FREE_SHIPPING_THRESHOLD)}.`
+        ? `🎉 Frete grátis! Sua compra passou de ${formatBRL(FREE_SHIPPING_THRESHOLD)}.${!MOTOBOY_FREE_SHIPPING ? ' (Motoboy não incluso na promoção.)' : ''}`
         : motoboyNote;
       optsEl.innerHTML = shippingOptions.map((opt, i) => `
         <div class="shipping-opt" data-idx="${i}">
@@ -540,6 +569,7 @@
   }
 
   render();
+  loadStoreConfig().then(()=> updateSummary());
 })();
 </script>
 
