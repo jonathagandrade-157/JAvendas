@@ -360,6 +360,23 @@
           </div>
         </div>
 
+        <!-- ---------- AVISOS ---------- -->
+        <div class="panel" data-panel="announcements">
+          <div class="card">
+            <div class="panel-head">
+              <h2>Avisos (carrossel do topo)</h2>
+              <button class="btn btn-primary" id="newAnnouncementBtn">+ Novo aviso</button>
+            </div>
+            <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 16px;">
+              Se houver mais de um aviso ativo, eles se alternam automaticamente na loja. Se não houver nenhum ativo, a faixa some por completo.
+            </p>
+            <table>
+              <thead><tr><th>Ordem</th><th>Ícone</th><th>Texto</th><th>Link</th><th>Status</th><th></th></tr></thead>
+              <tbody id="announcementsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- ---------- CONFIGURAÇÕES ---------- -->
         <div class="panel" data-panel="settings">
           <div class="card">
@@ -612,6 +629,27 @@
 </div>
 
 <!-- Modal de cupom -->
+<div class="overlay" id="announcementOverlay">
+  <div class="modal">
+    <h3 id="announcementModalTitle">Novo aviso</h3>
+    <input type="hidden" id="annId">
+    <div class="settings-grid">
+      <div class="field"><label>Ícone/emoji (opcional)</label><input id="annIcon" placeholder="🚚" maxlength="4"></div>
+      <div class="field"><label>Ordem de exibição</label><input id="annOrder" type="number" step="1" value="0"></div>
+    </div>
+    <div class="field"><label>Texto do aviso</label><input id="annText" placeholder="Ex: Frete grátis acima de R$ 300"></div>
+    <div class="settings-grid">
+      <div class="field"><label>Link (opcional)</label><input id="annLinkUrl" placeholder="#produtos"></div>
+      <div class="field"><label>Texto do link (opcional)</label><input id="annLinkText" placeholder="Saiba mais"></div>
+    </div>
+    <div class="field"><label><input type="checkbox" id="annActive" style="width:auto;display:inline-block;margin-right:6px;" checked>Aviso ativo</label></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="saveAnnouncementBtn" style="flex:1">Salvar</button>
+      <button class="btn btn-ghost" id="cancelAnnouncementBtn">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="couponOverlay">
   <div class="modal">
     <h3 id="couponModalTitle">Novo cupom</h3>
@@ -678,6 +716,7 @@
     { id:'orders', label:'Pedidos', icon:'M6 2L4 6M18 2l2 4M3 8h18l-1.5 12a2 2 0 01-2 1.8H6.5a2 2 0 01-2-1.8L3 8z' },
     { id:'customers', label:'Clientes', icon:'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75' },
     { id:'coupons', label:'Cupons', icon:'M20.59 13.41L13.41 20.6a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82zM7 7h.01' },
+    { id:'announcements', label:'Avisos', icon:'M3 11l18-5v12L3 14v-3z M11 13v5a2 2 0 002 2h0a2 2 0 002-2v-4' },
     { id:'settings', label:'Configurações', icon:'M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c.14.32.22.68.22 1.05V10a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z' },
   ];
 
@@ -705,6 +744,7 @@
     if (id === 'orders') loadOrders();
     if (id === 'customers') loadCustomers();
     if (id === 'coupons') loadCoupons();
+    if (id === 'announcements') loadAnnouncementsAdmin();
     if (id === 'settings') loadSettings();
   }
 
@@ -1711,6 +1751,136 @@
   }
 
   document.getElementById('custSearch').addEventListener('input', ()=>{ customersPage=1; renderCustomersTable(); });
+
+  // ================= AVISOS (carrossel) =================
+  let allAnnouncements = [];
+
+  async function loadAnnouncementsAdmin(){
+    const { data, error } = await sb.from('announcements').select('*').order('display_order', { ascending: true });
+    if (error){ showToast('Erro ao carregar avisos'); console.error(error); return; }
+    allAnnouncements = data;
+    renderAnnouncementsTable();
+  }
+
+  function renderAnnouncementsTable(){
+    document.getElementById('announcementsBody').innerHTML = allAnnouncements.map((a, i) => `
+      <tr>
+        <td style="white-space:nowrap;">
+          ${a.display_order}
+          <button class="icon-btn" data-move-up="${a.id}" title="Mover pra cima" ${i===0?'disabled style="opacity:.3;"':''}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2"/></svg>
+          </button>
+          <button class="icon-btn" data-move-down="${a.id}" title="Mover pra baixo" ${i===allAnnouncements.length-1?'disabled style="opacity:.3;"':''}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12l7 7 7-7" stroke="currentColor" stroke-width="2"/></svg>
+          </button>
+        </td>
+        <td style="font-size:16px;">${a.icon || '—'}</td>
+        <td>${a.text}</td>
+        <td>${a.link_url ? `<span style="font-size:12px;color:var(--ink-soft);">${a.link_text || 'link'}</span>` : '—'}</td>
+        <td>${a.active ? '<span class="badge badge-green">Ativo</span>' : '<span class="badge badge-red">Inativo</span>'}</td>
+        <td style="text-align:right; white-space:nowrap;">
+          <button class="icon-btn" data-toggle-ann="${a.id}" title="${a.active ? 'Desativar' : 'Ativar'}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">${a.active
+              ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>'
+              : '<path d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.6 21.6 0 015.06-6.06M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a21.6 21.6 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24M1 1l22 22" stroke="currentColor" stroke-width="1.7"/>'}
+            </svg>
+          </button>
+          <button class="icon-btn" data-edit-ann="${a.id}" title="Editar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="1.7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+          <button class="icon-btn" data-delete-ann="${a.id}" title="Excluir">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+        </td>
+      </tr>
+    `).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhum aviso cadastrado.</td></tr>`;
+
+    document.querySelectorAll('[data-edit-ann]').forEach(btn=>{
+      btn.addEventListener('click', ()=> openAnnouncementModal(allAnnouncements.find(a=>a.id===btn.dataset.editAnn)));
+    });
+    document.querySelectorAll('[data-toggle-ann]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const ann = allAnnouncements.find(a=>a.id===btn.dataset.toggleAnn);
+        const { error } = await sb.from('announcements').update({ active: !ann.active, updated_at: new Date().toISOString() }).eq('id', ann.id);
+        if (error){ showToast('Erro ao atualizar'); return; }
+        showToast(ann.active ? 'Aviso desativado' : 'Aviso ativado');
+        loadAnnouncementsAdmin();
+      });
+    });
+    document.querySelectorAll('[data-delete-ann]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        if (!confirm('Excluir este aviso?')) return;
+        const { error } = await sb.from('announcements').delete().eq('id', btn.dataset.deleteAnn);
+        if (error){ showToast('Erro ao excluir'); return; }
+        showToast('Aviso excluído');
+        loadAnnouncementsAdmin();
+      });
+    });
+    document.querySelectorAll('[data-move-up]').forEach(btn=>{
+      btn.addEventListener('click', ()=> reorderAnnouncement(btn.dataset.moveUp, -1));
+    });
+    document.querySelectorAll('[data-move-down]').forEach(btn=>{
+      btn.addEventListener('click', ()=> reorderAnnouncement(btn.dataset.moveDown, 1));
+    });
+  }
+
+  async function reorderAnnouncement(id, direction){
+    const idx = allAnnouncements.findIndex(a=>a.id===id);
+    const swapIdx = idx + direction;
+    if (swapIdx < 0 || swapIdx >= allAnnouncements.length) return;
+
+    const a = allAnnouncements[idx];
+    const b = allAnnouncements[swapIdx];
+    const aOrder = a.display_order;
+    const bOrder = b.display_order;
+
+    await Promise.all([
+      sb.from('announcements').update({ display_order: bOrder, updated_at: new Date().toISOString() }).eq('id', a.id),
+      sb.from('announcements').update({ display_order: aOrder, updated_at: new Date().toISOString() }).eq('id', b.id),
+    ]);
+    loadAnnouncementsAdmin();
+  }
+
+  const announcementOverlay = document.getElementById('announcementOverlay');
+  document.getElementById('newAnnouncementBtn').addEventListener('click', ()=> openAnnouncementModal(null));
+  document.getElementById('cancelAnnouncementBtn').addEventListener('click', ()=> announcementOverlay.classList.remove('open'));
+
+  function openAnnouncementModal(ann){
+    document.getElementById('announcementModalTitle').textContent = ann ? 'Editar aviso' : 'Novo aviso';
+    document.getElementById('annId').value = ann?.id || '';
+    document.getElementById('annIcon').value = ann?.icon || '';
+    document.getElementById('annText').value = ann?.text || '';
+    document.getElementById('annLinkUrl').value = ann?.link_url || '';
+    document.getElementById('annLinkText').value = ann?.link_text || '';
+    document.getElementById('annOrder').value = ann?.display_order ?? (allAnnouncements.length + 1) * 10;
+    document.getElementById('annActive').checked = ann ? ann.active : true;
+    announcementOverlay.classList.add('open');
+  }
+
+  document.getElementById('saveAnnouncementBtn').addEventListener('click', async ()=>{
+    const id = document.getElementById('annId').value;
+    const text = document.getElementById('annText').value.trim();
+    if (!text){ showToast('Informe o texto do aviso'); return; }
+
+    const payload = {
+      text,
+      icon: document.getElementById('annIcon').value.trim() || null,
+      link_url: document.getElementById('annLinkUrl').value.trim() || null,
+      link_text: document.getElementById('annLinkText').value.trim() || null,
+      display_order: Number(document.getElementById('annOrder').value || 0),
+      active: document.getElementById('annActive').checked,
+      updated_at: new Date().toISOString(),
+    };
+
+    let error;
+    if (id){ ({ error } = await sb.from('announcements').update(payload).eq('id', id)); }
+    else { ({ error } = await sb.from('announcements').insert(payload)); }
+
+    if (error){ showToast('Erro ao salvar: ' + error.message); return; }
+    showToast('Aviso salvo!');
+    announcementOverlay.classList.remove('open');
+    loadAnnouncementsAdmin();
+  });
 
   // ================= CUPONS =================
   async function loadCoupons(){
