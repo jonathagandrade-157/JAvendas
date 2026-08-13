@@ -400,6 +400,7 @@
               <button class="settings-tab" data-stab="motoboy">Motoboy</button>
               <button class="settings-tab" data-stab="banners">Banners</button>
               <button class="settings-tab" data-stab="seo">SEO</button>
+              <button class="settings-tab" data-stab="integracoes">Integrações</button>
             </div>
 
             <div class="settings-panel active" data-spanel="geral">
@@ -523,6 +524,32 @@
                 O título e a descrição já atualizam de verdade no Google e na aba do navegador. O <b>preview ao compartilhar no WhatsApp/Instagram</b> usa uma versão fixa (não muda sozinho com isso aqui) — se quiser trocar essa prévia, é um ajuste separado, direto no código.
               </p>
               <button class="btn btn-primary" id="saveSeoBtn">Salvar SEO</button>
+            </div>
+
+            <div class="settings-panel" data-spanel="integracoes">
+              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Google Analytics 4</p>
+              <div class="field" style="max-width:320px;">
+                <label>ID de métricas (começa com "G-")</label>
+                <input id="setGaId" placeholder="G-XXXXXXXXXX">
+              </div>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px; line-height:1.6;">
+                Encontre em <b>analytics.google.com → Administrador → Fluxos de dados</b>, clicando no fluxo do seu site.
+              </p>
+
+              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Meta Pixel (Facebook/Instagram Ads)</p>
+              <div class="field" style="max-width:320px;">
+                <label>ID do Pixel</label>
+                <input id="setMetaPixelId" placeholder="Ex: 123456789012345">
+              </div>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px; line-height:1.6;">
+                Encontre em <b>Gerenciador de Eventos (business.facebook.com/events_manager) → seu Pixel → Configurações</b>.
+              </p>
+
+              <button class="btn btn-primary" id="saveTrackingBtn">Salvar integrações</button>
+
+              <p style="font-size:12px; color:var(--ink-soft); margin:16px 0 0; line-height:1.6; border-top:1px solid var(--line); padding-top:16px;">
+                Depois de salvar, os eventos já passam a ser enviados automaticamente: visualização de produto, adicionar ao carrinho, início do checkout e <b>compra concluída</b>. Deixe os campos vazios e salve pra desativar o rastreamento a qualquer momento.
+              </p>
             </div>
           </div>
         </div>
@@ -2042,6 +2069,9 @@
     document.getElementById('setSeoDescription').value = data.seo_description || '';
     document.getElementById('setSeoKeywords').value = data.seo_keywords || '';
 
+    document.getElementById('setGaId').value = data.ga_measurement_id || '';
+    document.getElementById('setMetaPixelId').value = data.meta_pixel_id || '';
+
     const preview = document.getElementById('logoPreview');
     if (data.logo_url){
       preview.innerHTML = `<img src="${data.logo_url}" onerror="this.parentElement.innerHTML='<span style=\\'color:#7A7A7E;font-size:12px;\\'>Não foi possível carregar</span>'">`;
@@ -2169,6 +2199,17 @@
     const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
     if (error){ showToast('Erro ao salvar: ' + error.message); return; }
     showToast('SEO salvo!');
+  });
+
+  document.getElementById('saveTrackingBtn').addEventListener('click', async ()=>{
+    const payload = {
+      ga_measurement_id: document.getElementById('setGaId').value.trim() || null,
+      meta_pixel_id: document.getElementById('setMetaPixelId').value.trim() || null,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
+    if (error){ showToast('Erro ao salvar: ' + error.message); return; }
+    showToast('Integrações salvas! Recarregue a loja pra ativar.');
   });
 
   // ---------------- toast ----------------
