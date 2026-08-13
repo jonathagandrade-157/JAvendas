@@ -105,7 +105,7 @@
 <header>
   <div class="container">
     <span class="brand serif">
-      <img src="assets/logo.png" alt="JA Store" onerror="this.outerHTML='&lt;svg width=&quot;28&quot; height=&quot;28&quot; viewBox=&quot;0 0 40 40&quot;&gt;&lt;rect width=&quot;40&quot; height=&quot;40&quot; rx=&quot;9&quot; fill=&quot;#fff&quot;/&gt;&lt;text x=&quot;20&quot; y=&quot;27&quot; text-anchor=&quot;middle&quot; font-family=&quot;Inter,sans-serif&quot; font-weight=&quot;800&quot; font-size=&quot;17&quot; fill=&quot;#111&quot;&gt;JA&lt;/text&gt;&lt;/svg&gt;'">
+      <img id="logoImgCheckout" src="assets/logo.png" alt="JA Store" onerror="this.outerHTML='&lt;svg width=&quot;28&quot; height=&quot;28&quot; viewBox=&quot;0 0 40 40&quot;&gt;&lt;rect width=&quot;40&quot; height=&quot;40&quot; rx=&quot;9&quot; fill=&quot;#fff&quot;/&gt;&lt;text x=&quot;20&quot; y=&quot;27&quot; text-anchor=&quot;middle&quot; font-family=&quot;Inter,sans-serif&quot; font-weight=&quot;800&quot; font-size=&quot;17&quot; fill=&quot;#111&quot;&gt;JA&lt;/text&gt;&lt;/svg&gt;'">
       JA STORE
     </span>
     <nav class="main-nav">
@@ -163,7 +163,7 @@
       const sb = window.getSupabaseClient();
       const { data, error } = await sb
         .from('store_settings')
-        .select('free_shipping_threshold, pix_discount_percent, motoboy_free_shipping')
+        .select('free_shipping_threshold, pix_discount_percent, motoboy_free_shipping, logo_url')
         .eq('id', 1)
         .maybeSingle();
       if (error) throw error;
@@ -171,6 +171,10 @@
         if (data.free_shipping_threshold != null) FREE_SHIPPING_THRESHOLD = Number(data.free_shipping_threshold);
         if (data.pix_discount_percent != null) PIX_DISCOUNT_RATE = Number(data.pix_discount_percent) / 100;
         MOTOBOY_FREE_SHIPPING = !!data.motoboy_free_shipping;
+        if (data.logo_url){
+          const logoEl = document.getElementById('logoImgCheckout');
+          if (logoEl) logoEl.src = data.logo_url;
+        }
       }
     } catch (err) {
       console.error('Não foi possível carregar configurações da loja — usando padrões.', err);
