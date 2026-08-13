@@ -333,8 +333,8 @@
       <button class="menu-toggle-btn" id="mobileMenuBtn" aria-label="Menu">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
       </button>
-      <img src="assets/logo.png" alt="JA Store" style="height:26px;width:auto" onerror="this.outerHTML='&lt;svg width=&quot;26&quot; height=&quot;26&quot; viewBox=&quot;0 0 40 40&quot;&gt;&lt;rect width=&quot;40&quot; height=&quot;40&quot; rx=&quot;9&quot; fill=&quot;%23fff&quot;/&gt;&lt;text x=&quot;20&quot; y=&quot;27&quot; text-anchor=&quot;middle&quot; font-family=&quot;Inter,sans-serif&quot; font-weight=&quot;800&quot; font-size=&quot;17&quot; fill=&quot;%23111&quot;&gt;JA&lt;/text&gt;&lt;/svg&gt;'">
-      <span style="color:#fff;font-weight:700;font-family:'Inter',sans-serif;font-weight:800;font-size:16px;">JA Store</span>
+      <img id="logoImgMobile" src="assets/logo.png" alt="JA Store" style="height:26px;width:auto" onerror="this.outerHTML='&lt;svg width=&quot;26&quot; height=&quot;26&quot; viewBox=&quot;0 0 40 40&quot;&gt;&lt;rect width=&quot;40&quot; height=&quot;40&quot; rx=&quot;9&quot; fill=&quot;%23fff&quot;/&gt;&lt;text x=&quot;20&quot; y=&quot;27&quot; text-anchor=&quot;middle&quot; font-family=&quot;Inter,sans-serif&quot; font-weight=&quot;800&quot; font-size=&quot;17&quot; fill=&quot;%23111&quot;&gt;JA&lt;/text&gt;&lt;/svg&gt;'">
+      <span id="brandTextMobile" style="color:#fff;font-weight:700;font-family:'Inter',sans-serif;font-weight:800;font-size:16px;">JA Store</span>
     </div>
     <div class="container header-main">
       <div class="search-wrap">
@@ -345,8 +345,8 @@
       </div>
 
       <div class="brand-center">
-        <img src="assets/logo.png" alt="JA Store" onerror="this.outerHTML='&lt;svg width=&quot;36&quot; height=&quot;36&quot; viewBox=&quot;0 0 40 40&quot;&gt;&lt;rect width=&quot;40&quot; height=&quot;40&quot; rx=&quot;9&quot; fill=&quot;%23fff&quot;/&gt;&lt;text x=&quot;20&quot; y=&quot;27&quot; text-anchor=&quot;middle&quot; font-family=&quot;Inter,sans-serif&quot; font-weight=&quot;800&quot; font-size=&quot;17&quot; fill=&quot;%23111&quot;&gt;JA&lt;/text&gt;&lt;/svg&gt;'">
-        <span>JA Store</span>
+        <img id="logoImgDesktop" src="assets/logo.png" alt="JA Store" onerror="this.outerHTML='&lt;svg width=&quot;36&quot; height=&quot;36&quot; viewBox=&quot;0 0 40 40&quot;&gt;&lt;rect width=&quot;40&quot; height=&quot;40&quot; rx=&quot;9&quot; fill=&quot;%23fff&quot;/&gt;&lt;text x=&quot;20&quot; y=&quot;27&quot; text-anchor=&quot;middle&quot; font-family=&quot;Inter,sans-serif&quot; font-weight=&quot;800&quot; font-size=&quot;17&quot; fill=&quot;%23111&quot;&gt;JA&lt;/text&gt;&lt;/svg&gt;'">
+        <span id="brandTextDesktop">JA Store</span>
       </div>
 
       <nav class="main-nav">
@@ -418,7 +418,7 @@
 <section class="hero-dark" id="heroDark">
   <div class="container">
     <div class="hero-copy">
-      <p class="eyebrow">JA Store · coleção atual</p>
+      <p class="eyebrow"><span id="brandTextHero">JA Store</span> · coleção atual</p>
       <div class="hero-title-row">
         <span class="mark">
           <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
@@ -511,7 +511,7 @@
 <section class="container" style="padding:44px 20px 0;">
   <div class="instagram-cta">
     <p style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft); margin:0;">Siga a gente</p>
-    <h2 class="serif" style="font-size:20px; margin:8px 0 0;">JA Store no Instagram</h2>
+    <h2 class="serif" style="font-size:20px; margin:8px 0 0;"><span id="brandTextInstagram">JA Store</span> no Instagram</h2>
     <a id="instagramCta" href="#" target="_blank" rel="noopener">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="#fff" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="#fff"/></svg>
       Ver Instagram
@@ -532,9 +532,9 @@
 </section>
 
 <section class="container" id="sobre" style="padding:60px 20px; border-top:1px solid var(--line);">
-  <h2 class="serif" style="font-size:26px; margin:0 0 14px;">Sobre a JA Store</h2>
+  <h2 class="serif" style="font-size:26px; margin:0 0 14px;">Sobre a <span id="brandTextSobreTitle">JA Store</span></h2>
   <p style="max-width:560px; color:var(--ink-soft); line-height:1.7; font-size:15px;">
-    A JA Store nasceu para vestir quem gosta de um visual despojado, sem abrir mão de qualidade —
+    A <span id="brandTextSobreBody">JA Store</span> nasceu para vestir quem gosta de um visual despojado, sem abrir mão de qualidade —
     do streetwear ao esporte, do casual ao dia a dia. Selecionamos cada peça pensando em caimento,
     durabilidade e um preço justo.
   </p>
@@ -548,7 +548,7 @@
 
 <footer>
   <div class="container footer-inner">
-    <span>© 2026 JA Store</span>
+    <span>© 2026 <span id="brandTextFooter">JA Store</span></span>
     <span class="footer-links"><a href="troca-e-devolucao.html">Troca e Devolução</a></span>
     <span>Preços de venda rápida — ajuste no catálogo sempre que o custo do fornecedor mudar.</span>
   </div>
@@ -814,6 +814,53 @@
       const { data, error } = await sb.from('store_settings').select('*').eq('id', 1).maybeSingle();
       if (error) throw error;
       if (!data) return;
+
+      // ---------- nome da loja (com fallback "JA Store") ----------
+      // O próprio HTML já traz "JA Store" escrito em cada um desses spans,
+      // então se store_name estiver vazio/nulo, simplesmente não fazemos
+      // nada aqui — o fallback já é o texto que já está na página.
+      const storeName = (data.store_name || '').trim();
+      if (storeName){
+        ['brandTextMobile','brandTextDesktop','brandTextHero','brandTextInstagram','brandTextSobreTitle','brandTextSobreBody','brandTextFooter'].forEach(id=>{
+          const el = document.getElementById(id);
+          if (el) el.textContent = storeName;
+        });
+        const logoMobileAlt = document.getElementById('logoImgMobile');
+        const logoDesktopAlt = document.getElementById('logoImgDesktop');
+        if (logoMobileAlt) logoMobileAlt.alt = storeName;
+        if (logoDesktopAlt) logoDesktopAlt.alt = storeName;
+        // Só troca o título da aba se o SEO não tiver definido um título
+        // próprio (o SEO, mais abaixo nesta função, tem prioridade).
+        if (!data.seo_title) document.title = `${storeName} | Streetwear, esporte e casual`;
+      }
+
+      // ---------- cores de aparência (Etapa 2: só aplica se estiver preenchido) ----------
+      // Cada valor tem um "reserva" igual ao que já está fixo no CSS hoje —
+      // então, com o banco vazio, nada muda visualmente na loja.
+      const colorMap = {
+        color_background: '--bg',
+        color_text: '--ink',
+        color_primary: '--accent-dark',
+        color_secondary: '--ink-soft',
+        color_accent: '--accent',
+        color_button: '--green',
+        color_link: '--rust',
+      };
+      Object.entries(colorMap).forEach(([field, cssVar])=>{
+        if (data[field]){
+          document.documentElement.style.setProperty(cssVar, data[field]);
+        }
+      });
+
+      // Logo personalizada: se tiver uma configurada, usa ela; se não tiver
+      // (ou se der erro ao carregar), o "onerror" já em cada <img> cuida de
+      // mostrar a marca padrão "JA" — a loja nunca fica sem identidade.
+      if (data.logo_url){
+        const logoMobile = document.getElementById('logoImgMobile');
+        const logoDesktop = document.getElementById('logoImgDesktop');
+        if (logoMobile) logoMobile.src = data.logo_url;
+        if (logoDesktop) logoDesktop.src = data.logo_url;
+      }
 
       if (data.instagram_url){
         document.getElementById('instagramLink').href = data.instagram_url;
