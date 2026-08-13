@@ -618,13 +618,13 @@
       const sb = window.getSupabaseClient();
       const { data, error } = await sb
         .from('categories')
-        .select('name, slug')
+        .select('name, slug, image_url')
         .eq('active', true)
         .order('display_order', { ascending: true });
       if (error) throw error;
       CATEGORIES = [
         { id: "todos", label: "Todos" },
-        ...(data || []).map(c => ({ id: c.slug, label: c.name })),
+        ...(data || []).map(c => ({ id: c.slug, label: c.name, image: c.image_url })),
       ];
     } catch (err) {
       console.error('Não foi possível carregar categorias do Supabase:', err);
@@ -650,7 +650,11 @@
   function renderCategoryTiles(){
     const tilesEl = document.getElementById('categoryTiles');
     const cats = CATEGORIES.filter(c => c.id !== 'todos');
-    tilesEl.innerHTML = cats.map(c => `<div class="category-tile" data-cat-tile="${c.id}">${c.label}</div>`).join('');
+    tilesEl.innerHTML = cats.map(c => `
+      <div class="category-tile" data-cat-tile="${c.id}" ${c.image ? `style="background-image:linear-gradient(rgba(0,0,0,0.15),rgba(0,0,0,0.35)), url('${c.image}'); background-size:cover; background-position:center; color:#fff;"` : ''}>
+        ${c.label}
+      </div>
+    `).join('');
     tilesEl.querySelectorAll('[data-cat-tile]').forEach(tile=>{
       tile.addEventListener('click', ()=>{
         category = tile.dataset.catTile;
