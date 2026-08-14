@@ -56,6 +56,28 @@
   .side-btn.active svg{opacity:1;}
   .sidebar-foot{padding:10px; border-top:1px solid #232326;}
 
+  .side-group-head{
+    width:100%; display:flex; align-items:center; gap:11px; padding:10px 12px; border:none; background:transparent;
+    color:#C9C9CC; font-size:13.5px; font-weight:600; border-radius:8px; text-align:left; margin-bottom:2px; cursor:pointer;
+  }
+  .side-group-head:hover{background:var(--sidebar-hover); color:#fff;}
+  .side-group-head svg.chev{margin-left:auto; flex-shrink:0; transition:transform .15s ease;}
+  .side-group.open .side-group-head svg.chev{transform:rotate(90deg);}
+  .side-group-children{display:none; padding-left:30px; margin-bottom:2px;}
+  .side-group.open .side-group-children{display:block;}
+  .side-subbtn{
+    width:100%; display:block; padding:8px 10px; border:none; background:transparent;
+    color:#A6A6AA; font-size:12.5px; font-weight:600; border-radius:6px; text-align:left; margin-bottom:1px;
+  }
+  .side-subbtn:hover{background:var(--sidebar-hover); color:#fff;}
+  .policy-list-btn{
+    width:100%; display:block; padding:8px 10px; background:#fff; cursor:pointer;
+  }
+  .policy-list-btn:hover{background:var(--bg);}
+  .policy-list-btn.active{background:var(--ink); border-color:var(--ink) !important;}
+  .policy-list-btn.active span{color:#fff !important;}
+  .side-subbtn.active{background:var(--sidebar-active); color:#fff;}
+
   .main{flex:1; min-width:0;}
   .topbar{
     background:#fff; border-bottom:1px solid var(--line); padding:14px 26px;
@@ -118,7 +140,8 @@
   .color-row label{flex:1; font-size:13px; font-weight:600;}
   .color-row input[type="color"]{width:38px; height:38px; padding:2px; border:1.5px solid var(--line); border-radius:8px; cursor:pointer; background:none;}
   .color-row input[type="text"]{width:100px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; text-transform:uppercase;}
-  .appearance-preview{border:1px solid var(--line); border-radius:12px; padding:24px; margin:20px 0; text-align:center;}
+  .appearance-preview{border:1.5px solid var(--ink); border-radius:12px; padding:24px; margin:20px 0; text-align:center; background:#fff; transition:background .15s ease;}
+  .appearance-preview button{background:#111111; transition:background .15s ease;}
   .appearance-preview button{padding:11px 22px; border:none; border-radius:6px; font-weight:700; font-size:13px; margin-top:12px;}
   .settings-tab{padding:10px 16px; border:none; background:none; font-size:13.5px; font-weight:600; color:var(--ink-soft); border-bottom:2px solid transparent; margin-bottom:-1px;}
   .settings-tab.active{color:var(--ink); border-bottom-color:var(--ink);}
@@ -201,6 +224,57 @@
 
         <!-- ---------- DASHBOARD / RELATÓRIOS ---------- -->
         <div class="panel" data-panel="dashboard">
+
+          <div class="card" style="margin-bottom:20px;">
+            <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+              <div class="field" style="margin-bottom:0; max-width:220px;">
+                <label>Período</label>
+                <select id="dashPeriod">
+                  <option value="today">Hoje</option>
+                  <option value="yesterday">Ontem</option>
+                  <option value="last7">Últimos 7 dias</option>
+                  <option value="last30" selected>Últimos 30 dias</option>
+                  <option value="thisMonth">Este mês</option>
+                  <option value="lastMonth">Mês anterior</option>
+                  <option value="thisYear">Este ano</option>
+                  <option value="custom">Período personalizado</option>
+                </select>
+              </div>
+              <div class="field" id="dashCustomFrom" style="margin-bottom:0; max-width:160px; display:none;">
+                <label>Data inicial</label>
+                <input type="date" id="dashDateFrom">
+              </div>
+              <div class="field" id="dashCustomTo" style="margin-bottom:0; max-width:160px; display:none;">
+                <label>Data final</label>
+                <input type="date" id="dashDateTo">
+              </div>
+              <button class="btn btn-primary" id="dashApplyPeriodBtn">Aplicar</button>
+            </div>
+          </div>
+
+          <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Resumo do período selecionado</p>
+          <div class="stat-grid">
+            <div class="stat-card"><p class="label">Faturamento</p><p class="value" id="statPeriodRevenue">R$ 0,00</p></div>
+            <div class="stat-card"><p class="label">Pedidos</p><p class="value" id="statPeriodOrders">0</p></div>
+            <div class="stat-card"><p class="label">Ticket médio</p><p class="value" id="statPeriodAvg">R$ 0,00</p></div>
+            <div class="stat-card"><p class="label">Produtos vendidos</p><p class="value" id="statPeriodProductsSold">0</p></div>
+            <div class="stat-card"><p class="label">Clientes</p><p class="value" id="statPeriodCustomers">0</p></div>
+            <div class="stat-card"><p class="label">Pedidos pagos</p><p class="value" id="statPeriodPaid">0</p></div>
+            <div class="stat-card"><p class="label">Pedidos pendentes</p><p class="value" id="statPeriodPending">0</p></div>
+            <div class="stat-card"><p class="label">Pedidos cancelados</p><p class="value" id="statPeriodCanceled">0</p></div>
+          </div>
+
+          <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:24px 0 12px;">Catálogo (total geral, não depende do período)</p>
+          <div class="stat-grid">
+            <div class="stat-card"><p class="label">Produtos cadastrados</p><p class="value" id="statTotalProducts">0</p></div>
+            <div class="stat-card"><p class="label">Produtos ativos</p><p class="value" id="statActiveProducts">0</p></div>
+            <div class="stat-card"><p class="label">Produtos inativos</p><p class="value" id="statInactiveProducts">0</p></div>
+            <div class="stat-card"><p class="label">Sem estoque</p><p class="value" id="statOutOfStock">0</p></div>
+            <div class="stat-card"><p class="label">Estoque baixo</p><p class="value" id="statLowStock">0</p></div>
+            <div class="stat-card"><p class="label">Categorias cadastradas</p><p class="value" id="statTotalCategories">0</p></div>
+          </div>
+
+          <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:24px 0 12px;">Hoje e este mês (fixo, não muda com o filtro acima)</p>
           <div class="stat-grid">
             <div class="stat-card">
               <p class="label">Vendas hoje</p>
@@ -229,14 +303,6 @@
             <div class="stat-card">
               <p class="label">Ticket médio</p>
               <p class="value" id="statAvg">R$ 0,00</p>
-            </div>
-            <div class="stat-card">
-              <p class="label">Produtos ativos</p>
-              <p class="value" id="statActiveProducts">0</p>
-            </div>
-            <div class="stat-card">
-              <p class="label">Estoque baixo</p>
-              <p class="value" id="statLowStock">0</p>
             </div>
           </div>
 
@@ -305,7 +371,7 @@
               </select>
             </div>
             <table>
-              <thead><tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Estoque</th><th>Status</th><th>Criado em</th><th></th></tr></thead>
+              <thead><tr><th>Produto</th><th>SKU</th><th>Categoria</th><th>Preço</th><th>Estoque</th><th>Status</th><th>Criado em</th><th></th></tr></thead>
               <tbody id="productsBody"></tbody>
             </table>
             <div class="pagination" id="productsPagination"></div>
@@ -320,7 +386,7 @@
               <button class="btn btn-primary" id="newCategoryBtn">+ Nova categoria</button>
             </div>
             <table>
-              <thead><tr><th>Ordem</th><th>Imagem</th><th>Nome</th><th>Slug</th><th>Status</th><th></th></tr></thead>
+              <thead><tr><th>Ordem</th><th>Imagem</th><th>Nome</th><th>Slug</th><th>Produtos</th><th>Status</th><th></th></tr></thead>
               <tbody id="categoriesBody"></tbody>
             </table>
           </div>
@@ -337,6 +403,33 @@
             <table>
               <thead><tr><th>Ordem</th><th>Nome</th><th>Slug</th><th>Status</th><th></th></tr></thead>
               <tbody id="subcategoriesBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ---------- ESTOQUE ---------- -->
+        <div class="panel" data-panel="stock">
+          <div class="stat-grid">
+            <div class="stat-card"><p class="label">Produtos ativos</p><p class="value" id="stockActiveCount">0</p></div>
+            <div class="stat-card"><p class="label">Sem estoque</p><p class="value" id="stockOutCount">0</p></div>
+            <div class="stat-card"><p class="label">Estoque baixo</p><p class="value" id="stockLowCount">0</p></div>
+          </div>
+          <div class="card">
+            <div class="panel-head">
+              <h2>Estoque por produto</h2>
+            </div>
+            <div class="filters-row">
+              <input type="text" id="stockSearch" placeholder="Buscar produto ou SKU...">
+              <select id="stockFilterSelect">
+                <option value="">Todos</option>
+                <option value="out">Sem estoque</option>
+                <option value="low">Estoque baixo</option>
+                <option value="active">Só ativos</option>
+              </select>
+            </div>
+            <table>
+              <thead><tr><th>Produto</th><th>SKU</th><th>Categoria</th><th>Status</th><th>Estoque atual</th><th></th></tr></thead>
+              <tbody id="stockBody"></tbody>
             </table>
           </div>
         </div>
@@ -381,6 +474,23 @@
             <div class="panel-head">
               <h2>Cupons</h2>
               <button class="btn btn-primary" id="newCouponBtn">+ Novo cupom</button>
+            </div>
+            <div class="filters-row">
+              <input type="text" id="coupSearch" placeholder="Buscar por código...">
+              <select id="coupStatusFilter">
+                <option value="">Todos os status</option>
+                <option value="active">Ativos</option>
+                <option value="inactive">Inativos</option>
+              </select>
+              <select id="coupScopeFilter">
+                <option value="">Todos os tipos</option>
+                <option value="percent">Percentual</option>
+                <option value="fixed">Fixo</option>
+                <option value="free_shipping">Frete grátis</option>
+                <option value="first_purchase">1ª compra</option>
+                <option value="products">Produtos específicos</option>
+                <option value="category">Categoria</option>
+              </select>
             </div>
             <table>
               <thead><tr><th>Cupom</th><th>Desconto</th><th>Tipo</th><th>Mín. compra</th><th>Usos</th><th>Validade</th><th>Status</th><th></th></tr></thead>
@@ -429,8 +539,8 @@
               <button class="settings-tab" data-stab="motoboy">Motoboy</button>
               <button class="settings-tab" data-stab="banners">Banners</button>
               <button class="settings-tab" data-stab="seo">SEO</button>
-              <button class="settings-tab" data-stab="integracoes">Integrações</button>
-              <button class="settings-tab" data-stab="aparencia">Aparência</button>
+              <button class="settings-tab" data-stab="policies">Políticas</button>
+              <button class="settings-tab" data-stab="security">Segurança</button>
             </div>
 
             <div class="settings-panel active" data-spanel="geral">
@@ -547,14 +657,36 @@
                 <div class="field"><label>Texto do botão</label><input id="setBannerMainCtaText" placeholder="Comprar agora"></div>
                 <div class="field"><label>Link do botão</label><input id="setBannerMainCtaLink" placeholder="#produtos"></div>
               </div>
-              <div class="field"><label>URL da imagem de fundo (opcional — deixe vazio pra manter o fundo preto liso)</label><input id="setBannerMainImage" placeholder="assets/banners/principal.jpg"></div>
+              <div class="field">
+                <label>Imagem de fundo (opcional — deixe vazio pra manter o fundo preto liso)</label>
+                <div id="bannerMainImagePreviewWrap" style="display:none; margin-bottom:8px;">
+                  <img id="bannerMainImagePreview" style="width:100%; max-width:260px; height:100px; object-fit:cover; border-radius:8px; border:1px solid var(--line);">
+                </div>
+                <input type="hidden" id="setBannerMainImage">
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                  <input type="file" id="bannerMainImageFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:160px; font-size:12.5px;">
+                  <button class="btn btn-ghost" id="removeBannerMainImageBtn" type="button">Remover</button>
+                </div>
+                <p id="bannerMainImageUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:6px 0 0;"></p>
+              </div>
 
               <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:26px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Banner secundário (entre as seções da home)</p>
               <div class="settings-grid">
                 <div class="field"><label>Título</label><input id="setBannerSecondaryTitle" placeholder="Ex: Nova coleção de inverno"></div>
                 <div class="field"><label>Link (pra onde leva ao clicar)</label><input id="setBannerSecondaryLink" placeholder="#produtos"></div>
               </div>
-              <div class="field"><label>URL da imagem</label><input id="setBannerSecondaryImage" placeholder="assets/banners/secundario.jpg"></div>
+              <div class="field">
+                <label>Imagem</label>
+                <div id="bannerSecondaryImagePreviewWrap" style="display:none; margin-bottom:8px;">
+                  <img id="bannerSecondaryImagePreview" style="width:100%; max-width:260px; height:100px; object-fit:cover; border-radius:8px; border:1px solid var(--line);">
+                </div>
+                <input type="hidden" id="setBannerSecondaryImage">
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                  <input type="file" id="bannerSecondaryImageFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:160px; font-size:12.5px;">
+                  <button class="btn btn-ghost" id="removeBannerSecondaryImageBtn" type="button">Remover</button>
+                </div>
+                <p id="bannerSecondaryImageUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:6px 0 0;"></p>
+              </div>
               <p style="font-size:12px; color:var(--ink-soft); margin:0 0 16px;">Deixe o título e a imagem em branco pra esse banner não aparecer na loja.</p>
 
               <button class="btn btn-primary" id="saveBannersBtn">Salvar banners</button>
@@ -570,34 +702,145 @@
               <button class="btn btn-primary" id="saveSeoBtn">Salvar SEO</button>
             </div>
 
-            <div class="settings-panel" data-spanel="integracoes">
-              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Google Analytics 4</p>
-              <div class="field" style="max-width:320px;">
-                <label>ID de métricas (começa com "G-")</label>
-                <input id="setGaId" placeholder="G-XXXXXXXXXX">
+            <div class="settings-panel" data-spanel="policies">
+              <div style="display:grid; grid-template-columns:220px 1fr; gap:20px;" id="policiesLayout">
+                <div>
+                  <p style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px;">Políticas</p>
+                  <div id="policiesList" style="display:flex; flex-direction:column; gap:2px;"></div>
+                  <button class="btn btn-ghost" id="newCustomPolicyBtn" style="margin-top:12px; width:100%; font-size:12px;">+ Política personalizada</button>
+                </div>
+                <div id="policyEditorWrap" style="display:none;">
+                  <div class="field"><label>Título</label><input id="policyTitle"></div>
+                  <p id="policyUpdatedAt" style="font-size:12px; color:var(--ink-soft); margin:0 0 12px;"></p>
+                  <div class="field"><label>Conteúdo (as quebras de linha e parágrafos são preservados)</label>
+                    <textarea id="policyContent" rows="16" style="width:100%; padding:10px 12px; border-radius:8px; border:1.5px solid var(--line); font-size:13.5px; font-family:inherit; line-height:1.6;"></textarea>
+                  </div>
+                  <button class="btn btn-primary" id="savePolicyBtn">Salvar política</button>
+                  <p id="policySaveStatus" style="font-size:12.5px; margin-top:10px;"></p>
+                </div>
+                <p id="policyEmptyState" style="color:var(--ink-soft); font-size:13px;">Selecione uma política ao lado pra editar.</p>
               </div>
-              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px; line-height:1.6;">
-                Encontre em <b>analytics.google.com → Administrador → Fluxos de dados</b>, clicando no fluxo do seu site.
-              </p>
-
-              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Meta Pixel (Facebook/Instagram Ads)</p>
-              <div class="field" style="max-width:320px;">
-                <label>ID do Pixel</label>
-                <input id="setMetaPixelId" placeholder="Ex: 123456789012345">
-              </div>
-              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px; line-height:1.6;">
-                Encontre em <b>Gerenciador de Eventos (business.facebook.com/events_manager) → seu Pixel → Configurações</b>.
-              </p>
-
-              <button class="btn btn-primary" id="saveTrackingBtn">Salvar integrações</button>
-
-              <p style="font-size:12px; color:var(--ink-soft); margin:16px 0 0; line-height:1.6; border-top:1px solid var(--line); padding-top:16px;">
-                Depois de salvar, os eventos já passam a ser enviados automaticamente: visualização de produto, adicionar ao carrinho, início do checkout e <b>compra concluída</b>. Deixe os campos vazios e salve pra desativar o rastreamento a qualquer momento.
-              </p>
             </div>
 
-            <div class="settings-panel" data-spanel="aparencia">
-              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Modelo da loja</p>
+            <div class="settings-panel" data-spanel="security">
+              <div class="card" style="max-width:420px; box-shadow:none; border:1px solid var(--line); padding:20px;">
+                <h2 style="margin:0 0 4px; font-size:16px;">Alterar senha</h2>
+                <p style="font-size:12px; color:var(--ink-soft); margin:0 0 18px;">Usa o mesmo sistema de login que você já tem — a senha nunca fica salva em texto puro, isso é feito pelo próprio Supabase.</p>
+                <div class="field"><label>Senha atual</label><input id="currentPasswordInput" type="password"></div>
+                <div class="field"><label>Nova senha</label><input id="newPasswordInput" type="password"></div>
+                <div class="field"><label>Confirmar nova senha</label><input id="confirmPasswordInput" type="password"></div>
+                <button class="btn btn-primary" id="changePasswordBtn">Alterar senha</button>
+                <p id="passwordChangeStatus" style="font-size:12.5px; margin-top:10px;"></p>
+              </div>
+            </div>
+
+        <!-- ---------- ANALYTICS: GOOGLE ANALYTICS ---------- -->
+        <div class="panel" data-panel="analytics-ga">
+          <div class="card" style="max-width:520px;">
+            <div class="panel-head">
+              <h2>Google Analytics 4</h2>
+              <span class="badge" id="gaStatusBadge">—</span>
+            </div>
+            <div class="field"><label><input type="checkbox" id="setGaEnabled" style="width:auto;display:inline-block;margin-right:6px;">Ativar Google Analytics</label></div>
+            <div class="field">
+              <label>ID de métricas (começa com "G-")</label>
+              <input id="setGaId" placeholder="G-XXXXXXXXXX">
+            </div>
+            <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px; line-height:1.6;">
+              Encontre em <b>analytics.google.com → Administrador → Fluxos de dados</b>, clicando no fluxo do seu site.
+            </p>
+            <button class="btn btn-primary" id="saveGaBtn">Salvar</button>
+            <p id="gaSaveStatus" style="font-size:12.5px; margin-top:10px;"></p>
+          </div>
+        </div>
+
+        <!-- ---------- ANALYTICS: META PIXEL ---------- -->
+        <div class="panel" data-panel="analytics-pixel">
+          <div class="card" style="max-width:520px;">
+            <div class="panel-head">
+              <h2>Meta Pixel</h2>
+              <span class="badge" id="pixelStatusBadge">—</span>
+            </div>
+            <div class="field"><label><input type="checkbox" id="setMetaPixelEnabled" style="width:auto;display:inline-block;margin-right:6px;">Ativar Meta Pixel</label></div>
+            <div class="field">
+              <label>ID do Pixel</label>
+              <input id="setMetaPixelId" placeholder="Ex: 123456789012345">
+            </div>
+            <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px; line-height:1.6;">
+              Encontre em <b>Gerenciador de Eventos (business.facebook.com/events_manager) → seu Pixel → Configurações</b>.
+            </p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn btn-primary" id="savePixelBtn">Salvar</button>
+              <button class="btn btn-ghost" id="testPixelBtn" type="button">Testar integração</button>
+            </div>
+            <p id="pixelSaveStatus" style="font-size:12.5px; margin-top:10px;"></p>
+          </div>
+        </div>
+
+        <!-- ---------- ANALYTICS: EVENTOS ---------- -->
+        <div class="panel" data-panel="analytics-events">
+          <div class="card" style="max-width:560px;">
+            <h2 style="margin:0 0 6px;">Eventos rastreados</h2>
+            <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 20px;">
+              Esses eventos já são enviados automaticamente pra loja pública, tanto pro Google Analytics quanto pro Meta Pixel (quando ativados) — não precisa configurar nada além do ID.
+            </p>
+            <div id="eventsFlowList"></div>
+          </div>
+        </div>
+
+          </div>
+        </div>
+
+        <!-- ---------- PERSONALIZAÇÃO (aba própria, fora de Configurações) ---------- -->
+        <div class="panel" data-panel="appearance">
+          <div class="card">
+            <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Identidade</p>
+            <p style="font-size:12px; color:var(--ink-soft); margin:0 0 12px;">Nome e logo já são configurados em Configurações → Geral / Logomarca — aqui ficam só os itens que faltavam.</p>
+            <div class="field"><label>Slogan (opcional)</label><input id="setStoreSlogan" placeholder="Ex: Estilo que te representa"></div>
+
+            <div class="field">
+              <label>Favicon (ícone da aba do navegador)</label>
+              <div id="faviconPreviewWrap" style="display:none; margin-bottom:8px;">
+                <img id="faviconPreview" style="width:32px; height:32px; object-fit:contain; border-radius:6px; border:1px solid var(--line); background:#fff;">
+              </div>
+              <input type="hidden" id="setFaviconUrl">
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <input type="file" id="faviconFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:160px; font-size:12.5px;">
+                <button class="btn btn-ghost" id="removeFaviconBtn" type="button">Remover</button>
+              </div>
+              <p id="faviconUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:6px 0 0;"></p>
+            </div>
+
+            <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:24px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Tipografia</p>
+            <div class="settings-grid">
+              <div class="field">
+                <label>Fonte do texto</label>
+                <select id="setFontBody">
+                  <option value="Inter">Inter (padrão atual)</option>
+                  <option value="Poppins">Poppins</option>
+                  <option value="Roboto">Roboto</option>
+                  <option value="Montserrat">Montserrat</option>
+                  <option value="Lato">Lato</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Fonte dos títulos</label>
+                <select id="setFontHeading">
+                  <option value="Inter">Inter (padrão atual)</option>
+                  <option value="Poppins">Poppins</option>
+                  <option value="Playfair Display">Playfair Display</option>
+                  <option value="Montserrat">Montserrat</option>
+                  <option value="Merriweather">Merriweather</option>
+                </select>
+              </div>
+            </div>
+            <p style="font-size:12px; color:var(--ink-soft); margin:0 0 16px;">Tamanho e peso de cada texto específico ainda não são ajustáveis aqui — fica pra uma próxima etapa.</p>
+
+            <button class="btn btn-primary" id="saveIdentityTypographyBtn">Salvar identidade e tipografia</button>
+          </div>
+
+          <div class="card" style="margin-top:20px;">
+            <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Modelo da loja</p>
               <p style="font-size:12px; color:var(--ink-soft); margin:0 0 12px;">Deixe sem seleção pra manter o visual atual da JA Store (todas as seções, na ordem de hoje).</p>
               <div class="palette-grid" id="layoutGrid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));"></div>
               <button class="btn btn-primary" id="saveLayoutBtn" style="margin:16px 0 24px;">Salvar modelo</button>
@@ -619,7 +862,17 @@
                 <button class="btn btn-primary" id="saveAppearanceBtn">Salvar alterações</button>
                 <button class="btn btn-ghost" id="resetAppearanceBtn">Restaurar padrão</button>
               </div>
-            </div>
+          </div>
+        </div>
+
+        <!-- ---------- EM BREVE (áreas do menu ainda não implementadas) ---------- -->
+        <div class="panel" data-panel="coming-soon">
+          <div class="card" style="text-align:center; padding:48px 24px;">
+            <p style="font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft); margin:0 0 8px;">Em breve</p>
+            <h2 id="comingSoonTitle" style="margin:0 0 10px;">Essa área ainda não está pronta</h2>
+            <p style="color:var(--ink-soft); font-size:13.5px; max-width:420px; margin:0 auto;" id="comingSoonText">
+              Essa parte do painel foi organizada no menu, mas a funcionalidade ainda vai ser construída numa próxima etapa.
+            </p>
           </div>
         </div>
 
@@ -702,6 +955,17 @@
     <div class="field"><label>Custo (R$, opcional)</label><input id="prodCost" type="number" step="0.01"></div>
     <div class="field"><label>Descrição (aparece na página do produto)</label><textarea id="prodDescription" rows="3" style="width:100%; padding:9px 11px; border-radius:6px; border:1.5px solid var(--line); font-size:13px; font-family:inherit;"></textarea></div>
     <div class="field"><label>Estoque</label><input id="prodStock" type="number" step="1"></div>
+    <div class="field"><label>SKU (código do produto, opcional)</label><input id="prodSku" placeholder="Ex: CAM-PRETA-M"></div>
+
+    <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:14px 0 8px;">Peso e dimensões (opcional)</p>
+    <div class="settings-grid">
+      <div class="field"><label>Peso (kg)</label><input id="prodWeight" type="number" step="0.001"></div>
+      <div class="field"><label>Comprimento (cm)</label><input id="prodLength" type="number" step="0.1"></div>
+    </div>
+    <div class="settings-grid">
+      <div class="field"><label>Largura (cm)</label><input id="prodWidth" type="number" step="0.1"></div>
+      <div class="field"><label>Altura (cm)</label><input id="prodHeight" type="number" step="0.1"></div>
+    </div>
     <div class="field">
       <label>Foto de capa</label>
       <div id="coverPreviewWrap" style="display:none; margin-bottom:8px;">
@@ -795,23 +1059,67 @@
 </div>
 
 <div class="overlay" id="couponOverlay">
-  <div class="modal">
+  <div class="modal" style="max-width:520px;">
     <h3 id="couponModalTitle">Novo cupom</h3>
     <input type="hidden" id="coupId">
     <div class="field"><label>Código</label><input id="coupCode" style="text-transform:uppercase;"></div>
-    <div class="field"><label>Tipo de desconto</label>
-      <select id="coupType">
-        <option value="percent">Percentual (%)</option>
-        <option value="fixed">Valor fixo (R$)</option>
+
+    <p style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:14px 0 8px;">Desconto</p>
+    <div class="settings-grid">
+      <div class="field"><label>Tipo de desconto</label>
+        <select id="coupType">
+          <option value="percent">Percentual (%)</option>
+          <option value="fixed">Valor fixo (R$)</option>
+        </select>
+      </div>
+      <div class="field"><label>Valor do desconto</label><input id="coupValue" type="number" step="0.01"></div>
+    </div>
+    <div class="field"><label><input type="checkbox" id="coupFreeShipping" style="width:auto;display:inline-block;margin-right:6px;">Também dá frete grátis (pode combinar com o desconto acima, ou usar sozinho com valor 0)</label></div>
+
+    <p style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:16px 0 8px; border-top:1px solid var(--line); padding-top:16px;">Onde o desconto vale</p>
+    <div class="field"><label>Aplicar em</label>
+      <select id="coupScope">
+        <option value="all">Carrinho inteiro</option>
+        <option value="products">Produtos específicos</option>
+        <option value="category">Uma categoria</option>
       </select>
     </div>
-    <div class="field"><label>Valor do desconto</label><input id="coupValue" type="number" step="0.01"></div>
-    <div class="field"><label>Valor mínimo de compra (R$, opcional)</label><input id="coupMinPurchase" type="number" step="0.01"></div>
-    <div class="field"><label>Limite de usos (opcional)</label><input id="coupLimit" type="number" step="1"></div>
+    <div class="field" id="coupProductsWrap" style="display:none;">
+      <label>Produtos participantes (Ctrl/Cmd+clique pra selecionar vários)</label>
+      <select id="coupProductIds" multiple size="6" style="height:auto;"></select>
+    </div>
+    <div class="field" id="coupCategoryWrap" style="display:none;">
+      <label>Categoria</label>
+      <select id="coupCategorySlug"></select>
+    </div>
+
+    <p style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:16px 0 8px; border-top:1px solid var(--line); padding-top:16px;">Condições</p>
+    <div class="settings-grid">
+      <div class="field"><label>Valor mínimo de compra (R$, opcional)</label><input id="coupMinPurchase" type="number" step="0.01"></div>
+      <div class="field"><label><input type="checkbox" id="coupFirstPurchase" style="width:auto;display:inline-block;margin-right:6px;">Só na 1ª compra do cliente</label></div>
+    </div>
+
+    <p style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:16px 0 8px; border-top:1px solid var(--line); padding-top:16px;">Limites de uso</p>
+    <div class="settings-grid">
+      <div class="field"><label>Limite total de usos (opcional)</label><input id="coupLimit" type="number" step="1"></div>
+      <div class="field"><label>Limite por cliente (opcional)</label><input id="coupPerCustomerLimit" type="number" step="1"></div>
+    </div>
+
+    <p style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:16px 0 8px; border-top:1px solid var(--line); padding-top:16px;">Período e horário</p>
     <div class="settings-grid">
       <div class="field"><label>Válido a partir de (opcional)</label><input id="coupStarts" type="date"></div>
       <div class="field"><label>Válido até (opcional)</label><input id="coupExpires" type="date"></div>
     </div>
+    <div class="settings-grid">
+      <div class="field"><label>Horário inicial (opcional)</label><input id="coupTimeStart" type="time"></div>
+      <div class="field"><label>Horário final (opcional)</label><input id="coupTimeEnd" type="time"></div>
+    </div>
+
+    <div class="field" style="margin-top:12px; border-top:1px solid var(--line); padding-top:16px;">
+      <label><input type="checkbox" id="coupStackable" style="width:auto;display:inline-block;margin-right:6px;">Permitir combinar com outros cupons</label>
+      <p style="font-size:11.5px; color:var(--ink-soft); margin:4px 0 0;">⚠️ O checkout hoje só aceita 1 cupom por pedido — essa opção fica guardada pra quando o checkout passar a aceitar vários ao mesmo tempo.</p>
+    </div>
+
     <div class="field"><label><input type="checkbox" id="coupActive" style="width:auto;display:inline-block;margin-right:6px;">Cupom ativo</label></div>
     <div class="modal-actions">
       <button class="btn btn-primary" id="saveCouponBtn" style="flex:1">Salvar</button>
@@ -853,43 +1161,132 @@
   const loginScreen = document.getElementById('loginScreen');
   const dashboard = document.getElementById('dashboard');
 
+  // Estrutura do menu: itens soltos (vão direto pra um painel) e grupos
+  // (abrem/fecham, cada filho aponta pra um painel — e, quando faz sentido,
+  // pra uma aba específica dentro de Configurações, reaproveitando o que já
+  // existe em vez de duplicar telas).
   const NAV_ITEMS = [
-    { id:'dashboard', label:'Dashboard', icon:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z' },
-    { id:'products', label:'Produtos', icon:'M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8' },
-    { id:'categories', label:'Categorias', icon:'M3 7a4 4 0 014-4h3l2 2h5a4 4 0 014 4v6a4 4 0 01-4 4H7a4 4 0 01-4-4V7z' },
-    { id:'orders', label:'Pedidos', icon:'M6 2L4 6M18 2l2 4M3 8h18l-1.5 12a2 2 0 01-2 1.8H6.5a2 2 0 01-2-1.8L3 8z' },
-    { id:'customers', label:'Clientes', icon:'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75' },
-    { id:'coupons', label:'Cupons', icon:'M20.59 13.41L13.41 20.6a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82zM7 7h.01' },
-    { id:'announcements', label:'Avisos', icon:'M3 11l18-5v12L3 14v-3z M11 13v5a2 2 0 002 2h0a2 2 0 002-2v-4' },
-    { id:'settings', label:'Configurações', icon:'M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c.14.32.22.68.22 1.05V10a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z' },
+    { id:'dashboard', label:'Dashboard', icon:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z', panel:'dashboard' },
+    { id:'orders', label:'Pedidos', icon:'M6 2L4 6M18 2l2 4M3 8h18l-1.5 12a2 2 0 01-2 1.8H6.5a2 2 0 01-2-1.8L3 8z', panel:'orders' },
+    { id:'products-group', label:'Produtos', icon:'M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8', children:[
+      { label:'Todos os produtos', panel:'products' },
+      { label:'Adicionar produto', panel:'products', action:'new-product' },
+      { label:'Categorias', panel:'categories' },
+      { label:'Estoque', panel:'stock' },
+    ]},
+    { id:'customers', label:'Clientes', icon:'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75', panel:'customers' },
+    { id:'appearance', label:'Personalização', icon:'M12 2l2.4 6.5L21 9l-5 4.4L17.4 20 12 16.5 6.6 20 8 13.4 3 9l6.6-.5z', panel:'appearance' },
+    { id:'marketing-group', label:'Marketing', icon:'M3 11l18-5v12L3 14v-3z M11 13v5a2 2 0 002 2h0a2 2 0 002-2v-4', children:[
+      { label:'Cupons', panel:'coupons' },
+      { label:'Banners', panel:'settings', tab:'banners' },
+      { label:'Avisos', panel:'announcements' },
+      { label:'Campanhas', panel:'coming-soon', title:'Campanhas' },
+    ]},
+    { id:'analytics-group', label:'Analytics', icon:'M4 19V10M11 19V4M18 19v-7', children:[
+      { label:'Google Analytics', panel:'analytics-ga' },
+      { label:'Meta Pixel', panel:'analytics-pixel' },
+      { label:'Eventos', panel:'analytics-events' },
+      { label:'Relatórios', panel:'coming-soon', title:'Relatórios' },
+    ]},
+    { id:'settings-group', label:'Configurações', icon:'M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c.14.32.22.68.22 1.05V10a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z', children:[
+      { label:'Geral', panel:'settings', tab:'geral' },
+      { label:'Pagamentos', panel:'settings', tab:'pagamento' },
+      { label:'Frete', panel:'settings', tab:'envio' },
+      { label:'Motoboy', panel:'settings', tab:'motoboy' },
+      { label:'SEO', panel:'settings', tab:'seo' },
+      { label:'Políticas', panel:'coming-soon', title:'Políticas' },
+      { label:'Domínio', panel:'coming-soon', title:'Domínio' },
+      { label:'Usuários', panel:'coming-soon', title:'Usuários' },
+      { label:'Segurança', panel:'coming-soon', title:'Segurança' },
+    ]},
   ];
 
   function renderSideNav(){
-    document.getElementById('sideNav').innerHTML = NAV_ITEMS.map(item => `
-      <button class="side-btn" data-nav="${item.id}">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="${item.icon}" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        ${item.label}
-      </button>
-    `).join('');
-    document.querySelectorAll('[data-nav]').forEach(btn=>{
-      btn.addEventListener('click', ()=> switchPanel(btn.dataset.nav));
+    document.getElementById('sideNav').innerHTML = NAV_ITEMS.map(item => {
+      if (!item.children){
+        return `
+          <button class="side-btn" data-nav-simple="${item.id}">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="${item.icon}" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            ${item.label}
+          </button>
+        `;
+      }
+      return `
+        <div class="side-group" data-group="${item.id}">
+          <button class="side-group-head" data-group-toggle="${item.id}">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="${item.icon}" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            ${item.label}
+            <svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="side-group-children">
+            ${item.children.map((child, i) => `<button class="side-subbtn" data-nav-child="${item.id}:${i}">${child.label}</button>`).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    document.querySelectorAll('[data-nav-simple]').forEach(btn=>{
+      btn.addEventListener('click', ()=> navigateTo(NAV_ITEMS.find(n=>n.id===btn.dataset.navSimple)));
+    });
+    document.querySelectorAll('[data-group-toggle]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelector(`[data-group="${btn.dataset.groupToggle}"]`).classList.toggle('open');
+      });
+    });
+    document.querySelectorAll('[data-nav-child]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const [groupId, childIdx] = btn.dataset.navChild.split(':');
+        const group = NAV_ITEMS.find(n=>n.id===groupId);
+        navigateTo(group.children[Number(childIdx)], group, btn);
+      });
     });
   }
 
-  function switchPanel(id){
-    document.querySelectorAll('[data-nav]').forEach(b=> b.classList.toggle('active', b.dataset.nav===id));
-    document.querySelectorAll('.panel').forEach(p=> p.classList.toggle('active', p.dataset.panel===id));
-    document.getElementById('pageTitle').textContent = NAV_ITEMS.find(n=>n.id===id)?.label || 'Dashboard';
+  function openSettingsTab(tabId){
+    const tabBtn = document.querySelector(`.settings-tab[data-stab="${tabId}"]`);
+    if (tabBtn) tabBtn.click();
+  }
+
+  function navigateTo(item, parentGroup, clickedBtn){
+    // marca visualmente o item ativo (seja ele solto ou dentro de um grupo)
+    document.querySelectorAll('[data-nav-simple].active, [data-nav-child].active').forEach(b=>b.classList.remove('active'));
+    if (clickedBtn){
+      clickedBtn.classList.add('active');
+      document.querySelector(`[data-group="${parentGroup.id}"]`).classList.add('open');
+    } else {
+      document.querySelector(`[data-nav-simple="${item.id}"]`)?.classList.add('active');
+    }
+
+    document.getElementById('pageTitle').textContent = parentGroup ? `${parentGroup.label} · ${item.label}` : item.label;
+
+    if (item.panel === 'coming-soon'){
+      document.getElementById('comingSoonTitle').textContent = item.title || 'Essa área ainda não está pronta';
+      document.getElementById('comingSoonText').textContent = `A área "${item.title}" já está organizada no menu, mas a funcionalidade ainda será construída numa próxima etapa.`;
+    }
+
+    switchPanel(item.panel);
+
+    if (item.tab) openSettingsTab(item.tab);
+    if (item.action === 'new-product') setTimeout(()=> openProductModal(null), 50);
+
     document.getElementById('sidebar').classList.remove('open');
+  }
+
+  function switchPanel(id){
+    document.querySelectorAll('.panel').forEach(p=> p.classList.toggle('active', p.dataset.panel===id));
 
     if (id === 'dashboard') loadDashboard();
     if (id === 'products') loadProducts();
     if (id === 'categories') loadCategoriesAdmin();
+    if (id === 'stock') loadStockPanel();
     if (id === 'orders') loadOrders();
     if (id === 'customers') loadCustomers();
     if (id === 'coupons') loadCoupons();
     if (id === 'announcements') loadAnnouncementsAdmin();
     if (id === 'settings') loadSettings();
+    if (id === 'appearance') loadAppearance();
+    if (id === 'analytics-ga' || id === 'analytics-pixel') loadAnalyticsSettings();
+    if (id === 'analytics-events') renderEventsFlowList();
   }
 
   document.getElementById('menuToggle').addEventListener('click', ()=>{
@@ -931,6 +1328,7 @@
     document.getElementById('userAvatar').textContent = name.slice(0,2).toUpperCase();
     renderSideNav();
     switchPanel('dashboard');
+    document.querySelector('[data-nav-simple="dashboard"]')?.classList.add('active');
   }
 
   function formatBRL(v){ return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
@@ -945,10 +1343,59 @@
   let categoryChartInstance = null;
   const LOW_STOCK_THRESHOLD = 5;
 
+  // ---------- filtro de período do dashboard ----------
+  function getDashboardDateRange(){
+    const period = document.getElementById('dashPeriod').value;
+    const now = new Date();
+    const startOfDay = (d) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
+    const endOfDay = (d) => { const x = new Date(d); x.setHours(23,59,59,999); return x; };
+
+    if (period === 'today'){
+      return { start: startOfDay(now), end: endOfDay(now) };
+    }
+    if (period === 'yesterday'){
+      const y = new Date(now.getTime() - 86400000);
+      return { start: startOfDay(y), end: endOfDay(y) };
+    }
+    if (period === 'last7'){
+      return { start: startOfDay(new Date(now.getTime() - 6*86400000)), end: endOfDay(now) };
+    }
+    if (period === 'last30'){
+      return { start: startOfDay(new Date(now.getTime() - 29*86400000)), end: endOfDay(now) };
+    }
+    if (period === 'thisMonth'){
+      return { start: new Date(now.getFullYear(), now.getMonth(), 1), end: endOfDay(now) };
+    }
+    if (period === 'lastMonth'){
+      const start = new Date(now.getFullYear(), now.getMonth()-1, 1);
+      const end = new Date(now.getFullYear(), now.getMonth(), 0, 23,59,59,999);
+      return { start, end };
+    }
+    if (period === 'thisYear'){
+      return { start: new Date(now.getFullYear(), 0, 1), end: endOfDay(now) };
+    }
+    if (period === 'custom'){
+      const fromVal = document.getElementById('dashDateFrom').value;
+      const toVal = document.getElementById('dashDateTo').value;
+      if (!fromVal || !toVal) return { start: startOfDay(new Date(now.getTime()-29*86400000)), end: endOfDay(now) };
+      return { start: startOfDay(new Date(fromVal + 'T00:00:00')), end: endOfDay(new Date(toVal + 'T00:00:00')) };
+    }
+    return { start: startOfDay(new Date(now.getTime()-29*86400000)), end: endOfDay(now) };
+  }
+
+  document.getElementById('dashPeriod').addEventListener('change', ()=>{
+    const isCustom = document.getElementById('dashPeriod').value === 'custom';
+    document.getElementById('dashCustomFrom').style.display = isCustom ? 'block' : 'none';
+    document.getElementById('dashCustomTo').style.display = isCustom ? 'block' : 'none';
+    if (!isCustom) loadDashboard();
+  });
+  document.getElementById('dashApplyPeriodBtn').addEventListener('click', ()=> loadDashboard());
+
   async function loadDashboard(){
-    const [ordersRes, productsRes] = await Promise.all([
+    const [ordersRes, productsRes, categoriesRes] = await Promise.all([
       sb.from('orders').select('id, customer_name, customer_email, total, created_at, payment_status, order_status, order_items(product_name, quantity, product_id)').order('created_at', { ascending: true }),
       sb.from('products').select('id, name, category, stock, active'),
+      sb.from('categories').select('id', { count: 'exact', head: true }),
     ]);
 
     if (ordersRes.error){ showToast('Erro ao carregar dashboard'); console.error(ordersRes.error); return; }
@@ -962,7 +1409,45 @@
     const todayStr = now.toISOString().slice(0,10);
     const monthStr = now.toISOString().slice(0,7);
 
-    // ---------- cartões ----------
+    // ---------- catálogo (total geral, não depende do período) ----------
+    const totalProducts = products.length;
+    const activeProductsCount = products.filter(p => p.active).length;
+    const inactiveProductsCount = totalProducts - activeProductsCount;
+    const outOfStockProducts = products.filter(p => p.stock <= 0);
+    const lowStockOnlyProducts = products.filter(p => p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD);
+
+    document.getElementById('statTotalProducts').textContent = totalProducts;
+    document.getElementById('statActiveProducts').textContent = activeProductsCount;
+    document.getElementById('statInactiveProducts').textContent = inactiveProductsCount;
+    document.getElementById('statOutOfStock').textContent = outOfStockProducts.length;
+    document.getElementById('statLowStock').textContent = lowStockOnlyProducts.length;
+    document.getElementById('statTotalCategories').textContent = categoriesRes.count ?? 0;
+
+    // ---------- resumo do período selecionado ----------
+    const { start, end } = getDashboardDateRange();
+    const ordersInPeriod = orders.filter(o => {
+      const d = new Date(o.created_at);
+      return d >= start && d <= end;
+    });
+    const paidInPeriod = ordersInPeriod.filter(o => o.payment_status === 'pago');
+    const periodRevenue = paidInPeriod.reduce((s,o)=> s + Number(o.total), 0);
+    const periodAvg = paidInPeriod.length ? periodRevenue / paidInPeriod.length : 0;
+    const periodProductsSold = paidInPeriod.reduce((s,o)=> s + (o.order_items||[]).reduce((s2,i)=> s2 + i.quantity, 0), 0);
+    const periodCustomers = new Set(ordersInPeriod.map(o => o.customer_email)).size;
+    const periodPaid = paidInPeriod.length;
+    const periodPending = ordersInPeriod.filter(o => o.order_status === 'Aguardando pagamento').length;
+    const periodCanceled = ordersInPeriod.filter(o => o.order_status === 'Cancelado').length;
+
+    document.getElementById('statPeriodRevenue').textContent = formatBRL(periodRevenue);
+    document.getElementById('statPeriodOrders').textContent = ordersInPeriod.length;
+    document.getElementById('statPeriodAvg').textContent = formatBRL(periodAvg);
+    document.getElementById('statPeriodProductsSold').textContent = periodProductsSold;
+    document.getElementById('statPeriodCustomers').textContent = periodCustomers;
+    document.getElementById('statPeriodPaid').textContent = periodPaid;
+    document.getElementById('statPeriodPending').textContent = periodPending;
+    document.getElementById('statPeriodCanceled').textContent = periodCanceled;
+
+    // ---------- cartões fixos (hoje / este mês — sempre os mesmos, não mudam com o filtro acima) ----------
     const salesToday = paidOrders.filter(o => o.created_at.slice(0,10) === todayStr).reduce((s,o)=> s + Number(o.total), 0);
     const salesMonth = paidOrders.filter(o => o.created_at.slice(0,7) === monthStr).reduce((s,o)=> s + Number(o.total), 0);
     const ordersToday = orders.filter(o => o.created_at.slice(0,10) === todayStr).length;
@@ -980,8 +1465,6 @@
     document.getElementById('statShipped').textContent = shippedOrders;
     document.getElementById('statCustomers').textContent = uniqueCustomers;
     document.getElementById('statAvg').textContent = formatBRL(avgTicket);
-    document.getElementById('statActiveProducts').textContent = activeProducts;
-    document.getElementById('statLowStock').textContent = lowStockProducts.length;
 
     // ---------- gráfico: vendas e pedidos últimos 30 dias ----------
     const byDayRevenue = {};
@@ -1073,6 +1556,67 @@
       `).join('') || `<tr><td colspan="3" style="text-align:center;color:var(--ink-soft);padding:16px;">Nenhum produto com estoque baixo.</td></tr>`;
   }
 
+  // ================= ESTOQUE =================
+  let allStockProducts = [];
+
+  async function loadStockPanel(){
+    const { data, error } = await sb.from('products').select('id, name, sku, category, stock, active').order('name', { ascending: true });
+    if (error){ showToast('Erro ao carregar estoque'); console.error(error); return; }
+    allStockProducts = data;
+
+    document.getElementById('stockActiveCount').textContent = data.filter(p=>p.active).length;
+    document.getElementById('stockOutCount').textContent = data.filter(p=>p.stock <= 0).length;
+    document.getElementById('stockLowCount').textContent = data.filter(p=>p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD).length;
+
+    renderStockTable();
+  }
+
+  function renderStockTable(){
+    const search = document.getElementById('stockSearch').value.trim().toLowerCase();
+    const filter = document.getElementById('stockFilterSelect').value;
+
+    let list = allStockProducts.filter(p=>{
+      if (search && !p.name.toLowerCase().includes(search) && !(p.sku||'').toLowerCase().includes(search)) return false;
+      if (filter === 'out' && p.stock > 0) return false;
+      if (filter === 'low' && (p.stock <= 0 || p.stock > LOW_STOCK_THRESHOLD)) return false;
+      if (filter === 'active' && !p.active) return false;
+      return true;
+    });
+
+    document.getElementById('stockBody').innerHTML = list.map(p => `
+      <tr>
+        <td>${p.name}</td>
+        <td><code style="font-size:12px;">${p.sku || '—'}</code></td>
+        <td>${p.category}</td>
+        <td>${p.active ? '<span class="badge badge-green">Ativo</span>' : '<span class="badge badge-red">Inativo</span>'}</td>
+        <td>
+          <span style="display:inline-flex; align-items:center; gap:6px;">
+            <input type="number" step="1" value="${p.stock}" data-stock-input="${p.id}" style="width:70px; padding:5px 8px;">
+            ${p.stock <= 0 ? '<span class="badge badge-red">Esgotado</span>' : (p.stock <= LOW_STOCK_THRESHOLD ? '<span class="badge badge-amber">Baixo</span>' : '')}
+          </span>
+        </td>
+        <td style="text-align:right;">
+          <button class="btn btn-ghost" data-save-stock="${p.id}" style="padding:6px 12px; font-size:12px;">Salvar</button>
+        </td>
+      </tr>
+    `).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhum produto encontrado.</td></tr>`;
+
+    document.querySelectorAll('[data-save-stock]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const id = btn.dataset.saveStock;
+        const input = document.querySelector(`[data-stock-input="${id}"]`);
+        const newStock = Number(input.value || 0);
+        const { error } = await sb.from('products').update({ stock: newStock, updated_at: new Date().toISOString() }).eq('id', id);
+        if (error){ showToast('Erro ao salvar estoque'); return; }
+        showToast('Estoque atualizado!');
+        loadStockPanel();
+      });
+    });
+  }
+
+  document.getElementById('stockSearch').addEventListener('input', renderStockTable);
+  document.getElementById('stockFilterSelect').addEventListener('change', renderStockTable);
+
   // ================= PRODUTOS =================
   let allProducts = [];
   let productsPage = 1;
@@ -1080,11 +1624,21 @@
 
   // ================= CATEGORIAS =================
   let allCategoriesAdmin = [];
+  let productCountByCategory = {};
 
   async function loadCategoriesAdmin(){
-    const { data, error } = await sb.from('categories').select('*').order('display_order', { ascending: true });
-    if (error){ showToast('Erro ao carregar categorias'); console.error(error); return; }
-    allCategoriesAdmin = data;
+    const [catRes, prodCountRes] = await Promise.all([
+      sb.from('categories').select('*').order('display_order', { ascending: true }),
+      sb.from('products').select('category'),
+    ]);
+    if (catRes.error){ showToast('Erro ao carregar categorias'); console.error(catRes.error); return; }
+    allCategoriesAdmin = catRes.data;
+
+    productCountByCategory = {};
+    (prodCountRes.data || []).forEach(p => {
+      productCountByCategory[p.category] = (productCountByCategory[p.category] || 0) + 1;
+    });
+
     renderCategoriesTable();
     loadSubcategoriesAdmin();
   }
@@ -1096,6 +1650,11 @@
         <td><img class="thumb" src="${c.image_url||''}" onerror="this.style.background='var(--bg)';this.src='';"></td>
         <td>${c.name}</td>
         <td><code style="font-size:12px;">${c.slug}</code></td>
+        <td>
+          <button class="icon-btn" data-view-cat-products="${c.slug}" style="width:auto; padding:4px 10px; font-size:12px; font-weight:700;" title="Ver produtos desta categoria">
+            ${productCountByCategory[c.slug] || 0} produto(s)
+          </button>
+        </td>
         <td>${c.active ? '<span class="badge badge-green">Ativa</span>' : '<span class="badge badge-red">Inativa</span>'}</td>
         <td style="text-align:right; white-space:nowrap;">
           <button class="icon-btn" data-toggle-cat="${c.id}" title="${c.active ? 'Desativar' : 'Ativar'}">
@@ -1112,7 +1671,19 @@
           </button>
         </td>
       </tr>
-    `).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhuma categoria cadastrada.</td></tr>`;
+    `).join('') || `<tr><td colspan="7" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhuma categoria cadastrada.</td></tr>`;
+
+    document.querySelectorAll('[data-view-cat-products]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        navigateTo({ panel:'products', label:'Produtos' });
+        setTimeout(()=>{
+          document.getElementById('prodCategoryFilter').value = btn.dataset.viewCatProducts;
+          productsPage = 1;
+          renderProductsTable();
+        }, 60);
+      });
+    });
+
 
     document.querySelectorAll('[data-edit-cat]').forEach(btn=>{
       btn.addEventListener('click', ()=> openCategoryModal(allCategoriesAdmin.find(c=>c.id===btn.dataset.editCat)));
@@ -1461,6 +2032,7 @@
             <span>${p.name}</span>
           </div>
         </td>
+        <td><code style="font-size:12px;">${p.sku || '—'}</code></td>
         <td>${p.category}</td>
         <td>${p.sale_price && Number(p.sale_price) < Number(p.price) ? `<span style="text-decoration:line-through;color:var(--ink-soft);">${formatBRL(p.price)}</span> <b>${formatBRL(p.sale_price)}</b>` : formatBRL(p.price)}</td>
         <td>${p.stock}</td>
@@ -1481,7 +2053,7 @@
           </button>
         </td>
       </tr>
-    `).join('') || `<tr><td colspan="7" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhum produto encontrado.</td></tr>`;
+    `).join('') || `<tr><td colspan="8" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhum produto encontrado.</td></tr>`;
 
     document.querySelectorAll('[data-edit]').forEach(btn=>{
       btn.addEventListener('click', ()=> openProductModal(allProducts.find(p=>p.id===btn.dataset.edit)));
@@ -1719,6 +2291,11 @@
     document.getElementById('prodCost').value = product?.cost || '';
     document.getElementById('prodDescription').value = product?.description || '';
     document.getElementById('prodStock').value = product?.stock ?? 0;
+    document.getElementById('prodSku').value = product?.sku || '';
+    document.getElementById('prodWeight').value = product?.weight_kg ?? '';
+    document.getElementById('prodLength').value = product?.length_cm ?? '';
+    document.getElementById('prodWidth').value = product?.width_cm ?? '';
+    document.getElementById('prodHeight').value = product?.height_cm ?? '';
     document.getElementById('prodImage').value = product?.image_url || '';
     document.getElementById('prodImages').value = (product?.images || []).join('\n');
     document.getElementById('prodActive').checked = product ? product.active : true;
@@ -1728,7 +2305,7 @@
     document.getElementById('extraUploadStatus').textContent = '';
     updateCoverPreview();
 
-    const fieldIds = ['prodName','prodCategory','prodSubcategory','prodSizeType','prodPrice','prodSalePrice','prodCost','prodDescription','prodStock','prodImage','prodImages','prodActive','coverFileInput','extraFileInput','removeCoverBtn'];
+    const fieldIds = ['prodName','prodCategory','prodSubcategory','prodSizeType','prodPrice','prodSalePrice','prodCost','prodDescription','prodStock','prodSku','prodWeight','prodLength','prodWidth','prodHeight','prodImage','prodImages','prodActive','coverFileInput','extraFileInput','removeCoverBtn'];
     fieldIds.forEach(id => { document.getElementById(id).disabled = !!readOnly; });
     document.getElementById('saveProductBtn').style.display = readOnly ? 'none' : 'block';
 
@@ -1843,6 +2420,11 @@
       cost: Number(document.getElementById('prodCost').value || 0) || null,
       description: document.getElementById('prodDescription').value.trim() || null,
       stock: Number(document.getElementById('prodStock').value || 0),
+      sku: document.getElementById('prodSku').value.trim() || null,
+      weight_kg: Number(document.getElementById('prodWeight').value || 0) || null,
+      length_cm: Number(document.getElementById('prodLength').value || 0) || null,
+      width_cm: Number(document.getElementById('prodWidth').value || 0) || null,
+      height_cm: Number(document.getElementById('prodHeight').value || 0) || null,
       image_url: document.getElementById('prodImage').value.trim() || null,
       images: document.getElementById('prodImages').value.split('\n').map(s=>s.trim()).filter(Boolean),
       active: document.getElementById('prodActive').checked,
@@ -2297,11 +2879,52 @@
   });
 
   // ================= CUPONS =================
-  async function loadCoupons(){
-    const { data, error } = await sb.from('coupons').select('*').order('created_at', { ascending:false });
-    if (error){ showToast('Erro ao carregar cupons'); console.error(error); return; }
+  let allCouponsAdmin = [];
+  let couponFormProducts = [];
+  let couponFormCategories = [];
 
-    document.getElementById('couponsBody').innerHTML = data.map(c => {
+  async function loadCoupons(){
+    const [couponsRes, productsRes, categoriesRes] = await Promise.all([
+      sb.from('coupons').select('*').order('created_at', { ascending:false }),
+      sb.from('products').select('id, name'),
+      sb.from('categories').select('name, slug').order('display_order', { ascending: true }),
+    ]);
+    if (couponsRes.error){ showToast('Erro ao carregar cupons'); console.error(couponsRes.error); return; }
+    allCouponsAdmin = couponsRes.data;
+    couponFormProducts = productsRes.data || [];
+    couponFormCategories = categoriesRes.data || [];
+    renderCouponsTable();
+  }
+
+  function couponTypeLabel(c){
+    const parts = [];
+    parts.push(c.discount_type === 'percent' ? 'Percentual' : 'Fixo');
+    if (c.free_shipping) parts.push('Frete grátis');
+    if (c.first_purchase_only) parts.push('1ª compra');
+    if (Array.isArray(c.product_ids) && c.product_ids.length) parts.push('Produtos específicos');
+    if (c.category_slug) parts.push('Categoria');
+    return parts.join(' + ');
+  }
+
+  function renderCouponsTable(){
+    const search = document.getElementById('coupSearch').value.trim().toLowerCase();
+    const statusFilter = document.getElementById('coupStatusFilter').value;
+    const scopeFilter = document.getElementById('coupScopeFilter').value;
+
+    const filtered = allCouponsAdmin.filter(c=>{
+      if (search && !c.code.toLowerCase().includes(search)) return false;
+      if (statusFilter === 'active' && !c.active) return false;
+      if (statusFilter === 'inactive' && c.active) return false;
+      if (scopeFilter === 'percent' && c.discount_type !== 'percent') return false;
+      if (scopeFilter === 'fixed' && c.discount_type !== 'fixed') return false;
+      if (scopeFilter === 'free_shipping' && !c.free_shipping) return false;
+      if (scopeFilter === 'first_purchase' && !c.first_purchase_only) return false;
+      if (scopeFilter === 'products' && !(Array.isArray(c.product_ids) && c.product_ids.length)) return false;
+      if (scopeFilter === 'category' && !c.category_slug) return false;
+      return true;
+    });
+
+    document.getElementById('couponsBody').innerHTML = filtered.map(c => {
       const desconto = c.discount_type === 'percent' ? `${Number(c.discount_value)}%` : formatBRL(c.discount_value);
       const validade = c.expires_at ? new Date(c.expires_at).toLocaleDateString('pt-BR') : '—';
       const minimo = c.min_purchase && Number(c.min_purchase) > 0 ? formatBRL(c.min_purchase) : '—';
@@ -2310,7 +2933,7 @@
         <tr>
           <td><b>${c.code}</b></td>
           <td>${desconto}</td>
-          <td>${c.discount_type === 'percent' ? 'Percentual' : 'Fixo'}</td>
+          <td style="font-size:12px;">${couponTypeLabel(c)}</td>
           <td>${minimo}</td>
           <td>${usos}</td>
           <td>${validade}</td>
@@ -2325,10 +2948,10 @@
           </td>
         </tr>
       `;
-    }).join('') || `<tr><td colspan="8" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhum cupom cadastrado.</td></tr>`;
+    }).join('') || `<tr><td colspan="8" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhum cupom encontrado.</td></tr>`;
 
     document.querySelectorAll('[data-edit-coupon]').forEach(btn=>{
-      btn.addEventListener('click', ()=> openCouponModal(data.find(c=>c.id===btn.dataset.editCoupon)));
+      btn.addEventListener('click', ()=> openCouponModal(allCouponsAdmin.find(c=>c.id===btn.dataset.editCoupon)));
     });
     document.querySelectorAll('[data-delete-coupon]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
@@ -2341,9 +2964,20 @@
     });
   }
 
+  document.getElementById('coupSearch').addEventListener('input', renderCouponsTable);
+  document.getElementById('coupStatusFilter').addEventListener('change', renderCouponsTable);
+  document.getElementById('coupScopeFilter').addEventListener('change', renderCouponsTable);
+
   const couponOverlay = document.getElementById('couponOverlay');
   document.getElementById('newCouponBtn').addEventListener('click', ()=> openCouponModal(null));
   document.getElementById('cancelCouponBtn').addEventListener('click', ()=> couponOverlay.classList.remove('open'));
+
+  function updateCouponScopeVisibility(){
+    const scope = document.getElementById('coupScope').value;
+    document.getElementById('coupProductsWrap').style.display = scope === 'products' ? 'block' : 'none';
+    document.getElementById('coupCategoryWrap').style.display = scope === 'category' ? 'block' : 'none';
+  }
+  document.getElementById('coupScope').addEventListener('change', updateCouponScopeVisibility);
 
   function openCouponModal(coupon){
     document.getElementById('couponModalTitle').textContent = coupon ? 'Editar cupom' : 'Novo cupom';
@@ -2351,11 +2985,31 @@
     document.getElementById('coupCode').value = coupon?.code || '';
     document.getElementById('coupType').value = coupon?.discount_type || 'percent';
     document.getElementById('coupValue').value = coupon?.discount_value || '';
+    document.getElementById('coupFreeShipping').checked = !!coupon?.free_shipping;
+    document.getElementById('coupFirstPurchase').checked = !!coupon?.first_purchase_only;
     document.getElementById('coupMinPurchase').value = coupon?.min_purchase || '';
     document.getElementById('coupLimit').value = coupon?.usage_limit || '';
+    document.getElementById('coupPerCustomerLimit').value = coupon?.per_customer_limit || '';
     document.getElementById('coupStarts').value = coupon?.starts_at ? coupon.starts_at.slice(0,10) : '';
     document.getElementById('coupExpires').value = coupon?.expires_at ? coupon.expires_at.slice(0,10) : '';
+    document.getElementById('coupTimeStart').value = coupon?.time_start ? coupon.time_start.slice(0,5) : '';
+    document.getElementById('coupTimeEnd').value = coupon?.time_end ? coupon.time_end.slice(0,5) : '';
+    document.getElementById('coupStackable').checked = !!coupon?.stackable;
     document.getElementById('coupActive').checked = coupon ? coupon.active : true;
+
+    // escopo
+    const hasProducts = Array.isArray(coupon?.product_ids) && coupon.product_ids.length > 0;
+    const hasCategory = !!coupon?.category_slug;
+    document.getElementById('coupScope').value = hasProducts ? 'products' : (hasCategory ? 'category' : 'all');
+
+    document.getElementById('coupProductIds').innerHTML = couponFormProducts.map(p =>
+      `<option value="${p.id}" ${coupon?.product_ids?.includes(p.id) ? 'selected' : ''}>${p.name}</option>`
+    ).join('');
+    document.getElementById('coupCategorySlug').innerHTML = couponFormCategories.map(c =>
+      `<option value="${c.slug}" ${coupon?.category_slug===c.slug ? 'selected' : ''}>${c.name}</option>`
+    ).join('');
+    updateCouponScopeVisibility();
+
     couponOverlay.classList.add('open');
   }
 
@@ -2364,14 +3018,28 @@
     const code = document.getElementById('coupCode').value.trim().toUpperCase();
     if (!code){ showToast('Informe o código do cupom'); return; }
 
+    const scope = document.getElementById('coupScope').value;
+    const selectedProductIds = scope === 'products'
+      ? Array.from(document.getElementById('coupProductIds').selectedOptions).map(o=>o.value)
+      : [];
+    const selectedCategorySlug = scope === 'category' ? document.getElementById('coupCategorySlug').value : null;
+
     const payload = {
       code,
       discount_type: document.getElementById('coupType').value,
       discount_value: Number(document.getElementById('coupValue').value || 0),
+      free_shipping: document.getElementById('coupFreeShipping').checked,
+      first_purchase_only: document.getElementById('coupFirstPurchase').checked,
       min_purchase: Number(document.getElementById('coupMinPurchase').value || 0) || 0,
       usage_limit: Number(document.getElementById('coupLimit').value || 0) || null,
+      per_customer_limit: Number(document.getElementById('coupPerCustomerLimit').value || 0) || null,
       starts_at: document.getElementById('coupStarts').value || null,
       expires_at: document.getElementById('coupExpires').value || null,
+      time_start: document.getElementById('coupTimeStart').value || null,
+      time_end: document.getElementById('coupTimeEnd').value || null,
+      stackable: document.getElementById('coupStackable').checked,
+      product_ids: selectedProductIds,
+      category_slug: selectedCategorySlug,
       active: document.getElementById('coupActive').checked,
     };
 
@@ -2391,8 +3059,126 @@
       document.querySelectorAll('.settings-tab').forEach(t=>t.classList.remove('active'));
       tab.classList.add('active');
       document.querySelectorAll('.settings-panel').forEach(p=> p.classList.toggle('active', p.dataset.spanel===tab.dataset.stab));
-      if (tab.dataset.stab === 'aparencia') loadAppearance();
+      if (tab.dataset.stab === 'policies') loadPoliciesAdmin();
     });
+  });
+
+  // ================= POLÍTICAS (Etapa 6) =================
+  let allPoliciesAdmin = [];
+  let currentPolicyId = null;
+
+  const POLICY_TYPE_LABELS = {
+    privacy: 'Privacidade', terms: 'Termos', exchange: 'Trocas', shipping: 'Frete',
+    cookies: 'Cookies', cancellation: 'Cancelamento', custom: 'Personalizada',
+  };
+
+  async function loadPoliciesAdmin(){
+    const { data, error } = await sb.from('policies').select('*').order('type', { ascending: true });
+    if (error){ showToast('Erro ao carregar políticas'); console.error(error); return; }
+    allPoliciesAdmin = data;
+    renderPoliciesList();
+  }
+
+  function renderPoliciesList(){
+    document.getElementById('policiesList').innerHTML = allPoliciesAdmin.map(p => `
+      <button class="policy-list-btn ${p.id===currentPolicyId?'active':''}" data-select-policy="${p.id}" style="text-align:left; border:1px solid var(--line); margin-bottom:4px; border-radius:6px;">
+        <span style="display:block; font-size:12px; font-weight:700; color:var(--ink);">${p.title}</span>
+        <span style="display:block; font-size:10.5px; color:var(--ink-soft);">${POLICY_TYPE_LABELS[p.type]||p.type} ${p.content && p.content.trim() ? '· preenchida' : '· vazia'}</span>
+      </button>
+    `).join('');
+    document.querySelectorAll('[data-select-policy]').forEach(btn=>{
+      btn.addEventListener('click', ()=> openPolicyEditor(btn.dataset.selectPolicy));
+    });
+  }
+
+  function openPolicyEditor(id){
+    const policy = allPoliciesAdmin.find(p=>p.id===id);
+    if (!policy) return;
+    currentPolicyId = id;
+    renderPoliciesList();
+    document.getElementById('policyEmptyState').style.display = 'none';
+    document.getElementById('policyEditorWrap').style.display = 'block';
+    document.getElementById('policyTitle').value = policy.title;
+    document.getElementById('policyContent').value = policy.content || '';
+    document.getElementById('policyUpdatedAt').textContent = `Última atualização: ${new Date(policy.updated_at).toLocaleDateString('pt-BR')}`;
+    document.getElementById('policySaveStatus').textContent = '';
+  }
+
+  document.getElementById('savePolicyBtn').addEventListener('click', async ()=>{
+    if (!currentPolicyId) return;
+    const title = document.getElementById('policyTitle').value.trim();
+    if (!title){ showToast('Informe o título'); return; }
+    const payload = {
+      title,
+      content: document.getElementById('policyContent').value,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from('policies').update(payload).eq('id', currentPolicyId);
+    if (error){ document.getElementById('policySaveStatus').innerHTML = `<span style="color:var(--red);">Erro ao salvar: ${error.message}</span>`; return; }
+    document.getElementById('policySaveStatus').innerHTML = '<span style="color:var(--green);">Salvo! Já está valendo na loja pública.</span>';
+    loadPoliciesAdmin();
+  });
+
+  document.getElementById('newCustomPolicyBtn').addEventListener('click', async ()=>{
+    const title = prompt('Nome da nova política personalizada (ex: "Política de Garantia"):');
+    if (!title || !title.trim()) return;
+    const slug = slugify(title.trim()) + '-' + Date.now().toString().slice(-5);
+    const { data, error } = await sb.from('policies').insert({ type:'custom', slug, title: title.trim(), content: '' }).select().single();
+    if (error){ showToast('Erro ao criar: ' + error.message); return; }
+    showToast('Política criada!');
+    await loadPoliciesAdmin();
+    openPolicyEditor(data.id);
+  });
+
+  // ================= SEGURANÇA: ALTERAR SENHA (Etapa 6) =================
+  document.getElementById('changePasswordBtn').addEventListener('click', async ()=>{
+    const statusEl = document.getElementById('passwordChangeStatus');
+    const currentPassword = document.getElementById('currentPasswordInput').value;
+    const newPassword = document.getElementById('newPasswordInput').value;
+    const confirmPassword = document.getElementById('confirmPasswordInput').value;
+
+    if (!currentPassword || !newPassword || !confirmPassword){
+      statusEl.innerHTML = '<span style="color:var(--red);">Preencha os 3 campos.</span>';
+      return;
+    }
+    if (newPassword !== confirmPassword){
+      statusEl.innerHTML = '<span style="color:var(--red);">A nova senha e a confirmação não são iguais.</span>';
+      return;
+    }
+    if (newPassword.length < 6){
+      statusEl.innerHTML = '<span style="color:var(--red);">A nova senha precisa ter pelo menos 6 caracteres.</span>';
+      return;
+    }
+
+    statusEl.textContent = 'Verificando senha atual...';
+    try {
+      const { data: sessionData } = await sb.auth.getSession();
+      const email = sessionData?.session?.user?.email;
+      if (!email){ statusEl.innerHTML = '<span style="color:var(--red);">Sessão expirada — faça login de novo.</span>'; return; }
+
+      // Confirma a senha ATUAL tentando logar de novo com ela — é assim que
+      // se verifica uma senha com segurança pelo Supabase Auth, sem nunca
+      // manipular ou guardar a senha em texto puro em lugar nenhum.
+      const { error: verifyError } = await sb.auth.signInWithPassword({ email, password: currentPassword });
+      if (verifyError){
+        statusEl.innerHTML = '<span style="color:var(--red);">Senha atual incorreta.</span>';
+        return;
+      }
+
+      const { error: updateError } = await sb.auth.updateUser({ password: newPassword });
+      if (updateError){
+        statusEl.innerHTML = `<span style="color:var(--red);">Erro ao alterar senha: ${updateError.message}</span>`;
+        return;
+      }
+
+      statusEl.innerHTML = '<span style="color:var(--green);">Senha alterada com sucesso!</span>';
+      document.getElementById('currentPasswordInput').value = '';
+      document.getElementById('newPasswordInput').value = '';
+      document.getElementById('confirmPasswordInput').value = '';
+    } catch (err) {
+      console.error(err);
+      statusEl.innerHTML = '<span style="color:var(--red);">Erro inesperado ao alterar senha.</span>';
+    }
   });
 
   async function loadSettings(){
@@ -2432,13 +3218,12 @@
     document.getElementById('setBannerSecondaryTitle').value = data.banner_secondary_title || '';
     document.getElementById('setBannerSecondaryLink').value = data.banner_secondary_link || '';
     document.getElementById('setBannerSecondaryImage').value = data.banner_secondary_image || '';
+    updateBannerMainImagePreview();
+    updateBannerSecondaryImagePreview();
 
     document.getElementById('setSeoTitle').value = data.seo_title || '';
     document.getElementById('setSeoDescription').value = data.seo_description || '';
     document.getElementById('setSeoKeywords').value = data.seo_keywords || '';
-
-    document.getElementById('setGaId').value = data.ga_measurement_id || '';
-    document.getElementById('setMetaPixelId').value = data.meta_pixel_id || '';
 
     updateLogoPreview();
   }
@@ -2550,6 +3335,51 @@
     }
   });
 
+  // ================= UPLOAD DE IMAGENS DOS BANNERS (reaproveita o mesmo sistema dos produtos) =================
+  function setupBannerImageUpload(prefix){
+    function updatePreview(){
+      const url = document.getElementById(`setBanner${prefix}Image`).value.trim();
+      const wrap = document.getElementById(`banner${prefix}ImagePreviewWrap`);
+      const img = document.getElementById(`banner${prefix}ImagePreview`);
+      if (url){
+        img.src = url;
+        img.onerror = ()=>{ wrap.style.display = 'none'; };
+        img.onload = ()=>{ wrap.style.display = 'block'; };
+        wrap.style.display = 'block';
+      } else {
+        wrap.style.display = 'none';
+      }
+    }
+
+    document.getElementById(`banner${prefix}ImageFileInput`).addEventListener('change', async (e)=>{
+      const file = e.target.files[0];
+      if (!file) return;
+      const statusEl = document.getElementById(`banner${prefix}ImageUploadStatus`);
+      if (!validateImageFile(file, statusEl)) return;
+      const url = await uploadProductImage(file, statusEl);
+      if (url){
+        document.getElementById(`setBanner${prefix}Image`).value = url;
+        updatePreview();
+      }
+      e.target.value = '';
+    });
+
+    document.getElementById(`removeBanner${prefix}ImageBtn`).addEventListener('click', ()=>{
+      const currentUrl = document.getElementById(`setBanner${prefix}Image`).value.trim();
+      document.getElementById(`setBanner${prefix}Image`).value = '';
+      updatePreview();
+      document.getElementById(`banner${prefix}ImageUploadStatus`).textContent = '';
+      if (currentUrl.includes(`/storage/v1/object/public/${STORAGE_BUCKET}/`)){
+        const fileName = currentUrl.split(`/${STORAGE_BUCKET}/`).pop();
+        sb.storage.from(STORAGE_BUCKET).remove([fileName]).catch(()=>{});
+      }
+    });
+
+    return updatePreview;
+  }
+  const updateBannerMainImagePreview = setupBannerImageUpload('Main');
+  const updateBannerSecondaryImagePreview = setupBannerImageUpload('Secondary');
+
   document.getElementById('saveBannersBtn').addEventListener('click', async ()=>{
     const payload = {
       banner_main_title: document.getElementById('setBannerMainTitle').value.trim() || null,
@@ -2579,16 +3409,107 @@
     showToast('SEO salvo!');
   });
 
-  document.getElementById('saveTrackingBtn').addEventListener('click', async ()=>{
-    const payload = {
-      ga_measurement_id: document.getElementById('setGaId').value.trim() || null,
-      meta_pixel_id: document.getElementById('setMetaPixelId').value.trim() || null,
+  // ================= ANALYTICS (Etapa 5) =================
+  async function loadAnalyticsSettings(){
+    const { data, error } = await sb.from('store_settings').select('ga_enabled, ga_measurement_id, meta_pixel_enabled, meta_pixel_id').eq('id', 1).maybeSingle();
+    if (error){ console.error(error); return; }
+
+    document.getElementById('setGaEnabled').checked = !!data?.ga_enabled;
+    document.getElementById('setGaId').value = data?.ga_measurement_id || '';
+    updateAnalyticsStatusBadge('gaStatusBadge', !!data?.ga_enabled, !!data?.ga_measurement_id);
+
+    document.getElementById('setMetaPixelEnabled').checked = !!data?.meta_pixel_enabled;
+    document.getElementById('setMetaPixelId').value = data?.meta_pixel_id || '';
+    updateAnalyticsStatusBadge('pixelStatusBadge', !!data?.meta_pixel_enabled, !!data?.meta_pixel_id);
+  }
+
+  function updateAnalyticsStatusBadge(elId, enabled, hasId){
+    const el = document.getElementById(elId);
+    if (enabled && hasId){
+      el.textContent = 'Ativo';
+      el.className = 'badge badge-green';
+    } else if (enabled && !hasId){
+      el.textContent = 'Ativo, mas sem ID';
+      el.className = 'badge badge-amber';
+    } else {
+      el.textContent = 'Inativo';
+      el.className = 'badge badge-red';
+    }
+  }
+
+  document.getElementById('saveGaBtn').addEventListener('click', async ()=>{
+    const enabled = document.getElementById('setGaEnabled').checked;
+    const gaId = document.getElementById('setGaId').value.trim();
+    if (enabled && !gaId){
+      document.getElementById('gaSaveStatus').innerHTML = '<span style="color:var(--red);">Informe o ID de métricas antes de ativar.</span>';
+      return;
+    }
+    const { error } = await sb.from('store_settings').update({
+      ga_enabled: enabled,
+      ga_measurement_id: gaId || null,
       updated_at: new Date().toISOString(),
-    };
-    const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
-    if (error){ showToast('Erro ao salvar: ' + error.message); return; }
-    showToast('Integrações salvas! Recarregue a loja pra ativar.');
+    }).eq('id', 1);
+    if (error){ document.getElementById('gaSaveStatus').innerHTML = `<span style="color:var(--red);">Erro ao salvar: ${error.message}</span>`; return; }
+    document.getElementById('gaSaveStatus').innerHTML = '<span style="color:var(--green);">Salvo! Recarregue a loja pra ativar.</span>';
+    updateAnalyticsStatusBadge('gaStatusBadge', enabled, !!gaId);
   });
+
+  document.getElementById('savePixelBtn').addEventListener('click', async ()=>{
+    const enabled = document.getElementById('setMetaPixelEnabled').checked;
+    const pixelId = document.getElementById('setMetaPixelId').value.trim();
+    if (enabled && !pixelId){
+      document.getElementById('pixelSaveStatus').innerHTML = '<span style="color:var(--red);">Informe o ID do Pixel antes de ativar.</span>';
+      return;
+    }
+    const { error } = await sb.from('store_settings').update({
+      meta_pixel_enabled: enabled,
+      meta_pixel_id: pixelId || null,
+      updated_at: new Date().toISOString(),
+    }).eq('id', 1);
+    if (error){ document.getElementById('pixelSaveStatus').innerHTML = `<span style="color:var(--red);">Erro ao salvar: ${error.message}</span>`; return; }
+    document.getElementById('pixelSaveStatus').innerHTML = '<span style="color:var(--green);">Salvo! Recarregue a loja pra ativar.</span>';
+    updateAnalyticsStatusBadge('pixelStatusBadge', enabled, !!pixelId);
+  });
+
+  document.getElementById('testPixelBtn').addEventListener('click', ()=>{
+    const pixelId = document.getElementById('setMetaPixelId').value.trim();
+    const statusEl = document.getElementById('pixelSaveStatus');
+    if (!pixelId){
+      statusEl.innerHTML = '<span style="color:var(--red);">Informe o ID do Pixel primeiro.</span>';
+      return;
+    }
+    if (!/^\d{10,20}$/.test(pixelId)){
+      statusEl.innerHTML = '<span style="color:var(--red);">Esse ID não parece válido — o Pixel do Meta é só números (geralmente 15-16 dígitos).</span>';
+      return;
+    }
+    // O Pixel só carrega de verdade na loja pública (não aqui no admin) —
+    // por isso o teste completo é feito lá, com a extensão "Meta Pixel
+    // Helper" do Chrome instalada.
+    statusEl.innerHTML = '<span style="color:var(--green);">Formato do ID parece correto. Abrindo a loja numa aba nova — instale a extensão "Meta Pixel Helper" no Chrome pra confirmar que o Pixel está disparando de verdade lá.</span>';
+    window.open('/', '_blank');
+  });
+
+  function renderEventsFlowList(){
+    const events = [
+      { name: 'PageView', desc: 'Disparado em toda página da loja, automaticamente.' },
+      { name: 'Search', desc: 'Quando o cliente busca um produto na loja.' },
+      { name: 'ViewContent', desc: 'Quando o cliente abre a página de um produto.' },
+      { name: 'AddToCart', desc: 'Quando o cliente adiciona um produto à sacola.' },
+      { name: 'InitiateCheckout', desc: 'Quando o cliente entra na tela de finalizar pedido.' },
+      { name: 'Purchase', desc: 'Quando o pagamento é aprovado (o mais importante pra medir resultado).' },
+    ];
+    document.getElementById('eventsFlowList').innerHTML = `
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:20px; font-size:12px; color:var(--ink-soft); align-items:center;">
+        ${events.filter(e=>e.name!=='PageView').map((e,i,arr)=> `<span style="font-weight:700; color:var(--ink);">${e.name}</span>${i<arr.length-1?' → ':''}`).join('')}
+      </div>
+      ${events.map(e => `
+        <div style="display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--line);">
+          <span class="badge badge-green" style="flex-shrink:0;">Ativo</span>
+          <div><b style="font-size:13px;">${e.name}</b><p style="font-size:12px; color:var(--ink-soft); margin:2px 0 0;">${e.desc}</p></div>
+        </div>
+      `).join('')}
+    `;
+  }
 
   // ================= APARÊNCIA (Etapa 3) =================
   // Os valores abaixo são EXATAMENTE os mesmos defaults gravados no banco
@@ -2744,8 +3665,13 @@
   });
 
   async function loadAppearance(){
-    const { data, error } = await sb.from('store_settings').select('color_primary, color_secondary, color_accent, color_button, color_text, color_background, color_link, selected_layout').eq('id', 1).maybeSingle();
-    if (error){ console.error(error); return; }
+    const { data, error } = await sb.from('store_settings').select('color_primary, color_secondary, color_accent, color_button, color_text, color_background, color_link, selected_layout, store_slogan, favicon_url, font_body, font_heading').eq('id', 1).maybeSingle();
+    if (error){
+      console.error('Erro ao buscar aparência — usando cores padrão pra não deixar a tela em branco:', error);
+    }
+    // Mesmo se a busca falhar (data fica undefined), sempre monta o objeto
+    // com os valores padrão — a prévia e os seletores de cor SEMPRE
+    // aparecem preenchidos, nunca ficam em branco.
     currentAppearance = {
       color_background: data?.color_background || DEFAULT_APPEARANCE.color_background,
       color_text: data?.color_text || DEFAULT_APPEARANCE.color_text,
@@ -2760,7 +3686,65 @@
     renderPaletteGrid();
     renderColorRows();
     updateAppearancePreview();
+
+    document.getElementById('setStoreSlogan').value = data?.store_slogan || '';
+    document.getElementById('setFaviconUrl').value = data?.favicon_url || '';
+    document.getElementById('setFontBody').value = data?.font_body || 'Inter';
+    document.getElementById('setFontHeading').value = data?.font_heading || 'Inter';
+    updateFaviconPreview();
   }
+
+  // ================= IDENTIDADE E TIPOGRAFIA (reaproveita o mesmo sistema de upload) =================
+  function updateFaviconPreview(){
+    const url = document.getElementById('setFaviconUrl').value.trim();
+    const wrap = document.getElementById('faviconPreviewWrap');
+    const img = document.getElementById('faviconPreview');
+    if (url){
+      img.src = url;
+      img.onerror = ()=>{ wrap.style.display = 'none'; };
+      img.onload = ()=>{ wrap.style.display = 'block'; };
+      wrap.style.display = 'block';
+    } else {
+      wrap.style.display = 'none';
+    }
+  }
+
+  document.getElementById('faviconFileInput').addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('faviconUploadStatus');
+    if (!validateImageFile(file, statusEl)) return;
+    const url = await uploadProductImage(file, statusEl);
+    if (url){
+      document.getElementById('setFaviconUrl').value = url;
+      updateFaviconPreview();
+    }
+    e.target.value = '';
+  });
+
+  document.getElementById('removeFaviconBtn').addEventListener('click', ()=>{
+    const currentUrl = document.getElementById('setFaviconUrl').value.trim();
+    document.getElementById('setFaviconUrl').value = '';
+    updateFaviconPreview();
+    document.getElementById('faviconUploadStatus').textContent = '';
+    if (currentUrl.includes(`/storage/v1/object/public/${STORAGE_BUCKET}/`)){
+      const fileName = currentUrl.split(`/${STORAGE_BUCKET}/`).pop();
+      sb.storage.from(STORAGE_BUCKET).remove([fileName]).catch(()=>{});
+    }
+  });
+
+  document.getElementById('saveIdentityTypographyBtn').addEventListener('click', async ()=>{
+    const payload = {
+      store_slogan: document.getElementById('setStoreSlogan').value.trim() || null,
+      favicon_url: document.getElementById('setFaviconUrl').value.trim() || null,
+      font_body: document.getElementById('setFontBody').value,
+      font_heading: document.getElementById('setFontHeading').value,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
+    if (error){ showToast('Erro ao salvar: ' + error.message); return; }
+    showToast('Identidade e tipografia salvas! Atualize a loja pra ver.');
+  });
 
   document.getElementById('saveAppearanceBtn').addEventListener('click', async ()=>{
     const payload = { ...currentAppearance, updated_at: new Date().toISOString() };
