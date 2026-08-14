@@ -13,6 +13,8 @@
     --accent:#111111; --accent-dark:#000000;
   }
   *{box-sizing:border-box;}
+  .logo-mark{display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; max-width:160px; overflow:hidden;}
+  .logo-mark img{height:100%; width:auto; max-width:160px; object-fit:contain; display:block;}
   body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif;}
   .serif{font-family:'Inter',sans-serif; font-weight:800; letter-spacing:-0.02em;}
   a{color:inherit;}
@@ -105,7 +107,9 @@
 <header>
   <div class="container">
     <span class="brand serif">
-      <img id="logoImgCheckout" src="assets/logo.png" alt="JA Store" onerror="this.outerHTML='&lt;svg width=&quot;28&quot; height=&quot;28&quot; viewBox=&quot;0 0 40 40&quot;&gt;&lt;rect width=&quot;40&quot; height=&quot;40&quot; rx=&quot;9&quot; fill=&quot;#fff&quot;/&gt;&lt;text x=&quot;20&quot; y=&quot;27&quot; text-anchor=&quot;middle&quot; font-family=&quot;Inter,sans-serif&quot; font-weight=&quot;800&quot; font-size=&quot;17&quot; fill=&quot;#111&quot;&gt;JA&lt;/text&gt;&lt;/svg&gt;'">
+      <span id="logoImgCheckout" class="logo-mark" style="width:28px;height:28px;">
+        <svg width="28" height="28" viewBox="0 0 40 40"><rect width="40" height="40" rx="9" fill="#fff"/><text x="20" y="27" text-anchor="middle" font-family="Inter,sans-serif" font-weight="800" font-size="17" fill="#111">JA</text></svg>
+      </span>
       JA STORE
     </span>
     <nav class="main-nav">
@@ -173,7 +177,7 @@
         MOTOBOY_FREE_SHIPPING = !!data.motoboy_free_shipping;
         if (data.logo_url){
           const logoEl = document.getElementById('logoImgCheckout');
-          if (logoEl) logoEl.src = data.logo_url;
+          if (logoEl) logoEl.innerHTML = `<img src="${data.logo_url}" alt="JA Store" onerror="this.parentElement.innerHTML='<svg width=&quot;100%&quot; height=&quot;100%&quot; viewBox=&quot;0 0 40 40&quot;><rect width=&quot;40&quot; height=&quot;40&quot; rx=&quot;9&quot; fill=&quot;%23fff&quot;/><text x=&quot;20&quot; y=&quot;27&quot; text-anchor=&quot;middle&quot; font-family=&quot;Inter,sans-serif&quot; font-weight=&quot;800&quot; font-size=&quot;17&quot; fill=&quot;%23111&quot;>JA</text></svg>';">`;
         }
       }
     } catch (err) {
