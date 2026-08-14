@@ -1,9 +1,9 @@
 // assets/js/tracking.js
 //
 // Carrega o Google Analytics (GA4) e o Meta Pixel dinamicamente, só se
-// estiverem configurados no admin (Configurações → Integrações).
-// Se nenhum dos dois estiver configurado, não carrega nada — não deixa
-// nenhum script "quebrado" nem chamada pra ID vazio.
+// estiverem ATIVADOS e com ID preenchido (Admin → Analytics). Se qualquer
+// um dos dois estiver desativado (ou sem ID), simplesmente não carrega
+// aquele — não deixa nenhum script "quebrado" nem chamada pra ID vazio.
 
 window.JATracking = {
   gaId: null,
@@ -15,16 +15,16 @@ window.JATracking = {
       const sb = window.getSupabaseClient();
       const { data, error } = await sb
         .from('store_settings')
-        .select('ga_measurement_id, meta_pixel_id')
+        .select('ga_enabled, ga_measurement_id, meta_pixel_enabled, meta_pixel_id')
         .eq('id', 1)
         .maybeSingle();
       if (error) throw error;
 
-      if (data?.ga_measurement_id){
+      if (data?.ga_enabled && data?.ga_measurement_id){
         this.gaId = data.ga_measurement_id.trim();
         this._loadGA(this.gaId);
       }
-      if (data?.meta_pixel_id){
+      if (data?.meta_pixel_enabled && data?.meta_pixel_id){
         this.metaPixelId = data.meta_pixel_id.trim();
         this._loadMetaPixel(this.metaPixelId);
       }
@@ -59,6 +59,12 @@ window.JATracking = {
   },
 
   // ---------- eventos de negócio ----------
+
+  trackSearch(searchTerm){
+    if (!searchTerm || !searchTerm.trim()) return;
+    if (window.gtag) window.gtag('event', 'search', { search_term: searchTerm.trim() });
+    if (window.fbq) window.fbq('track', 'Search', { search_string: searchTerm.trim() });
+  },
 
   trackViewItem(product){
     if (!product) return;
