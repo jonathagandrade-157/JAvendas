@@ -98,6 +98,7 @@ exports.handler = async (event) => {
 
     // ---------- cupom (se informado) ----------
     let discount = 0;
+    let couponGrantsFreeShipping = false;
     if (couponCode) {
       const { data: coupon } = await supabase
         .from("coupons")
@@ -114,14 +115,66 @@ exports.handler = async (event) => {
         const notStartedYet = coupon.starts_at && new Date(coupon.starts_at) > new Date();
         const belowMinimum = coupon.min_purchase && subtotal < Number(coupon.min_purchase);
         const overLimit = coupon.usage_limit && coupon.used_count >= coupon.usage_limit;
-        if (!expired && !notStartedYet && !belowMinimum && !overLimit) {
+
+        // ---------- horário válido (aproximação de horário de Brasília, UTC-3) ----------
+        let outsideTimeWindow = false;
+        if (coupon.time_start && coupon.time_end) {
+          const nowBrasilia = new Date(Date.now() - 3 * 60 * 60 * 1000);
+          const hhmm = nowBrasilia.toISOString().slice(11, 16);
+          outsideTimeWindow = hhmm < coupon.time_start.slice(0, 5) || hhmm > coupon.time_end.slice(0, 5);
+        }
+
+        // ---------- só na primeira compra ----------
+        let notFirstPurchase = false;
+        if (coupon.first_purchase_only) {
+          const { count } = await supabase
+            .from("orders")
+            .select("id", { count: "exact", head: true })
+            .eq("customer_email", customer.email)
+            .eq("payment_status", "pago");
+          notFirstPurchase = (count || 0) > 0;
+        }
+
+        // ---------- limite de usos por cliente ----------
+        let overPerCustomerLimit = false;
+        if (coupon.per_customer_limit) {
+          const { count } = await supabase
+            .from("orders")
+            .select("id", { count: "exact", head: true })
+            .eq("customer_email", customer.email)
+            .eq("coupon_code", coupon.code)
+            .eq("payment_status", "pago");
+          overPerCustomerLimit = (count || 0) >= coupon.per_customer_limit;
+        }
+
+        const couponIsValid =
+          !expired && !notStartedYet && !belowMinimum && !overLimit &&
+          !outsideTimeWindow && !notFirstPurchase && !overPerCustomerLimit;
+
+        if (couponIsValid) {
+          // ---------- escopo do desconto: carrinho inteiro, produtos específicos ou 1 categoria ----------
+          const hasProductScope = Array.isArray(coupon.product_ids) && coupon.product_ids.length > 0;
+          const hasCategoryScope = !!coupon.category_slug;
+          let eligibleSubtotal = subtotal;
+          if (hasProductScope || hasCategoryScope) {
+            eligibleSubtotal = orderItems.reduce((sum, oi) => {
+              const product = products.find((p) => p.id === oi.product_id);
+              const matches = hasProductScope
+                ? coupon.product_ids.includes(oi.product_id)
+                : product?.category === coupon.category_slug;
+              return matches ? sum + oi.unit_price * oi.quantity : sum;
+            }, 0);
+          }
+
           if (coupon.discount_type === "percent") {
-            discount = (subtotal * Number(coupon.discount_value)) / 100;
+            discount = (eligibleSubtotal * Number(coupon.discount_value)) / 100;
           } else if (coupon.discount_type === "fixed") {
             discount = Number(coupon.discount_value);
           }
-          discount = Math.min(discount, subtotal);
+          discount = Math.min(discount, eligibleSubtotal);
           discount = Math.round(discount * 100) / 100;
+
+          couponGrantsFreeShipping = !!coupon.free_shipping;
 
           // contabiliza o uso do cupom
           await supabase
@@ -147,7 +200,9 @@ exports.handler = async (event) => {
     const isMotoboy = !!shipping?.isMotoboy;
     // Regra específica do Motoboy: só entra no frete grátis geral se a
     // opção "Frete grátis para Motoboy" estiver ativada nas configurações.
-    const shippingPrice = (qualifiesForFreeShipping && (!isMotoboy || MOTOBOY_FREE_SHIPPING))
+    // Um cupom de frete grátis, porém, vale pra qualquer modalidade —
+    // é uma concessão explícita do lojista ao dar aquele cupom.
+    const shippingPrice = couponGrantsFreeShipping || (qualifiesForFreeShipping && (!isMotoboy || MOTOBOY_FREE_SHIPPING))
       ? 0
       : Number(shipping?.price || 0);
 
