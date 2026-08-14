@@ -148,7 +148,7 @@
   let shippingOptions = [];
   let selectedShipping = null;
   let selectedPaymentMethod = null;
-  let coupon = { code: null, discount: 0 };
+  let coupon = { code: null, discount: 0, freeShipping: false };
 
   // ---------- fonte única de verdade: valores vêm do banco (Configurações no admin) ----------
   // Esses valores abaixo são só um "padrão de segurança" caso a busca no
@@ -191,7 +191,7 @@
     return Math.round(subtotal() * PIX_DISCOUNT_RATE * 100) / 100;
   }
   function total(){
-    const shippingPrice = selectedShipping ? selectedShipping.price : 0;
+    const shippingPrice = coupon.freeShipping ? 0 : (selectedShipping ? selectedShipping.price : 0);
     return Math.max(0, subtotal() - coupon.discount - pixDiscountValue() + shippingPrice);
   }
 
@@ -328,7 +328,9 @@
     const pixDiscount = pixDiscountValue();
     document.getElementById('sumPixRow').style.display = pixDiscount > 0 ? 'flex' : 'none';
     if (pixDiscount > 0) document.getElementById('sumPixDiscount').textContent = '- ' + formatBRL(pixDiscount);
-    document.getElementById('sumShipping').textContent = selectedShipping ? (selectedShipping.price === 0 ? 'Grátis' : formatBRL(selectedShipping.price)) : 'Calcule o CEP';
+    document.getElementById('sumShipping').textContent = coupon.freeShipping
+      ? 'Grátis (cupom)'
+      : (selectedShipping ? (selectedShipping.price === 0 ? 'Grátis' : formatBRL(selectedShipping.price)) : 'Calcule o CEP');
     document.getElementById('sumTotal').textContent = formatBRL(total());
   }
 
@@ -461,18 +463,24 @@
     msgEl.style.color = 'var(--ink-soft)';
     msgEl.textContent = 'Verificando...';
     try {
+      const emailField = document.getElementById('custEmail');
       const res = await fetch('/.netlify/functions/apply-coupon', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ code, subtotal: subtotal() })
+        body: JSON.stringify({
+          code,
+          subtotal: subtotal(),
+          items: cart.map(i => ({ id: i.id, price: i.price, qty: i.qty })),
+          customerEmail: emailField && emailField.value.trim() ? emailField.value.trim() : undefined,
+        })
       });
       const data = await res.json();
       if (!data.valid){
-        coupon = { code: null, discount: 0 };
+        coupon = { code: null, discount: 0, freeShipping: false };
         msgEl.style.color = 'var(--rust)';
         msgEl.textContent = data.message || 'Cupom inválido.';
       } else {
-        coupon = { code: data.code, discount: data.discount || 0 };
+        coupon = { code: data.code, discount: data.discount || 0, freeShipping: !!data.freeShipping };
         msgEl.style.color = 'var(--green)';
         msgEl.textContent = data.message;
       }
