@@ -132,6 +132,7 @@
   .palette-card{border:1.5px solid var(--line); border-radius:10px; padding:12px; text-align:left; background:#fff; cursor:pointer; transition:border-color .15s;}
   .palette-card:hover{border-color:var(--ink);}
   .palette-card.selected{border-color:var(--ink); box-shadow:0 0 0 1.5px var(--ink) inset;}
+  .preview-mode-btn.active-preview-mode{background:var(--ink); color:#fff; border-color:var(--ink);}
   .palette-swatches{display:flex; gap:4px; margin-bottom:8px;}
   .palette-swatches span{width:20px; height:20px; border-radius:5px; border:1px solid rgba(0,0,0,0.08); display:block;}
   .palette-card b{font-size:12.5px;}
@@ -533,7 +534,6 @@
           <div class="card">
             <div class="settings-tabs" id="settingsTabs">
               <button class="settings-tab active" data-stab="geral">Geral</button>
-              <button class="settings-tab" data-stab="loja">Logomarca</button>
               <button class="settings-tab" data-stab="pagamento">Pagamento</button>
               <button class="settings-tab" data-stab="envio">Envio</button>
               <button class="settings-tab" data-stab="motoboy">Motoboy</button>
@@ -558,24 +558,6 @@
                 <div class="field"><label>TikTok (link completo, opcional)</label><input id="setTiktokUrl" placeholder="https://tiktok.com/@jastore"></div>
               </div>
               <button class="btn btn-primary" id="saveSettingsBtn">Salvar alterações</button>
-            </div>
-
-            <div class="settings-panel" data-spanel="loja">
-              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Logo da loja</p>
-
-              <div class="logo-preview" id="logoPreview"><span style="color:#7A7A7E;font-size:12px;">Sem logomarca</span></div>
-
-              <input type="hidden" id="setLogoUrl">
-              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:12px 0 8px;">
-                <input type="file" id="logoFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:180px; font-size:12.5px;">
-                <button class="btn btn-ghost" id="removeLogoBtn" type="button">Remover</button>
-              </div>
-              <p id="logoUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:0 0 14px;"></p>
-
-              <button class="btn btn-primary" id="saveLogoBtn">Salvar logomarca</button>
-              <p style="font-size:12px;color:var(--ink-soft);margin:12px 0 0;">
-                Formatos aceitos: JPG, PNG ou WEBP — até 8MB. A imagem é redimensionada automaticamente antes de salvar.
-              </p>
             </div>
 
             <div class="settings-panel" data-spanel="pagamento">
@@ -794,8 +776,73 @@
         <!-- ---------- PERSONALIZAÇÃO (aba própria, fora de Configurações) ---------- -->
         <div class="panel" data-panel="appearance">
           <div class="card">
+            <div class="panel-head">
+              <h2>Prévia da loja</h2>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn btn-ghost preview-mode-btn active-preview-mode" id="previewDesktopBtn" type="button" style="padding:7px 12px; font-size:12px;">🖥️ Desktop</button>
+                <button class="btn btn-ghost preview-mode-btn" id="previewMobileBtn" type="button" style="padding:7px 12px; font-size:12px;">📱 Mobile</button>
+                <button class="btn btn-primary" id="openFullPreviewBtn" type="button" style="padding:7px 14px; font-size:12px;">Abrir prévia ↗</button>
+              </div>
+            </div>
+            <div id="homePreviewOuter" style="display:flex; justify-content:center; margin-top:12px;">
+              <div id="homePreviewBox" style="width:100%; max-width:820px; height:560px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--bg); position:relative;">
+                <iframe id="homePreviewFrame" style="border:none; position:absolute; top:0; left:0;"></iframe>
+              </div>
+            </div>
+            <p style="font-size:11.5px; color:var(--ink-soft); margin-top:10px;">
+              Essa é a própria loja de verdade (logo, menu, categorias, produtos, carrossel, banners, avisos, rodapé) — reflete as cores, fontes, logo e modelo de menu que você está ajustando aqui, mesmo antes de salvar. Carrossel, Banners e Avisos continuam sendo gerenciados em Marketing — aqui você só visualiza.
+            </p>
+          </div>
+
+          <div class="card" style="margin-top:20px;">
+            <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Logomarca</p>
+
+            <div class="logo-preview" id="logoPreview"><span style="color:#7A7A7E;font-size:12px;">Sem logomarca</span></div>
+
+            <input type="hidden" id="setLogoUrl">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:12px 0 8px;">
+              <input type="file" id="logoFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:180px; font-size:12.5px;">
+              <button class="btn btn-ghost" id="removeLogoBtn" type="button">Remover</button>
+            </div>
+            <p id="logoUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:0 0 14px;"></p>
+
+            <button class="btn btn-primary" id="saveLogoBtn">Salvar logomarca</button>
+            <p style="font-size:12px;color:var(--ink-soft);margin:12px 0 0;">
+              Formatos aceitos: JPG, PNG ou WEBP — até 8MB. A imagem é redimensionada automaticamente antes de salvar.
+            </p>
+
+            <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--line);">
+              <button class="btn btn-ghost" id="generateLogoPaletteBtn" type="button">🎨 Gerar paleta da logomarca</button>
+              <p style="font-size:11.5px; color:var(--ink-soft); margin:6px 0 0;">Analisa a imagem da logo e sugere cores — é só uma sugestão, você decide se aplica.</p>
+
+              <div id="logoPaletteResult" style="display:none; margin-top:16px;">
+                <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:14px;">
+                  <div style="text-align:center;">
+                    <div id="paletteSwatchPrimary" style="width:56px; height:56px; border-radius:10px; border:1px solid var(--line); margin-bottom:6px;"></div>
+                    <p style="font-size:11px; font-weight:700; margin:0;">Cor principal</p>
+                    <p id="paletteHexPrimary" style="font-size:11px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; margin:2px 0 0;">—</p>
+                  </div>
+                  <div style="text-align:center;">
+                    <div id="paletteSwatchSecondary" style="width:56px; height:56px; border-radius:10px; border:1px solid var(--line); margin-bottom:6px;"></div>
+                    <p style="font-size:11px; font-weight:700; margin:0;">Cor secundária</p>
+                    <p id="paletteHexSecondary" style="font-size:11px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; margin:2px 0 0;">—</p>
+                  </div>
+                  <div style="text-align:center;">
+                    <div id="paletteSwatchAccent" style="width:56px; height:56px; border-radius:10px; border:1px solid var(--line); margin-bottom:6px;"></div>
+                    <p style="font-size:11px; font-weight:700; margin:0;">Cor de destaque</p>
+                    <p id="paletteHexAccent" style="font-size:11px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; margin:2px 0 0;">—</p>
+                  </div>
+                </div>
+                <button class="btn btn-primary" id="applyLogoPaletteBtn" type="button">Aplicar paleta</button>
+                <p style="font-size:11px; color:var(--ink-soft); margin:8px 0 0;">Isso preenche as cores em "Cores" logo abaixo — ainda precisa clicar em "Salvar alterações" lá pra confirmar de vez.</p>
+              </div>
+              <p id="logoPaletteStatus" style="font-size:12.5px; margin-top:10px;"></p>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:20px;">
             <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Identidade</p>
-            <p style="font-size:12px; color:var(--ink-soft); margin:0 0 12px;">Nome e logo já são configurados em Configurações → Geral / Logomarca — aqui ficam só os itens que faltavam.</p>
+            <p style="font-size:12px; color:var(--ink-soft); margin:0 0 12px;">O nome da loja é configurado em Configurações → Geral — aqui ficam os itens complementares de identidade.</p>
             <div class="field"><label>Slogan (opcional)</label><input id="setStoreSlogan" placeholder="Ex: Estilo que te representa"></div>
 
             <div class="field">
@@ -840,6 +887,14 @@
           </div>
 
           <div class="card" style="margin-top:20px;">
+            <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Modelo de Menu (cabeçalho da loja)</p>
+            <p style="font-size:12px; color:var(--ink-soft); margin:0 0 14px;">Deixe sem seleção pra manter o cabeçalho atual. Clique num modelo pra visualizar antes de aplicar.</p>
+            <div class="palette-grid" id="headerTemplateGrid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));"></div>
+            <p id="headerTemplateStatus" style="font-size:12.5px; margin-top:10px;"></p>
+            <button class="btn btn-primary" id="applyHeaderTemplateBtn" style="margin-top:6px;">Aplicar este modelo</button>
+          </div>
+
+          <div class="card" style="margin-top:20px;">
             <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Modelo da loja</p>
               <p style="font-size:12px; color:var(--ink-soft); margin:0 0 12px;">Deixe sem seleção pra manter o visual atual da JA Store (todas as seções, na ordem de hoje).</p>
               <div class="palette-grid" id="layoutGrid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));"></div>
@@ -854,6 +909,9 @@
 
               <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 10px;">Prévia</p>
               <div class="appearance-preview" id="appearancePreview">
+                <div id="previewLogoWrap" style="margin-bottom:12px; display:none;">
+                  <img id="previewLogo" style="height:32px; width:auto; max-width:160px; object-fit:contain;">
+                </div>
                 <p style="font-size:13px; margin:0 0 4px;" id="previewText">Assim vai ficar o texto principal da loja.</p>
                 <button id="previewButton" style="color:#fff;">Comprar agora</button>
               </div>
@@ -2240,6 +2298,9 @@
   document.getElementById('prodImage').addEventListener('input', updateCoverPreview);
 
   // ================= UPLOAD DA LOGO (reaproveita o mesmo sistema dos produtos) =================
+  document.getElementById('setFontBody').addEventListener('change', ()=> pushPreviewOverrides());
+  document.getElementById('setFontHeading').addEventListener('change', ()=> pushPreviewOverrides());
+
   function updateLogoPreview(){
     const url = document.getElementById('setLogoUrl').value.trim();
     const preview = document.getElementById('logoPreview');
@@ -2248,6 +2309,19 @@
     } else {
       preview.innerHTML = `<span style="color:#7A7A7E;font-size:12px;">Sem logomarca</span>`;
     }
+
+    // reflete também na prévia da Home, logo abaixo
+    const previewLogoWrap = document.getElementById('previewLogoWrap');
+    const previewLogo = document.getElementById('previewLogo');
+    if (previewLogoWrap && previewLogo){
+      if (url){
+        previewLogo.src = url;
+        previewLogoWrap.style.display = 'block';
+      } else {
+        previewLogoWrap.style.display = 'none';
+      }
+    }
+    pushPreviewOverrides();
   }
 
   document.getElementById('logoFileInput').addEventListener('change', async (e)=>{
@@ -3194,7 +3268,6 @@
     document.getElementById('setStoreDescription').value = data.store_description || '';
     document.getElementById('setInstagramUrl').value = data.instagram_url || '';
     document.getElementById('setTiktokUrl').value = data.tiktok_url || '';
-    document.getElementById('setLogoUrl').value = data.logo_url || '';
     document.getElementById('setMotoboyEnabled').checked = !!data.motoboy_enabled;
     document.getElementById('setMotoboyFreeShipping').checked = !!data.motoboy_free_shipping;
     document.getElementById('setPixDiscount').value = data.pix_discount_percent ?? 5;
@@ -3260,7 +3333,118 @@
     const { error } = await sb.from('store_settings').update({ logo_url, updated_at: new Date().toISOString() }).eq('id', 1);
     if (error){ showToast('Erro ao salvar: ' + error.message); return; }
     showToast('Logomarca salva!');
-    loadSettings();
+    loadAppearance();
+  });
+
+  // ================= GERAR PALETA DA LOGOMARCA =================
+  let extractedLogoPalette = null;
+
+  // Analisa a imagem num canvas escondido, agrupa as cores parecidas e
+  // devolve as 3 mais relevantes — sem nenhuma biblioteca externa.
+  function extractColorsFromImage(imgEl){
+    const size = 80;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(imgEl, 0, 0, size, size);
+
+    let pixels;
+    try {
+      pixels = ctx.getImageData(0, 0, size, size).data;
+    } catch (err) {
+      return null; // imagem bloqueada por CORS — tratamos como "não deu pra analisar"
+    }
+
+    const counts = {};
+    for (let i = 0; i < pixels.length; i += 4){
+      const a = pixels[i+3];
+      if (a < 128) continue; // ignora pixels transparentes
+      // agrupa tons bem parecidos num "balde" só, pra não contar 50 tons de azul como cores diferentes
+      const r = Math.round(pixels[i] / 24) * 24;
+      const g = Math.round(pixels[i+1] / 24) * 24;
+      const b = Math.round(pixels[i+2] / 24) * 24;
+      const key = `${r},${g},${b}`;
+      counts[key] = (counts[key] || 0) + 1;
+    }
+
+    const swatches = Object.entries(counts)
+      .sort((a,b)=> b[1]-a[1])
+      .map(([key])=>{
+        const [r,g,b] = key.split(',').map(Number);
+        return { r, g, b };
+      });
+
+    if (!swatches.length) return null;
+
+    const luminance = (c) => 0.299*c.r + 0.587*c.g + 0.114*c.b;
+    const distance = (c1,c2) => Math.sqrt((c1.r-c2.r)**2 + (c1.g-c2.g)**2 + (c1.b-c2.b)**2);
+    const toHex = (c) => '#' + [c.r,c.g,c.b].map(v=> Math.min(255,v).toString(16).padStart(2,'0')).join('').toUpperCase();
+
+    // prioriza tons "úteis" (nem quase-branco nem quase-preto) — mas se a
+    // logo for só preto/branco/cinza mesmo, usa o que tiver disponível.
+    const useful = swatches.filter(c => luminance(c) > 20 && luminance(c) < 235);
+    const pool = useful.length >= 3 ? useful : swatches;
+
+    const picked = [];
+    for (const c of pool){
+      if (picked.length >= 3) break;
+      if (picked.every(p => distance(p,c) > 40)) picked.push(c);
+    }
+    for (const c of swatches){
+      if (picked.length >= 3) break;
+      if (!picked.includes(c)) picked.push(c);
+    }
+
+    return picked.slice(0,3).map(toHex);
+  }
+
+  document.getElementById('generateLogoPaletteBtn').addEventListener('click', ()=>{
+    const logoUrl = document.getElementById('setLogoUrl').value.trim();
+    const statusEl = document.getElementById('logoPaletteStatus');
+    if (!logoUrl){
+      statusEl.innerHTML = '<span style="color:var(--red);">Envie uma logomarca primeiro.</span>';
+      return;
+    }
+    statusEl.textContent = 'Analisando a imagem...';
+    document.getElementById('logoPaletteResult').style.display = 'none';
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = ()=>{
+      const colors = extractColorsFromImage(img);
+      if (!colors || colors.length < 3){
+        statusEl.innerHTML = '<span style="color:var(--red);">Não consegui identificar cores suficientes nessa imagem.</span>';
+        return;
+      }
+      extractedLogoPalette = { color_primary: colors[0], color_secondary: colors[1], color_accent: colors[2] };
+      document.getElementById('paletteSwatchPrimary').style.background = colors[0];
+      document.getElementById('paletteHexPrimary').textContent = colors[0];
+      document.getElementById('paletteSwatchSecondary').style.background = colors[1];
+      document.getElementById('paletteHexSecondary').textContent = colors[1];
+      document.getElementById('paletteSwatchAccent').style.background = colors[2];
+      document.getElementById('paletteHexAccent').textContent = colors[2];
+      document.getElementById('logoPaletteResult').style.display = 'block';
+      statusEl.textContent = '';
+    };
+    img.onerror = ()=>{
+      statusEl.innerHTML = '<span style="color:var(--red);">Não foi possível carregar a imagem pra analisar.</span>';
+    };
+    img.src = logoUrl;
+  });
+
+  document.getElementById('applyLogoPaletteBtn').addEventListener('click', ()=>{
+    if (!extractedLogoPalette) return;
+    // Reaproveita EXATAMENTE o mesmo sistema de cores já existente — só
+    // preenche os campos, igual clicar numa paleta pronta faz. Ainda
+    // precisa clicar em "Salvar alterações" (na seção de Cores) pra
+    // confirmar de vez.
+    currentAppearance = { ...currentAppearance, ...extractedLogoPalette };
+    document.querySelectorAll('.palette-card').forEach(c=>c.classList.remove('selected'));
+    renderColorRows();
+    updateAppearancePreview();
+    pushPreviewOverrides();
+    showToast('Paleta aplicada! Role até "Cores" e clique em "Salvar alterações" pra confirmar.');
   });
 
   document.getElementById('saveMotoboySettingsBtn').addEventListener('click', async ()=>{
@@ -3573,6 +3757,7 @@
         hex.value = picker.value.toUpperCase();
         currentAppearance[f.key] = picker.value;
         updateAppearancePreview();
+        pushPreviewOverrides();
       });
       hex.addEventListener('input', ()=>{
         const v = hex.value.trim();
@@ -3580,6 +3765,7 @@
           picker.value = v;
           currentAppearance[f.key] = v;
           updateAppearancePreview();
+          pushPreviewOverrides();
         }
       });
     });
@@ -3606,6 +3792,7 @@
         currentAppearance = { ...palette.colors };
         renderColorRows();
         updateAppearancePreview();
+        pushPreviewOverrides();
       });
     });
   }
@@ -3621,6 +3808,138 @@
   }
 
   // ================= MODELO DA LOJA (Etapa 4) =================
+  // ================= MODELO DE MENU (cabeçalho) =================
+  const HEADER_TEMPLATE_OPTIONS = [
+    { key:'classic', name:'Clássico', description:'Logo à esquerda, menu horizontal, busca compacta.' },
+    { key:'premium', name:'Premium', description:'Visual escuro e elegante, logo centralizada.' },
+    { key:'ecommerce', name:'E-commerce', description:'Busca em destaque, foco em categorias.' },
+    { key:'minimal', name:'Minimalista', description:'O visual atual da JA Store — clean e direto.' },
+  ];
+  let selectedHeaderTemplateKey = null;
+  let previewingHeaderTemplate = null;
+
+  function renderHeaderTemplateGrid(){
+    const noneCardHTML = `
+      <button class="palette-card" type="button" data-header-tpl="">
+        <b>Sem seleção</b>
+        <p style="font-size:11px; color:var(--ink-soft); margin:6px 0 0;">Mantém o cabeçalho atual da loja.</p>
+      </button>
+    `;
+    const cardsHTML = HEADER_TEMPLATE_OPTIONS.map(t => `
+      <button class="palette-card" type="button" data-header-tpl="${t.key}">
+        <b>${t.name}</b>
+        <p style="font-size:11px; color:var(--ink-soft); margin:6px 0 0;">${t.description}</p>
+      </button>
+    `).join('');
+
+    document.getElementById('headerTemplateGrid').innerHTML = noneCardHTML + cardsHTML;
+
+    document.querySelectorAll('[data-header-tpl]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('#headerTemplateGrid .palette-card').forEach(c=>c.classList.remove('selected'));
+        btn.classList.add('selected');
+        previewingHeaderTemplate = btn.dataset.headerTpl || null;
+        showHeaderTemplatePreview(previewingHeaderTemplate);
+      });
+    });
+
+    const activeCard = document.querySelector(`[data-header-tpl="${selectedHeaderTemplateKey || ''}"]`);
+    if (activeCard) activeCard.classList.add('selected');
+  }
+
+  function showHeaderTemplatePreview(key){
+    // Escolher um modelo de menu já atualiza a prévia compartilhada da Home
+    // (não existe mais uma prévia separada só do cabeçalho).
+    pushPreviewOverrides();
+  }
+
+  document.getElementById('applyHeaderTemplateBtn').addEventListener('click', async ()=>{
+    const statusEl = document.getElementById('headerTemplateStatus');
+    const { error } = await sb.from('store_settings').update({
+      header_template: previewingHeaderTemplate || null,
+      updated_at: new Date().toISOString(),
+    }).eq('id', 1);
+    if (error){ statusEl.innerHTML = `<span style="color:var(--red);">Erro ao salvar: ${error.message}</span>`; return; }
+    selectedHeaderTemplateKey = previewingHeaderTemplate;
+    statusEl.innerHTML = '<span style="color:var(--green);">Modelo aplicado! A loja já está usando esse cabeçalho.</span>';
+  });
+
+  // ================= PRÉVIA DA HOME (compartilhada por toda a aba Personalização) =================
+  let previewMode = 'desktop';
+
+  function collectPreviewOverrides(){
+    return {
+      header_template: previewingHeaderTemplate,
+      selected_layout: selectedLayoutKey,
+      color_background: currentAppearance.color_background,
+      color_text: currentAppearance.color_text,
+      color_primary: currentAppearance.color_primary,
+      color_secondary: currentAppearance.color_secondary,
+      color_accent: currentAppearance.color_accent,
+      color_button: currentAppearance.color_button,
+      color_link: currentAppearance.color_link,
+      font_body: document.getElementById('setFontBody')?.value,
+      font_heading: document.getElementById('setFontHeading')?.value,
+      logo_url: document.getElementById('setLogoUrl')?.value,
+    };
+  }
+
+  // Manda os dados ainda não salvos direto pro iframe (mesma origem, então
+  // dá pra chamar a função que a própria loja expõe) — e também guarda numa
+  // "caixinha" (sessionStorage) que o botão "Abrir prévia" reaproveita.
+  function pushPreviewOverrides(){
+    const overrides = collectPreviewOverrides();
+    try { sessionStorage.setItem('ja_preview_overrides', JSON.stringify(overrides)); } catch(err){}
+    const frame = document.getElementById('homePreviewFrame');
+    try {
+      if (frame && frame.contentWindow && frame.contentWindow.__jaPreviewOverride){
+        frame.contentWindow.__jaPreviewOverride(overrides);
+      }
+    } catch (err) {
+      console.error('Não foi possível atualizar a prévia ao vivo:', err);
+    }
+  }
+
+  function setPreviewMode(mode){
+    previewMode = mode;
+    const frame = document.getElementById('homePreviewFrame');
+    const box = document.getElementById('homePreviewBox');
+    if (mode === 'desktop'){
+      const scale = 800 / 1280;
+      frame.style.width = '1280px';
+      frame.style.height = (560/scale) + 'px';
+      frame.style.transform = `scale(${scale})`;
+      frame.style.transformOrigin = 'top left';
+      box.style.maxWidth = '820px';
+    } else {
+      const scale = 320 / 390;
+      frame.style.width = '390px';
+      frame.style.height = (560/scale) + 'px';
+      frame.style.transform = `scale(${scale})`;
+      frame.style.transformOrigin = 'top left';
+      box.style.maxWidth = '340px';
+    }
+    document.getElementById('previewDesktopBtn').classList.toggle('active-preview-mode', mode==='desktop');
+    document.getElementById('previewMobileBtn').classList.toggle('active-preview-mode', mode==='mobile');
+  }
+  document.getElementById('previewDesktopBtn').addEventListener('click', ()=> setPreviewMode('desktop'));
+  document.getElementById('previewMobileBtn').addEventListener('click', ()=> setPreviewMode('mobile'));
+
+  document.getElementById('openFullPreviewBtn').addEventListener('click', ()=>{
+    pushPreviewOverrides();
+    window.open('../index.html?preview_mode=1', '_blank');
+  });
+
+  let homePreviewInitialized = false;
+  function initHomePreview(){
+    setPreviewMode(previewMode);
+    if (homePreviewInitialized) { pushPreviewOverrides(); return; }
+    homePreviewInitialized = true;
+    const frame = document.getElementById('homePreviewFrame');
+    frame.addEventListener('load', ()=> pushPreviewOverrides());
+    frame.src = '../index.html?preview_mode=1';
+  }
+
   const LAYOUTS = [
     { key:'minimal', name:'Minimalista', description:'Visual limpo e focado nos produtos.', sections:['Header','Hero','Categorias','Produtos','Benefícios','Footer'] },
     { key:'highlights', name:'Destaques', description:'Ideal para destacar ofertas, produtos mais vendidos e depoimentos.', sections:['Header','Hero','Categorias','Ofertas','Mais vendidos','Produtos','Depoimentos','Footer'] },
@@ -3651,6 +3970,7 @@
         document.querySelectorAll('#layoutGrid .palette-card').forEach(c=>c.classList.remove('selected'));
         btn.classList.add('selected');
         selectedLayoutKey = btn.dataset.layout || null;
+        pushPreviewOverrides();
       });
     });
 
@@ -3665,7 +3985,7 @@
   });
 
   async function loadAppearance(){
-    const { data, error } = await sb.from('store_settings').select('color_primary, color_secondary, color_accent, color_button, color_text, color_background, color_link, selected_layout, store_slogan, favicon_url, font_body, font_heading').eq('id', 1).maybeSingle();
+    const { data, error } = await sb.from('store_settings').select('color_primary, color_secondary, color_accent, color_button, color_text, color_background, color_link, selected_layout, store_slogan, favicon_url, font_body, font_heading, logo_url, header_template').eq('id', 1).maybeSingle();
     if (error){
       console.error('Erro ao buscar aparência — usando cores padrão pra não deixar a tela em branco:', error);
     }
@@ -3682,9 +4002,15 @@
       color_link: data?.color_link || DEFAULT_APPEARANCE.color_link,
     };
     selectedLayoutKey = LAYOUTS.some(l=>l.key===data?.selected_layout) ? data.selected_layout : null;
+    selectedHeaderTemplateKey = data?.header_template || null;
+    previewingHeaderTemplate = selectedHeaderTemplateKey;
+    renderHeaderTemplateGrid();
     renderLayoutGrid();
     renderPaletteGrid();
     renderColorRows();
+
+    document.getElementById('setLogoUrl').value = data?.logo_url || '';
+    updateLogoPreview();
     updateAppearancePreview();
 
     document.getElementById('setStoreSlogan').value = data?.store_slogan || '';
@@ -3692,6 +4018,8 @@
     document.getElementById('setFontBody').value = data?.font_body || 'Inter';
     document.getElementById('setFontHeading').value = data?.font_heading || 'Inter';
     updateFaviconPreview();
+
+    initHomePreview();
   }
 
   // ================= IDENTIDADE E TIPOGRAFIA (reaproveita o mesmo sistema de upload) =================
