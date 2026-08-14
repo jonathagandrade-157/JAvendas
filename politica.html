@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">Política | JA Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF; --ink:#111111; --ink-soft:#6E6E73; --line:#E4E4E4; --rust:#8B3A2B;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif;}
+  .container{width:100%; max-width:1160px; margin:0 auto; padding:0 20px;}
+
+  header{background:var(--ink); padding:0;}
+  header .container{max-width:1160px; margin:0 auto; display:flex; align-items:center; gap:16px; padding:14px 20px;}
+  header .brand{color:#fff; font-weight:800; font-size:16px;}
+  header .back-link{color:#fff; font-size:13.5px; font-weight:600; margin-left:auto; opacity:.9;}
+  header .back-link:hover{opacity:1;}
+
+  main{max-width:720px; margin:0 auto; padding:56px 20px 80px;}
+  .updated{font-size:13px; color:var(--ink-soft); margin:0 0 32px;}
+  h1{font-size:28px; margin:0 0 10px; line-height:1.15;}
+  .content{font-size:15px; line-height:1.8; color:var(--ink-soft); white-space:pre-wrap;}
+  .empty-msg{font-size:14px; color:var(--ink-soft); background:var(--bg); border:1px dashed var(--line); border-radius:10px; padding:20px;}
+
+  .back-btn{
+    display:inline-flex; align-items:center; gap:8px; margin-top:44px; padding:13px 24px;
+    background:var(--ink); color:#fff; border-radius:6px; font-size:13.5px; font-weight:800;
+    letter-spacing:.02em; text-transform:uppercase; text-decoration:none;
+  }
+
+  footer{border-top:1px solid var(--line);}
+  .footer-inner{display:flex; flex-direction:column; gap:8px; padding:32px 20px; font-size:13.5px; color:var(--ink-soft);}
+  @media (min-width:640px){ .footer-inner{flex-direction:row; justify-content:space-between; align-items:center;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <span class="brand">JA STORE</span>
+    <a href="index.html" class="back-link">← Voltar à loja</a>
+  </div>
+</header>
+
+<main>
+  <div id="policyRoot">
+    <p style="color:var(--ink-soft);">Carregando...</p>
+  </div>
+  <a href="index.html" class="back-btn">← Voltar à loja</a>
+</main>
+
+<footer>
+  <div class="container footer-inner">
+    <span>© 2026 JA Store</span>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabase-client.js"></script>
+<script>
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('slug');
+
+  async function init(){
+    const root = document.getElementById('policyRoot');
+    if (!slug){
+      root.innerHTML = `<p class="empty-msg">Nenhuma política informada.</p>`;
+      return;
+    }
+    try {
+      const sb = window.getSupabaseClient();
+      const { data, error } = await sb.from('policies').select('*').eq('slug', slug).eq('active', true).maybeSingle();
+      if (error) throw error;
+      if (!data){
+        root.innerHTML = `<p class="empty-msg">Não encontramos essa política.</p>`;
+        return;
+      }
+
+      document.getElementById('pageTitle').textContent = `${data.title} | JA Store`;
+      const updatedDate = data.updated_at ? new Date(data.updated_at).toLocaleDateString('pt-BR') : '';
+
+      if (data.content && data.content.trim()){
+        root.innerHTML = `
+          <h1>${data.title}</h1>
+          <p class="updated">Última atualização: ${updatedDate}</p>
+          <div class="content">${data.content}</div>
+        `;
+      } else {
+        root.innerHTML = `
+          <h1>${data.title}</h1>
+          <p class="empty-msg">Essa política ainda não foi preenchida pela loja.</p>
+        `;
+      }
+    } catch (err) {
+      console.error(err);
+      root.innerHTML = `<p class="empty-msg">Erro ao carregar essa política. Tente novamente mais tarde.</p>`;
+    }
+  }
+
+  init();
+})();
+</script>
+
+</body>
+</html>
