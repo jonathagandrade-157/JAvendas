@@ -1212,7 +1212,18 @@
   async function loadStoreSettingsPublic(){
     try {
       const sb = window.getSupabaseClient();
-      const { data, error } = await sb.from('store_settings').select('*').eq('id', 1).maybeSingle();
+      // Lista explícita de campos (em vez de select('*')) — reforço de
+      // segurança: mesmo que uma coluna sensível seja adicionada um dia
+      // em store_settings por engano, a loja pública nunca a recebe.
+      const { data, error } = await sb.from('store_settings').select(`
+        store_name, logo_url, favicon_url, font_body, font_heading,
+        header_template, selected_layout,
+        color_background, color_text, color_primary, color_secondary, color_accent, color_button, color_link,
+        banner_main_image, banner_main_title, banner_main_subtitle, banner_main_cta_text, banner_main_cta_link,
+        banner_secondary_image, banner_secondary_title, banner_secondary_link,
+        seo_title, seo_description, seo_keywords,
+        instagram_url, free_shipping_threshold
+      `).eq('id', 1).maybeSingle();
       if (error) throw error;
       if (!data) return;
 
