@@ -113,7 +113,7 @@
     width:100%; display:block; padding:8px 10px; background:#fff; cursor:pointer;
   }
   .policy-list-btn:hover{background:var(--bg);}
-  .policy-list-btn.active{background:var(--ink); border-color:var(--ink) !important;}
+  .policy-list-btn.active{background:var(--admin-accent); border-color:var(--admin-accent) !important;}
   .policy-list-btn.active span{color:#fff !important;}
   .side-subbtn.active{background:var(--sidebar-active); color:var(--sidebar-text-active);}
 
@@ -150,12 +150,12 @@
 
   .status-tabs{display:flex; gap:4px; margin-bottom:16px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:0;}
   .status-tab{padding:9px 14px; border:none; background:none; font-size:13px; font-weight:600; color:var(--ink-soft); border-bottom:2px solid transparent; margin-bottom:-1px;}
-  .status-tab.active{color:var(--ink); border-bottom-color:var(--ink);}
+  .status-tab.active{color:var(--admin-accent); border-bottom-color:var(--admin-accent);}
 
   .pagination{display:flex; align-items:center; justify-content:space-between; margin-top:14px; font-size:13px; color:var(--ink-soft);}
   .page-btns{display:flex; gap:4px;}
   .page-btn{width:30px; height:30px; border-radius:6px; border:1px solid var(--line); background:#fff; font-size:13px;}
-  .page-btn.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .page-btn.active{background:var(--admin-accent); color:#fff; border-color:var(--admin-accent);}
   .page-btn:disabled{opacity:.4;}
 
   .stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:20px;}
@@ -169,9 +169,9 @@
   .settings-tabs{display:flex; gap:4px; margin-bottom:20px; border-bottom:1px solid var(--line); flex-wrap:wrap;}
   .palette-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin-bottom:24px;}
   .palette-card{border:1.5px solid var(--line); border-radius:10px; padding:12px; text-align:left; background:#fff; cursor:pointer; transition:border-color .15s;}
-  .palette-card:hover{border-color:var(--ink);}
-  .palette-card.selected{border-color:var(--ink); box-shadow:0 0 0 1.5px var(--ink) inset;}
-  .preview-mode-btn.active-preview-mode{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .palette-card:hover{border-color:var(--admin-accent);}
+  .palette-card.selected{border-color:var(--admin-accent); box-shadow:0 0 0 1.5px var(--admin-accent) inset;}
+  .preview-mode-btn.active-preview-mode{background:var(--admin-accent); color:#fff; border-color:var(--admin-accent);}
   .palette-swatches{display:flex; gap:4px; margin-bottom:8px;}
   .palette-swatches span{width:20px; height:20px; border-radius:5px; border:1px solid rgba(0,0,0,0.08); display:block;}
   .palette-card b{font-size:12.5px;}
@@ -184,7 +184,7 @@
   .appearance-preview button{background:#111111; transition:background .15s ease;}
   .appearance-preview button{padding:11px 22px; border:none; border-radius:6px; font-weight:700; font-size:13px; margin-top:12px;}
   .settings-tab{padding:10px 16px; border:none; background:none; font-size:13.5px; font-weight:600; color:var(--ink-soft); border-bottom:2px solid transparent; margin-bottom:-1px;}
-  .settings-tab.active{color:var(--ink); border-bottom-color:var(--ink);}
+  .settings-tab.active{color:var(--admin-accent); border-bottom-color:var(--admin-accent);}
   .settings-panel{display:none;}
   .settings-panel.active{display:block;}
   .settings-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
@@ -569,20 +569,9 @@
         </div>
 
         <!-- ---------- CONFIGURAÇÕES ---------- -->
-        <div class="panel" data-panel="settings">
+        <!-- ---------- CONFIGURAÇÕES → GERAL ---------- -->
+        <div class="panel" data-panel="settings-geral">
           <div class="card">
-            <div class="settings-tabs" id="settingsTabs">
-              <button class="settings-tab active" data-stab="geral">Geral</button>
-              <button class="settings-tab" data-stab="pagamento">Pagamento</button>
-              <button class="settings-tab" data-stab="envio">Envio</button>
-              <button class="settings-tab" data-stab="motoboy">Motoboy</button>
-              <button class="settings-tab" data-stab="banners">Banners</button>
-              <button class="settings-tab" data-stab="seo">SEO</button>
-              <button class="settings-tab" data-stab="policies">Políticas</button>
-              <button class="settings-tab" data-stab="security">Segurança</button>
-            </div>
-
-            <div class="settings-panel active" data-spanel="geral">
               <div class="settings-grid">
                 <div class="field"><label>Nome da loja</label><input id="setStoreName"></div>
                 <div class="field"><label>E-mail</label><input id="setStoreEmail" type="email"></div>
@@ -597,9 +586,13 @@
                 <div class="field"><label>TikTok (link completo, opcional)</label><input id="setTiktokUrl" placeholder="https://tiktok.com/@jastore"></div>
               </div>
               <button class="btn btn-primary" id="saveSettingsBtn">Salvar alterações</button>
-            </div>
+            
+          </div>
+        </div>
 
-            <div class="settings-panel" data-spanel="pagamento">
+        <!-- ---------- CONFIGURAÇÕES → PAGAMENTOS ---------- -->
+        <div class="panel" data-panel="settings-pagamento">
+          <div class="card">
               <div class="field" style="max-width:280px;">
                 <label>Desconto no Pix (%)</label>
                 <input id="setPixDiscount" type="number" step="0.5" min="0" max="100">
@@ -615,9 +608,13 @@
                 já que são credenciais sensíveis. Para trocar, acesse
                 <b>Netlify → Project configuration → Environment variables</b>.
               </p>
-            </div>
+            
+          </div>
+        </div>
 
-            <div class="settings-panel" data-spanel="envio">
+        <!-- ---------- CONFIGURAÇÕES → FRETE ---------- -->
+        <div class="panel" data-panel="settings-envio">
+          <div class="card">
               <div class="field" style="max-width:280px;">
                 <label>Frete grátis acima de (R$)</label>
                 <input id="setFreeShippingThreshold" type="number" step="1" min="0">
@@ -631,9 +628,13 @@
                 As credenciais do Melhor Envio (<code>MELHORENVIO_TOKEN</code>, <code>STORE_ORIGIN_CEP</code>)
                 também ficam nas variáveis de ambiente da Netlify, pelo mesmo motivo de segurança.
               </p>
-            </div>
+            
+          </div>
+        </div>
 
-            <div class="settings-panel" data-spanel="motoboy">
+        <!-- ---------- CONFIGURAÇÕES → MOTOBOY ---------- -->
+        <div class="panel" data-panel="settings-motoboy">
+          <div class="card">
               <div class="field">
                 <label><input type="checkbox" id="setMotoboyEnabled" style="width:auto;display:inline-block;margin-right:6px;">Ativar entrega por Motoboy</label>
               </div>
@@ -666,9 +667,13 @@
               </div>
 
               <button class="btn btn-primary" id="saveMotoboySettingsBtn" style="margin-top:16px;">Salvar configuração de Motoboy</button>
-            </div>
+            
+          </div>
+        </div>
 
-            <div class="settings-panel" data-spanel="banners">
+        <!-- ---------- CONFIGURAÇÕES → BANNERS ---------- -->
+        <div class="panel" data-panel="settings-banners">
+          <div class="card">
               <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Banner principal (topo da home)</p>
               <div class="settings-grid">
                 <div class="field"><label>Título</label><input id="setBannerMainTitle" placeholder="Ex: Estilo que te representa."></div>
@@ -711,9 +716,13 @@
               <p style="font-size:12px; color:var(--ink-soft); margin:0 0 16px;">Deixe o título e a imagem em branco pra esse banner não aparecer na loja.</p>
 
               <button class="btn btn-primary" id="saveBannersBtn">Salvar banners</button>
-            </div>
+            
+          </div>
+        </div>
 
-            <div class="settings-panel" data-spanel="seo">
+        <!-- ---------- CONFIGURAÇÕES → SEO ---------- -->
+        <div class="panel" data-panel="settings-seo">
+          <div class="card">
               <div class="field"><label>Título da loja (aba do navegador e Google)</label><input id="setSeoTitle" placeholder="JA Store — Streetwear, esporte e casual"></div>
               <div class="field"><label>Descrição (aparece no Google, embaixo do título)</label><textarea id="setSeoDescription" rows="3" placeholder="Calçados, camisetas, conjuntos e mais, com envio para todo o Brasil."></textarea></div>
               <div class="field"><label>Palavras-chave (separadas por vírgula)</label><input id="setSeoKeywords" placeholder="streetwear, tênis, camisetas, moda masculina"></div>
@@ -721,9 +730,13 @@
                 O título e a descrição já atualizam de verdade no Google e na aba do navegador. O <b>preview ao compartilhar no WhatsApp/Instagram</b> usa uma versão fixa (não muda sozinho com isso aqui) — se quiser trocar essa prévia, é um ajuste separado, direto no código.
               </p>
               <button class="btn btn-primary" id="saveSeoBtn">Salvar SEO</button>
-            </div>
+            
+          </div>
+        </div>
 
-            <div class="settings-panel" data-spanel="policies">
+        <!-- ---------- CONFIGURAÇÕES → POLÍTICAS ---------- -->
+        <div class="panel" data-panel="settings-policies">
+          <div class="card">
               <div style="display:grid; grid-template-columns:220px 1fr; gap:20px;" id="policiesLayout">
                 <div>
                   <p style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px;">Políticas</p>
@@ -741,9 +754,13 @@
                 </div>
                 <p id="policyEmptyState" style="color:var(--ink-soft); font-size:13px;">Selecione uma política ao lado pra editar.</p>
               </div>
-            </div>
+            
+          </div>
+        </div>
 
-            <div class="settings-panel" data-spanel="security">
+        <!-- ---------- CONFIGURAÇÕES → SEGURANÇA ---------- -->
+        <div class="panel" data-panel="settings-security">
+          <div class="card">
               <div class="card" style="max-width:420px; box-shadow:none; border:1px solid var(--line); padding:20px;">
                 <h2 style="margin:0 0 4px; font-size:16px;">Alterar senha</h2>
                 <p style="font-size:12px; color:var(--ink-soft); margin:0 0 18px;">Usa o mesmo sistema de login que você já tem — a senha nunca fica salva em texto puro, isso é feito pelo próprio Supabase.</p>
@@ -753,8 +770,9 @@
                 <button class="btn btn-primary" id="changePasswordBtn">Alterar senha</button>
                 <p id="passwordChangeStatus" style="font-size:12.5px; margin-top:10px;"></p>
               </div>
-            </div>
-
+            
+          </div>
+        </div>
         <!-- ---------- ANALYTICS: GOOGLE ANALYTICS ---------- -->
         <div class="panel" data-panel="analytics-ga">
           <div class="card" style="max-width:520px;">
@@ -809,9 +827,6 @@
           </div>
         </div>
 
-          </div>
-        </div>
-
         <!-- ---------- PERSONALIZAÇÃO (aba própria, fora de Configurações) ---------- -->
         <!-- ---------- PERSONALIZAÇÃO → PAINEL ADMINISTRATIVO ---------- -->
         <div class="panel" data-panel="admin-appearance">
@@ -855,16 +870,9 @@
 
           <div class="card" style="margin-top:20px;">
             <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Logo do painel</p>
-            <p style="font-size:12px; color:var(--ink-soft); margin:0 0 12px;">É a marca que aparece no topo do menu lateral do painel — diferente da logo da loja pública.</p>
-            <div id="adminLogoPreviewWrap" style="display:none; margin-bottom:8px;">
-              <img id="adminLogoPreview" style="width:44px; height:44px; object-fit:contain; border-radius:8px; border:1px solid var(--line); background:#0B0B0C; padding:6px;">
-            </div>
-            <input type="hidden" id="adminLogoUrlInput">
-            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-              <input type="file" id="adminLogoFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:180px; font-size:12.5px;">
-              <button class="btn btn-ghost" id="removeAdminLogoBtn" type="button">Remover</button>
-            </div>
-            <p id="adminLogoUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:6px 0 0;"></p>
+            <p style="font-size:12px; color:var(--ink-soft); margin:0;">
+              O painel usa <b>a mesma logo da loja</b> (cadastrada em Personalização → Loja Online → Logomarca) — não existe uma logo separada só pro painel, pra nunca ficarem duas logos diferentes do mesmo negócio. Se você trocar a logo lá, o painel atualiza sozinho.
+            </p>
           </div>
 
           <div class="card" style="margin-top:20px;">
@@ -1391,7 +1399,7 @@
   }
 
   function getDefaultAdminTheme(){
-    return { style:'classic', colors:{ ...ADMIN_PALETTES[0].colors }, logoUrl:null, photoUrl:null };
+    return { style:'classic', colors:{ ...ADMIN_PALETTES[0].colors }, photoUrl:null };
   }
 
   function applyAdminTheme(theme){
@@ -1415,11 +1423,7 @@
     root.setProperty('--admin-radius', styleDef.radius);
     root.setProperty('--admin-shadow', styleDef.shadow);
 
-    // ---------- aplica de verdade no sidebar/avatar reais do painel ----------
-    const realMark = document.querySelector('.sidebar-brand .mark');
-    if (realMark){
-      realMark.innerHTML = theme.logoUrl ? `<img src="${theme.logoUrl}" style="width:100%;height:100%;object-fit:contain;" onerror="this.parentElement.textContent='JA';">` : 'JA';
-    }
+    // ---------- aplica de verdade no avatar real do painel ----------
     const realAvatar = document.getElementById('userAvatar');
     if (realAvatar){
       if (theme.photoUrl){
@@ -1430,6 +1434,30 @@
     }
 
     updateAdminPreviewMock(theme);
+  }
+
+  // A logo do painel é SEMPRE a mesma logo da loja (Personalização → Loja
+  // Online → Logomarca) — não existe uma logo separada pro painel, pra
+  // nunca ter duas logos diferentes do mesmo negócio.
+  window.__storeLogoUrl = null;
+  function applyStoreLogoToAdminSidebar(url){
+    window.__storeLogoUrl = url || null;
+    const realMark = document.querySelector('.sidebar-brand .mark');
+    if (realMark){
+      realMark.innerHTML = url
+        ? `<img src="${url}" style="width:100%;height:100%;object-fit:contain;" onerror="this.parentElement.textContent='JA';">`
+        : 'JA';
+    }
+    // se a prévia do painel administrativo estiver aberta, atualiza ela também
+    if (document.getElementById('mockLogoWrap')) updateAdminPreviewMock(currentAdminTheme);
+  }
+  async function loadStoreLogoForAdminSidebar(){
+    try {
+      const { data } = await sb.from('store_settings').select('logo_url').eq('id', 1).maybeSingle();
+      applyStoreLogoToAdminSidebar(data?.logo_url || null);
+    } catch (err) {
+      console.error('Não foi possível carregar a logo da loja pro painel:', err);
+    }
   }
 
   function updateAdminPreviewMock(theme){
@@ -1448,7 +1476,7 @@
     document.getElementById('mockBrandText').style.color = textActive;
     document.getElementById('mockLogoWrap').style.background = textActive;
     document.getElementById('mockLogoWrap').style.color = c.sidebar;
-    document.getElementById('mockLogoWrap').innerHTML = theme.logoUrl ? `<img src="${theme.logoUrl}" style="width:100%;height:100%;object-fit:contain;">` : 'JA';
+    document.getElementById('mockLogoWrap').innerHTML = window.__storeLogoUrl ? `<img src="${window.__storeLogoUrl}" style="width:100%;height:100%;object-fit:contain;">` : 'JA';
 
     document.getElementById('mockNavActive').style.background = c.admin_primary;
     document.getElementById('mockNavActive').style.color = textActive;
@@ -1486,8 +1514,6 @@
   applyAdminTheme(currentAdminTheme); // reaplica (o <head> já fez isso antes da tela desenhar; aqui é só pra preencher o estado do JS)
 
   function renderAdminThemePanel(){
-    document.getElementById('adminLogoUrlInput').value = currentAdminTheme.logoUrl || '';
-    updateAdminLogoPreview();
     document.getElementById('adminPhotoUrlInput').value = currentAdminTheme.photoUrl || '';
     updateAdminPhotoPreview();
     updateAdminPreviewMock(currentAdminTheme);
@@ -1563,13 +1589,7 @@
     });
   }
 
-  // ================= LOGO DO PAINEL E FOTO DO ADMINISTRADOR (reaproveita o mesmo sistema de upload) =================
-  function updateAdminLogoPreview(){
-    const url = document.getElementById('adminLogoUrlInput').value.trim();
-    const wrap = document.getElementById('adminLogoPreviewWrap');
-    const img = document.getElementById('adminLogoPreview');
-    if (url){ img.src = url; wrap.style.display = 'block'; } else { wrap.style.display = 'none'; }
-  }
+  // ================= FOTO DO ADMINISTRADOR (reaproveita o mesmo sistema de upload) =================
   function updateAdminPhotoPreview(){
     const url = document.getElementById('adminPhotoUrlInput').value.trim();
     const wrap = document.getElementById('adminPhotoPreviewWrap');
@@ -1579,40 +1599,15 @@
 
   function persistAdminThemeAsset(field, url){
     currentAdminTheme[field] = url;
-    // Logo e foto são salvas na hora (diferente das cores, que só valem
-    // depois de "Aplicar") — evita perder um upload que já terminou de
-    // subir pro Storage se a pessoa navegar pra outra aba sem querer.
+    // Salvo na hora (diferente das cores, que só valem depois de
+    // "Aplicar") — evita perder um upload que já terminou de subir pro
+    // Storage se a pessoa navegar pra outra aba sem querer.
     try {
       savedAdminTheme = { ...savedAdminTheme, [field]: url };
       localStorage.setItem(ADMIN_THEME_STORAGE_KEY, JSON.stringify(savedAdminTheme));
     } catch (err) {}
     applyAdminTheme(currentAdminTheme);
   }
-
-  document.getElementById('adminLogoFileInput').addEventListener('change', async (e)=>{
-    const file = e.target.files[0];
-    if (!file) return;
-    const statusEl = document.getElementById('adminLogoUploadStatus');
-    if (!validateImageFile(file, statusEl)) return;
-    const url = await uploadProductImage(file, statusEl);
-    if (url){
-      document.getElementById('adminLogoUrlInput').value = url;
-      updateAdminLogoPreview();
-      persistAdminThemeAsset('logoUrl', url);
-    }
-    e.target.value = '';
-  });
-  document.getElementById('removeAdminLogoBtn').addEventListener('click', ()=>{
-    const currentUrl = document.getElementById('adminLogoUrlInput').value.trim();
-    document.getElementById('adminLogoUrlInput').value = '';
-    updateAdminLogoPreview();
-    document.getElementById('adminLogoUploadStatus').textContent = '';
-    persistAdminThemeAsset('logoUrl', null);
-    if (currentUrl.includes(`/storage/v1/object/public/${STORAGE_BUCKET}/`)){
-      const fileName = currentUrl.split(`/${STORAGE_BUCKET}/`).pop();
-      sb.storage.from(STORAGE_BUCKET).remove([fileName]).catch(()=>{});
-    }
-  });
 
   document.getElementById('adminPhotoFileInput').addEventListener('change', async (e)=>{
     const file = e.target.files[0];
@@ -1686,7 +1681,7 @@
     ]},
     { id:'marketing-group', label:'Marketing', icon:'M3 11l18-5v12L3 14v-3z M11 13v5a2 2 0 002 2h0a2 2 0 002-2v-4', children:[
       { label:'Cupons', panel:'coupons' },
-      { label:'Banners', panel:'settings', tab:'banners' },
+      { label:'Banners', panel:'settings-banners' },
       { label:'Avisos', panel:'announcements' },
       { label:'Campanhas', panel:'coming-soon', title:'Campanhas' },
     ]},
@@ -1697,15 +1692,16 @@
       { label:'Relatórios', panel:'coming-soon', title:'Relatórios' },
     ]},
     { id:'settings-group', label:'Configurações', icon:'M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c.14.32.22.68.22 1.05V10a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z', children:[
-      { label:'Geral', panel:'settings', tab:'geral' },
-      { label:'Pagamentos', panel:'settings', tab:'pagamento' },
-      { label:'Frete', panel:'settings', tab:'envio' },
-      { label:'Motoboy', panel:'settings', tab:'motoboy' },
-      { label:'SEO', panel:'settings', tab:'seo' },
-      { label:'Políticas', panel:'coming-soon', title:'Políticas' },
+      { label:'Geral', panel:'settings-geral' },
+      { label:'Pagamentos', panel:'settings-pagamento' },
+      { label:'Frete', panel:'settings-envio' },
+      { label:'Motoboy', panel:'settings-motoboy' },
+      { label:'Banners', panel:'settings-banners' },
+      { label:'SEO', panel:'settings-seo' },
+      { label:'Políticas', panel:'settings-policies' },
+      { label:'Segurança', panel:'settings-security' },
       { label:'Domínio', panel:'coming-soon', title:'Domínio' },
       { label:'Usuários', panel:'coming-soon', title:'Usuários' },
-      { label:'Segurança', panel:'coming-soon', title:'Segurança' },
     ]},
   ];
 
@@ -1791,7 +1787,10 @@
     if (id === 'customers') loadCustomers();
     if (id === 'coupons') loadCoupons();
     if (id === 'announcements') loadAnnouncementsAdmin();
-    if (id === 'settings') loadSettings();
+    if (id === 'settings-geral' || id === 'settings-pagamento' || id === 'settings-envio' ||
+        id === 'settings-motoboy' || id === 'settings-banners' || id === 'settings-seo' ||
+        id === 'settings-policies' || id === 'settings-security') loadSettings();
+    if (id === 'settings-policies') loadPoliciesAdmin();
     if (id === 'appearance') loadAppearance();
     if (id === 'admin-appearance') renderAdminThemePanel();
     if (id === 'analytics-ga' || id === 'analytics-pixel') loadAnalyticsSettings();
@@ -1844,6 +1843,7 @@
     renderSideNav();
     switchPanel('dashboard');
     document.querySelector('[data-nav-simple="dashboard"]')?.classList.add('active');
+    loadStoreLogoForAdminSidebar();
   }
 
   function formatBRL(v){ return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
@@ -3585,15 +3585,6 @@
   });
 
   // ================= CONFIGURAÇÕES =================
-  document.querySelectorAll('.settings-tab').forEach(tab=>{
-    tab.addEventListener('click', ()=>{
-      document.querySelectorAll('.settings-tab').forEach(t=>t.classList.remove('active'));
-      tab.classList.add('active');
-      document.querySelectorAll('.settings-panel').forEach(p=> p.classList.toggle('active', p.dataset.spanel===tab.dataset.stab));
-      if (tab.dataset.stab === 'policies') loadPoliciesAdmin();
-    });
-  });
-
   // ================= POLÍTICAS (Etapa 6) =================
   let allPoliciesAdmin = [];
   let currentPolicyId = null;
@@ -3790,6 +3781,7 @@
     const { error } = await sb.from('store_settings').update({ logo_url, updated_at: new Date().toISOString() }).eq('id', 1);
     if (error){ showToast('Erro ao salvar: ' + error.message); return; }
     showToast('Logomarca salva!');
+    applyStoreLogoToAdminSidebar(logo_url || null); // atualiza o painel administrativo na hora, sem precisar recarregar
     loadAppearance();
   });
 
