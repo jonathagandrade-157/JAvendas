@@ -207,6 +207,12 @@
   .settings-tab.active{color:var(--admin-accent); border-bottom-color:var(--admin-accent);}
   .settings-panel{display:none;}
   .settings-panel.active{display:block;}
+  .settings-cat-label{font-size:10.5px; font-weight:800; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.08em; margin:16px 0 4px; padding:0 10px;}
+  .settings-cat-label:first-child{margin-top:0;}
+  .settings-cat-item{display:block; width:100%; text-align:left; padding:8px 10px; border:none; background:none; border-radius:6px; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:1px;}
+  .settings-cat-item:hover{background:var(--bg);}
+  .settings-cat-item.active{background:var(--admin-accent); color:#fff;}
+  @media (max-width:820px){ .settings-layout-grid{grid-template-columns:1fr !important;} }
   .settings-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
   @media (max-width:700px){ .settings-grid{grid-template-columns:1fr;} }
   .field{margin-bottom:14px;}
@@ -251,7 +257,7 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
         <span class="mark">JA</span>
-        <span>STORE</span>
+        <span id="adminSidebarStoreName">STORE</span>
       </div>
       <p class="sidebar-label">Painel Administrativo</p>
       <nav class="side-nav" id="sideNav"></nav>
@@ -535,8 +541,13 @@
         </div>
 
         <!-- ---------- CONFIGURAÇÕES ---------- -->
-        <!-- ---------- CONFIGURAÇÕES → GERAL ---------- -->
-        <div class="panel" data-panel="settings-geral">
+        <div class="panel" data-panel="settings">
+          <div class="panel-head"><h2>Configurações</h2></div>
+          <div class="settings-layout-grid" style="display:grid; grid-template-columns:200px 1fr; gap:24px; align-items:start;">
+            <nav id="settingsCategoryNav" style="display:flex; flex-direction:column; gap:2px;"></nav>
+            <div id="settingsContentArea">
+            <div class="settings-panel active" data-spanel="geral">
+              <div class="card">
           <div class="card">
               <div class="settings-grid">
                 <div class="field"><label>Nome da loja</label><input id="setStoreName"></div>
@@ -554,10 +565,68 @@
               <button class="btn btn-primary" id="saveSettingsBtn">Salvar alterações</button>
             
           </div>
-        </div>
-
-        <!-- ---------- CONFIGURAÇÕES → PAGAMENTOS ---------- -->
-        <div class="panel" data-panel="settings-pagamento">
+        
+              </div>
+            </div>
+            <div class="settings-panel " data-spanel="seo">
+              <div class="card">
+          <div class="card">
+              <div class="field"><label>Título da loja (aba do navegador e Google)</label><input id="setSeoTitle" placeholder="JA Store — Streetwear, esporte e casual"></div>
+              <div class="field"><label>Descrição (aparece no Google, embaixo do título)</label><textarea id="setSeoDescription" rows="3" placeholder="Calçados, camisetas, conjuntos e mais, com envio para todo o Brasil."></textarea></div>
+              <div class="field"><label>Palavras-chave (separadas por vírgula)</label><input id="setSeoKeywords" placeholder="streetwear, tênis, camisetas, moda masculina"></div>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 16px; line-height:1.6;">
+                O título e a descrição já atualizam de verdade no Google e na aba do navegador. O <b>preview ao compartilhar no WhatsApp/Instagram</b> usa uma versão fixa (não muda sozinho com isso aqui) — se quiser trocar essa prévia, é um ajuste separado, direto no código.
+              </p>
+              <button class="btn btn-primary" id="saveSeoBtn">Salvar SEO</button>
+            
+          </div>
+        
+              </div>
+            </div>
+            <div class="settings-panel " data-spanel="policies">
+              <div class="card">
+          <div class="card">
+              <div style="display:grid; grid-template-columns:220px 1fr; gap:20px;" id="policiesLayout">
+                <div>
+                  <p style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px;">Políticas</p>
+                  <div id="policiesList" style="display:flex; flex-direction:column; gap:2px;"></div>
+                  <button class="btn btn-ghost" id="newCustomPolicyBtn" style="margin-top:12px; width:100%; font-size:12px;">+ Política personalizada</button>
+                </div>
+                <div id="policyEditorWrap" style="display:none;">
+                  <div class="field"><label>Título</label><input id="policyTitle"></div>
+                  <p id="policyUpdatedAt" style="font-size:12px; color:var(--ink-soft); margin:0 0 12px;"></p>
+                  <div class="field"><label>Conteúdo (as quebras de linha e parágrafos são preservados)</label>
+                    <textarea id="policyContent" rows="16" style="width:100%; padding:10px 12px; border-radius:8px; border:1.5px solid var(--line); font-size:13.5px; font-family:inherit; line-height:1.6;"></textarea>
+                  </div>
+                  <button class="btn btn-primary" id="savePolicyBtn">Salvar política</button>
+                  <p id="policySaveStatus" style="font-size:12.5px; margin-top:10px;"></p>
+                </div>
+                <p id="policyEmptyState" style="color:var(--ink-soft); font-size:13px;">Selecione uma política ao lado pra editar.</p>
+              </div>
+            
+          </div>
+        
+              </div>
+            </div>
+            <div class="settings-panel " data-spanel="security">
+              <div class="card">
+          <div class="card">
+              <div class="card" style="max-width:420px; box-shadow:none; border:1px solid var(--line); padding:20px;">
+                <h2 style="margin:0 0 4px; font-size:16px;">Alterar senha</h2>
+                <p style="font-size:12px; color:var(--ink-soft); margin:0 0 18px;">Usa o mesmo sistema de login que você já tem — a senha nunca fica salva em texto puro, isso é feito pelo próprio Supabase.</p>
+                <div class="field"><label>Senha atual</label><input id="currentPasswordInput" type="password"></div>
+                <div class="field"><label>Nova senha</label><input id="newPasswordInput" type="password"></div>
+                <div class="field"><label>Confirmar nova senha</label><input id="confirmPasswordInput" type="password"></div>
+                <button class="btn btn-primary" id="changePasswordBtn">Alterar senha</button>
+                <p id="passwordChangeStatus" style="font-size:12.5px; margin-top:10px;"></p>
+              </div>
+            
+          </div>
+        
+              </div>
+            </div>
+            <div class="settings-panel " data-spanel="pagamento">
+              <div class="card">
           <div class="card">
               <div class="field" style="max-width:280px;">
                 <label>Desconto no Pix (%)</label>
@@ -574,16 +643,6 @@
               <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px;">Desmarcar aqui remove a opção de verdade da tela de pagamento do checkout — não é só visual.</p>
 
               <button class="btn btn-primary" id="savePaymentBtn" style="margin-bottom:20px;">Salvar</button>
-
-              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Mercado Pago</p>
-              <div class="field"><label><input type="checkbox" id="setMercadoPagoEnabled" style="width:auto;display:inline-block;margin-right:6px;">Mercado Pago ativado</label></div>
-              <div class="field" style="max-width:480px;"><label>Access Token (privado — nunca aparece pro cliente)</label><input id="setMpAccessToken" type="password" placeholder="Deixe em branco pra continuar usando a variável de ambiente"></div>
-              <div class="field" style="max-width:480px;"><label>Public Key</label><input id="setMpPublicKey" placeholder="Deixe em branco pra continuar usando a variável de ambiente"></div>
-              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 16px; max-width:520px;">
-                Preenchendo aqui, o sistema passa a usar essa credencial automaticamente — não precisa mais mexer em código nem na Netlify. Deixando em branco, continua usando <code>MERCADOPAGO_ACCESS_TOKEN</code> da Netlify normalmente (nada quebra).
-              </p>
-              <button class="btn btn-primary" id="saveMercadoPagoBtn" style="margin-bottom:8px;">Salvar credenciais do Mercado Pago</button>
-              <p id="mpCredsStatus" style="font-size:12.5px; margin:0 0 20px;"></p>
 
               <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Chave Pix</p>
               <p style="font-size:12px; color:var(--rust); margin:0 0 12px; max-width:520px;">
@@ -605,12 +664,30 @@
               <p id="pixKeyStatus" style="font-size:12.5px;"></p>
             
           </div>
-        </div>
-
-        <!-- ---------- CONFIGURAÇÕES → FRETE ---------- -->
-        <div class="panel" data-panel="settings-envio">
-          <div class="card">
-              <div class="field" style="max-width:280px;">
+        
+              </div>
+            </div>
+            <div class="settings-panel " data-spanel="checkout">
+              <div class="card">
+<p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Checkout</p>
+                <p style="font-size:13px; color:var(--ink-soft); margin:0 0 16px; max-width:480px;">
+                  As configurações que afetam a experiência de pagamento no checkout (Pix, cartão, boleto, desconto no Pix) ficam reunidas em <b>Vendas → Pagamentos</b> — não duplicamos o formulário aqui.
+                </p>
+                <button class="btn btn-primary" id="goToPaymentSettingsBtn" type="button">Ir para Pagamentos</button>
+              </div>
+            </div>
+            <div class="settings-panel " data-spanel="cupons-shortcut">
+              <div class="card">
+<p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Cupons</p>
+                <p style="font-size:13px; color:var(--ink-soft); margin:0 0 16px; max-width:480px;">
+                  Cupons têm sua própria área completa em <b>Marketing → Cupons</b> (criar, editar, todas as regras avançadas).
+                </p>
+                <button class="btn btn-primary" id="goToCouponsBtn" type="button">Ir para Cupons</button>
+              </div>
+            </div>
+            <div class="settings-panel " data-spanel="envio">
+              <div class="card">
+<div class="field" style="max-width:280px;">
                 <label>Frete grátis acima de (R$)</label>
                 <input id="setFreeShippingThreshold" type="number" step="1" min="0">
               </div>
@@ -623,22 +700,11 @@
 
               <button class="btn btn-primary" id="saveShippingBtn" style="margin-bottom:20px;">Salvar</button>
 
-              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Melhor Envio</p>
-              <div class="field" style="max-width:480px;"><label>Token de acesso (privado)</label><input id="setMelhorEnvioToken" type="password" placeholder="Deixe em branco pra continuar usando a variável de ambiente"></div>
-              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 12px; max-width:520px;">
-                Preenchendo aqui, o sistema passa a usar esse token automaticamente. Deixando em branco, continua usando <code>MELHORENVIO_TOKEN</code> da Netlify (nada quebra).
-              </p>
-              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px; max-width:520px;">
-                O <b>CEP de origem</b> (usado pra calcular a distância do frete) é o mesmo já cadastrado em <b>Configurações → Geral → CEP da loja</b> — não duplicamos esse campo aqui.
-              </p>
-              <button class="btn btn-ghost" id="saveMelhorEnvioTokenBtn" style="margin-bottom:8px;">Salvar token do Melhor Envio</button>
-              <p id="melhorEnvioTokenStatus" style="font-size:12.5px;"></p>
-            
-          </div>
-        </div>
-
-        <!-- ---------- CONFIGURAÇÕES → MOTOBOY ---------- -->
-        <div class="panel" data-panel="settings-motoboy">
+              
+              </div>
+            </div>
+            <div class="settings-panel " data-spanel="motoboy">
+              <div class="card">
           <div class="card">
               <div class="field">
                 <label><input type="checkbox" id="setMotoboyEnabled" style="width:auto;display:inline-block;margin-right:6px;">Ativar entrega por Motoboy</label>
@@ -674,111 +740,87 @@
               <button class="btn btn-primary" id="saveMotoboySettingsBtn" style="margin-top:16px;">Salvar configuração de Motoboy</button>
             
           </div>
-        </div>
-
-        <!-- ---------- MARKETING → BANNERS ---------- -->
-        <div class="panel" data-panel="settings-banners">
-          <div class="card">
-              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Banner principal (topo da home)</p>
-              <div class="settings-grid">
-                <div class="field"><label>Título</label><input id="setBannerMainTitle" placeholder="Ex: Estilo que te representa."></div>
-                <div class="field"><label>Subtítulo</label><input id="setBannerMainSubtitle" placeholder="Texto curto abaixo do título"></div>
+        
               </div>
-              <div class="settings-grid">
-                <div class="field"><label>Texto do botão</label><input id="setBannerMainCtaText" placeholder="Comprar agora"></div>
-                <div class="field"><label>Link do botão</label><input id="setBannerMainCtaLink" placeholder="#produtos"></div>
-              </div>
-              <div class="field">
-                <label>Imagem de fundo (opcional — deixe vazio pra manter o fundo preto liso)</label>
-                <div id="bannerMainImagePreviewWrap" style="display:none; margin-bottom:8px;">
-                  <img id="bannerMainImagePreview" style="width:100%; max-width:260px; height:100px; object-fit:cover; border-radius:8px; border:1px solid var(--line);">
-                </div>
-                <input type="hidden" id="setBannerMainImage">
-                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                  <input type="file" id="bannerMainImageFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:160px; font-size:12.5px;">
-                  <button class="btn btn-ghost" id="removeBannerMainImageBtn" type="button">Remover</button>
-                </div>
-                <p id="bannerMainImageUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:6px 0 0;"></p>
-              </div>
-
-              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:26px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Banner secundário (entre as seções da home)</p>
-              <div class="settings-grid">
-                <div class="field"><label>Título</label><input id="setBannerSecondaryTitle" placeholder="Ex: Nova coleção de inverno"></div>
-                <div class="field"><label>Link (pra onde leva ao clicar)</label><input id="setBannerSecondaryLink" placeholder="#produtos"></div>
-              </div>
-              <div class="field">
-                <label>Imagem</label>
-                <div id="bannerSecondaryImagePreviewWrap" style="display:none; margin-bottom:8px;">
-                  <img id="bannerSecondaryImagePreview" style="width:100%; max-width:260px; height:100px; object-fit:cover; border-radius:8px; border:1px solid var(--line);">
-                </div>
-                <input type="hidden" id="setBannerSecondaryImage">
-                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                  <input type="file" id="bannerSecondaryImageFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:160px; font-size:12.5px;">
-                  <button class="btn btn-ghost" id="removeBannerSecondaryImageBtn" type="button">Remover</button>
-                </div>
-                <p id="bannerSecondaryImageUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:6px 0 0;"></p>
-              </div>
-              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 16px;">Deixe o título e a imagem em branco pra esse banner não aparecer na loja.</p>
-
-              <button class="btn btn-primary" id="saveBannersBtn">Salvar banners</button>
-            
-          </div>
-        </div>
-
-        <!-- ---------- CONFIGURAÇÕES → SEO ---------- -->
-        <div class="panel" data-panel="settings-seo">
-          <div class="card">
-              <div class="field"><label>Título da loja (aba do navegador e Google)</label><input id="setSeoTitle" placeholder="JA Store — Streetwear, esporte e casual"></div>
-              <div class="field"><label>Descrição (aparece no Google, embaixo do título)</label><textarea id="setSeoDescription" rows="3" placeholder="Calçados, camisetas, conjuntos e mais, com envio para todo o Brasil."></textarea></div>
-              <div class="field"><label>Palavras-chave (separadas por vírgula)</label><input id="setSeoKeywords" placeholder="streetwear, tênis, camisetas, moda masculina"></div>
-              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 16px; line-height:1.6;">
-                O título e a descrição já atualizam de verdade no Google e na aba do navegador. O <b>preview ao compartilhar no WhatsApp/Instagram</b> usa uma versão fixa (não muda sozinho com isso aqui) — se quiser trocar essa prévia, é um ajuste separado, direto no código.
+            </div>
+            <div class="settings-panel " data-spanel="mercadopago">
+              <div class="card">
+<p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Mercado Pago</p>
+              <div class="field"><label><input type="checkbox" id="setMercadoPagoEnabled" style="width:auto;display:inline-block;margin-right:6px;">Mercado Pago ativado</label></div>
+              <div class="field" style="max-width:480px;"><label>Access Token (privado — nunca aparece pro cliente)</label><input id="setMpAccessToken" type="password" placeholder="Deixe em branco pra continuar usando a variável de ambiente"></div>
+              <div class="field" style="max-width:480px;"><label>Public Key</label><input id="setMpPublicKey" placeholder="Deixe em branco pra continuar usando a variável de ambiente"></div>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 16px; max-width:520px;">
+                Preenchendo aqui, o sistema passa a usar essa credencial automaticamente — não precisa mais mexer em código nem na Netlify. Deixando em branco, continua usando <code>MERCADOPAGO_ACCESS_TOKEN</code> da Netlify normalmente (nada quebra).
               </p>
-              <button class="btn btn-primary" id="saveSeoBtn">Salvar SEO</button>
-            
+              <button class="btn btn-primary" id="saveMercadoPagoBtn" style="margin-bottom:8px;">Salvar credenciais do Mercado Pago</button>
+              <p id="mpCredsStatus" style="font-size:12.5px; margin:0 0 20px;"></p>
+
+              
+              </div>
+            </div>
+            <div class="settings-panel " data-spanel="melhorenvio">
+              <div class="card">
+<p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Melhor Envio</p>
+              <div class="field" style="max-width:480px;"><label>Token de acesso (privado)</label><input id="setMelhorEnvioToken" type="password" placeholder="Deixe em branco pra continuar usando a variável de ambiente"></div>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 12px; max-width:520px;">
+                Preenchendo aqui, o sistema passa a usar esse token automaticamente. Deixando em branco, continua usando <code>MELHORENVIO_TOKEN</code> da Netlify (nada quebra).
+              </p>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px; max-width:520px;">
+                O <b>CEP de origem</b> (usado pra calcular a distância do frete) é o mesmo já cadastrado em <b>Configurações → Geral → CEP da loja</b> — não duplicamos esse campo aqui.
+              </p>
+              <button class="btn btn-ghost" id="saveMelhorEnvioTokenBtn" style="margin-bottom:8px;">Salvar token do Melhor Envio</button>
+              <p id="melhorEnvioTokenStatus" style="font-size:12.5px;"></p>
+              </div>
+            </div>
+            <div class="settings-panel " data-spanel="analytics-shortcut">
+              <div class="card">
+<p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Analytics</p>
+                <p style="font-size:13px; color:var(--ink-soft); margin:0 0 16px; max-width:480px;">
+                  Google Analytics tem sua própria área em <b>Analytics → Google Analytics</b> (ativar, ID, status).
+                </p>
+                <button class="btn btn-primary" id="goToAnalyticsBtn" type="button">Ir para Google Analytics</button>
+              </div>
+            </div>
+            <div class="settings-panel " data-spanel="metapixel-shortcut">
+              <div class="card">
+<p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Meta Pixel</p>
+                <p style="font-size:13px; color:var(--ink-soft); margin:0 0 16px; max-width:480px;">
+                  Meta Pixel tem sua própria área em <b>Analytics → Meta Pixel</b> (ativar, ID, testar integração).
+                </p>
+                <button class="btn btn-primary" id="goToMetaPixelBtn" type="button">Ir para Meta Pixel</button>
+              </div>
+            </div>
+            <div class="settings-panel " data-spanel="logomarca-shortcut">
+              <div class="card">
+<p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Logomarca</p>
+                <p style="font-size:13px; color:var(--ink-soft); margin:0 0 16px; max-width:480px;">
+                  A logo é editada em <b>Personalização → Loja Online → Logomarca</b> (mesmo local onde já ficam a paleta e a prévia) — não criamos um segundo lugar pra isso.
+                </p>
+                <button class="btn btn-primary" id="goToLogoBtn" type="button">Ir para Personalização</button>
+              </div>
+            </div>
+            <div class="settings-panel " data-spanel="dominio">
+              <div class="card">
+                <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px;">Domínio</p>
+                <p style="font-size:13px; color:var(--ink-soft); margin:0;">A troca de domínio é feita direto no painel da Netlify (Site settings → Domain management) — não é algo que o Supabase ou este painel controla, então não dá pra trazer pra cá sem acesso a essa conta.</p>
+              </div>
+            </div>
+            <div class="settings-panel " data-spanel="usuarios">
+              <div class="card">
+                <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px;">Usuários</p>
+                <p style="font-size:13px; color:var(--ink-soft); margin:0;">Adicionar mais administradores exigiria mexer no sistema de login/permissões — fora do escopo desta etapa. Se quiser múltiplos usuários, é melhor tratar como uma etapa própria, com atenção redobrada em segurança.</p>
+              </div>
+            </div>
+            <div class="settings-panel " data-spanel="outras-integracoes">
+              <div class="card">
+<p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px;">Outras integrações</p>
+                <p style="font-size:13px; color:var(--ink-soft); margin:0;">Nenhuma outra integração disponível ainda. Quando alguma nova integração for construída de verdade, ela aparece aqui.</p>
+              </div>
+            </div>
+            </div>
           </div>
         </div>
 
-        <!-- ---------- CONFIGURAÇÕES → POLÍTICAS ---------- -->
-        <div class="panel" data-panel="settings-policies">
-          <div class="card">
-              <div style="display:grid; grid-template-columns:220px 1fr; gap:20px;" id="policiesLayout">
-                <div>
-                  <p style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px;">Políticas</p>
-                  <div id="policiesList" style="display:flex; flex-direction:column; gap:2px;"></div>
-                  <button class="btn btn-ghost" id="newCustomPolicyBtn" style="margin-top:12px; width:100%; font-size:12px;">+ Política personalizada</button>
-                </div>
-                <div id="policyEditorWrap" style="display:none;">
-                  <div class="field"><label>Título</label><input id="policyTitle"></div>
-                  <p id="policyUpdatedAt" style="font-size:12px; color:var(--ink-soft); margin:0 0 12px;"></p>
-                  <div class="field"><label>Conteúdo (as quebras de linha e parágrafos são preservados)</label>
-                    <textarea id="policyContent" rows="16" style="width:100%; padding:10px 12px; border-radius:8px; border:1.5px solid var(--line); font-size:13.5px; font-family:inherit; line-height:1.6;"></textarea>
-                  </div>
-                  <button class="btn btn-primary" id="savePolicyBtn">Salvar política</button>
-                  <p id="policySaveStatus" style="font-size:12.5px; margin-top:10px;"></p>
-                </div>
-                <p id="policyEmptyState" style="color:var(--ink-soft); font-size:13px;">Selecione uma política ao lado pra editar.</p>
-              </div>
-            
-          </div>
-        </div>
-
-        <!-- ---------- CONFIGURAÇÕES → SEGURANÇA ---------- -->
-        <div class="panel" data-panel="settings-security">
-          <div class="card">
-              <div class="card" style="max-width:420px; box-shadow:none; border:1px solid var(--line); padding:20px;">
-                <h2 style="margin:0 0 4px; font-size:16px;">Alterar senha</h2>
-                <p style="font-size:12px; color:var(--ink-soft); margin:0 0 18px;">Usa o mesmo sistema de login que você já tem — a senha nunca fica salva em texto puro, isso é feito pelo próprio Supabase.</p>
-                <div class="field"><label>Senha atual</label><input id="currentPasswordInput" type="password"></div>
-                <div class="field"><label>Nova senha</label><input id="newPasswordInput" type="password"></div>
-                <div class="field"><label>Confirmar nova senha</label><input id="confirmPasswordInput" type="password"></div>
-                <button class="btn btn-primary" id="changePasswordBtn">Alterar senha</button>
-                <p id="passwordChangeStatus" style="font-size:12.5px; margin-top:10px;"></p>
-              </div>
-            
-          </div>
-        </div>
-        <!-- ---------- ANALYTICS: GOOGLE ANALYTICS ---------- -->
         <div class="panel" data-panel="analytics-ga">
           <div class="card" style="max-width:520px;">
             <div class="panel-head">
@@ -1502,8 +1544,12 @@
   }
   async function loadStoreLogoForAdminSidebar(){
     try {
-      const { data } = await sb.from('store_settings').select('logo_url').eq('id', 1).maybeSingle();
+      const { data } = await sb.from('store_settings').select('logo_url, store_name').eq('id', 1).maybeSingle();
       applyStoreLogoToAdminSidebar(data?.logo_url || null);
+      if (data?.store_name){
+        const el = document.getElementById('adminSidebarStoreName');
+        if (el) el.textContent = data.store_name.toUpperCase();
+      }
     } catch (err) {
       console.error('Não foi possível carregar a logo da loja pro painel:', err);
     }
@@ -1599,6 +1645,10 @@
     window.open(window.location.pathname, '_blank');
   });
 
+  // O banco de dados (store_settings) é a fonte de verdade — funciona em
+  // qualquer navegador/aparelho depois de login. O localStorage aqui vira
+  // só um CACHE rápido, pra pintar a tela sem "flash" antes do banco
+  // responder — assim que os dados reais chegam, eles sempre têm prioridade.
   function loadAdminThemeFromStorage(){
     try {
       const raw = localStorage.getItem(ADMIN_THEME_STORAGE_KEY);
@@ -1606,10 +1656,48 @@
     } catch (err) {}
     return null;
   }
+  function cacheAdminThemeLocally(theme){
+    try { localStorage.setItem(ADMIN_THEME_STORAGE_KEY, JSON.stringify(theme)); } catch (err) {}
+  }
 
   let savedAdminTheme = loadAdminThemeFromStorage() || getDefaultAdminTheme();
   let currentAdminTheme = JSON.parse(JSON.stringify(savedAdminTheme));
-  applyAdminTheme(currentAdminTheme); // reaplica (o <head> já fez isso antes da tela desenhar; aqui é só pra preencher o estado do JS)
+  applyAdminTheme(currentAdminTheme); // pinta com o cache local imediatamente (evita flash); o banco confirma/corrige logo em seguida
+
+  async function loadAdminThemeFromDatabase(){
+    const { data, error } = await sb.from('store_settings').select(
+      'admin_theme_style, admin_color_bg, admin_color_ink, admin_color_sidebar, admin_color_primary, admin_color_secondary, admin_color_accent, admin_color_btn, admin_photo_url'
+    ).eq('id', 1).maybeSingle();
+    if (error){ console.error('Erro ao carregar aparência do painel do banco — mantendo o cache local:', error); return; }
+    if (!data || !data.admin_color_bg){
+      // Ainda não existe nada salvo no banco pra esse admin — mantém o
+      // padrão (ou o cache local antigo, se houver) e não sobrescreve nada.
+      return;
+    }
+    savedAdminTheme = {
+      style: data.admin_theme_style || 'classic',
+      colors: {
+        bg: data.admin_color_bg,
+        ink: data.admin_color_ink,
+        sidebar: data.admin_color_sidebar,
+        admin_primary: data.admin_color_primary,
+        admin_secondary: data.admin_color_secondary,
+        admin_accent: data.admin_color_accent,
+        admin_btn: data.admin_color_btn,
+      },
+      photoUrl: data.admin_photo_url || null,
+    };
+    currentAdminTheme = JSON.parse(JSON.stringify(savedAdminTheme));
+    applyAdminTheme(currentAdminTheme);
+    cacheAdminThemeLocally(savedAdminTheme); // mantém o cache local sincronizado com o banco
+
+    // se a foto já vier do banco antes do showDashboard() ter rodado (ou
+    // depois, em qualquer ordem), garante que o avatar real reflete ela
+    if (savedAdminTheme.photoUrl && document.getElementById('userAvatar')){
+      const initials = window.__adminAvatarInitials || 'JA';
+      document.getElementById('userAvatar').innerHTML = `<img src="${savedAdminTheme.photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${initials}';">`;
+    }
+  }
 
   function renderAdminThemePanel(){
     document.getElementById('adminPhotoUrlInput').value = currentAdminTheme.photoUrl || '';
@@ -1695,16 +1783,19 @@
     if (url){ img.src = url; wrap.style.display = 'block'; } else { wrap.style.display = 'none'; }
   }
 
-  function persistAdminThemeAsset(field, url){
+  async function persistAdminThemeAsset(field, url){
     currentAdminTheme[field] = url;
-    // Salvo na hora (diferente das cores, que só valem depois de
-    // "Aplicar") — evita perder um upload que já terminou de subir pro
-    // Storage se a pessoa navegar pra outra aba sem querer.
-    try {
-      savedAdminTheme = { ...savedAdminTheme, [field]: url };
-      localStorage.setItem(ADMIN_THEME_STORAGE_KEY, JSON.stringify(savedAdminTheme));
-    } catch (err) {}
+    savedAdminTheme = { ...savedAdminTheme, [field]: url };
+    cacheAdminThemeLocally(savedAdminTheme);
     applyAdminTheme(currentAdminTheme);
+    // Salvo no banco na hora (diferente das cores, que só valem depois de
+    // "Aplicar") — evita perder um upload que já terminou de subir pro
+    // Storage se a pessoa navegar pra outra aba sem querer. Assim, a foto
+    // continua aparecendo depois de sair e entrar de novo, em qualquer aparelho.
+    if (field === 'photoUrl'){
+      const { error } = await sb.from('store_settings').update({ admin_photo_url: url, updated_at: new Date().toISOString() }).eq('id', 1);
+      if (error) console.error('Erro ao salvar a foto do administrador no banco:', error);
+    }
   }
 
   document.getElementById('adminPhotoFileInput').addEventListener('change', async (e)=>{
@@ -1737,23 +1828,49 @@
     document.getElementById('adminThemeStatus').innerHTML = '<span style="color:var(--ink-soft);">Visualizando — clique em "Aplicar" pra manter, ou "Restaurar padrão" pra descartar.</span>';
   });
 
-  document.getElementById('applyAdminThemeBtn').addEventListener('click', ()=>{
-    try {
-      localStorage.setItem(ADMIN_THEME_STORAGE_KEY, JSON.stringify(currentAdminTheme));
-      savedAdminTheme = JSON.parse(JSON.stringify(currentAdminTheme));
-      document.getElementById('adminThemeStatus').innerHTML = '<span style="color:var(--green);">Aparência aplicada e salva neste navegador!</span>';
-    } catch (err) {
-      document.getElementById('adminThemeStatus').innerHTML = '<span style="color:var(--red);">Não foi possível salvar (armazenamento do navegador indisponível).</span>';
+  async function saveAdminThemeToDatabase(theme){
+    const payload = {
+      admin_theme_style: theme.style,
+      admin_color_bg: theme.colors.bg,
+      admin_color_ink: theme.colors.ink,
+      admin_color_sidebar: theme.colors.sidebar,
+      admin_color_primary: theme.colors.admin_primary,
+      admin_color_secondary: theme.colors.admin_secondary,
+      admin_color_accent: theme.colors.admin_accent,
+      admin_color_btn: theme.colors.admin_btn,
+      admin_photo_url: theme.photoUrl || null,
+      updated_at: new Date().toISOString(),
+    };
+    return sb.from('store_settings').update(payload).eq('id', 1);
+  }
+
+  document.getElementById('applyAdminThemeBtn').addEventListener('click', async ()=>{
+    const statusEl = document.getElementById('adminThemeStatus');
+    statusEl.textContent = 'Salvando...';
+    const { error } = await saveAdminThemeToDatabase(currentAdminTheme);
+    if (error){
+      statusEl.innerHTML = `<span style="color:var(--red);">Erro ao salvar: ${error.message}</span>`;
+      return;
     }
+    savedAdminTheme = JSON.parse(JSON.stringify(currentAdminTheme));
+    cacheAdminThemeLocally(savedAdminTheme);
+    statusEl.innerHTML = '<span style="color:var(--green);">Aparência salva! Continua assim mesmo depois de sair e entrar de novo, em qualquer aparelho.</span>';
   });
 
-  document.getElementById('resetAdminThemeBtn').addEventListener('click', ()=>{
+  document.getElementById('resetAdminThemeBtn').addEventListener('click', async ()=>{
+    const statusEl = document.getElementById('adminThemeStatus');
     currentAdminTheme = getDefaultAdminTheme();
     applyAdminTheme(currentAdminTheme);
-    try { localStorage.removeItem(ADMIN_THEME_STORAGE_KEY); } catch (err) {}
+    statusEl.textContent = 'Restaurando...';
+    const { error } = await saveAdminThemeToDatabase(currentAdminTheme);
+    if (error){
+      statusEl.innerHTML = `<span style="color:var(--red);">Erro ao restaurar: ${error.message}</span>`;
+      return;
+    }
     savedAdminTheme = JSON.parse(JSON.stringify(currentAdminTheme));
+    cacheAdminThemeLocally(savedAdminTheme);
     renderAdminThemePanel();
-    document.getElementById('adminThemeStatus').innerHTML = '<span style="color:var(--green);">Restaurado pro padrão original.</span>';
+    statusEl.innerHTML = '<span style="color:var(--green);">Restaurado pro padrão original.</span>';
   });
 
   const loginScreen = document.getElementById('loginScreen');
@@ -1789,17 +1906,7 @@
       { label:'Eventos', panel:'analytics-events' },
       { label:'Relatórios', panel:'reports' },
     ]},
-    { id:'settings-group', label:'Configurações', icon:'M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c.14.32.22.68.22 1.05V10a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z', children:[
-      { label:'Geral', panel:'settings-geral' },
-      { label:'Pagamentos', panel:'settings-pagamento' },
-      { label:'Frete', panel:'settings-envio' },
-      { label:'Motoboy', panel:'settings-motoboy' },
-      { label:'SEO', panel:'settings-seo' },
-      { label:'Políticas', panel:'settings-policies' },
-      { label:'Segurança', panel:'settings-security' },
-      { label:'Domínio', panel:'coming-soon', title:'Domínio', reason:'A troca de domínio é feita direto no painel da Netlify (Site settings → Domain management) — não é algo que o Supabase ou este painel controla, então não dá pra trazer pra cá sem acesso a essa conta.' },
-      { label:'Usuários', panel:'coming-soon', title:'Usuários', reason:'Adicionar mais administradores exigiria mexer no sistema de login/permissões — e isso está fora do que foi pedido nesta etapa. Se quiser mesmo múltiplos usuários, é melhor tratar como uma etapa própria, com atenção redobrada em segurança.' },
-    ]},
+    { id:'settings', label:'Configurações', icon:'M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c.14.32.22.68.22 1.05V10a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z', panel:'settings' },
   ];
 
   function renderSideNav(){
@@ -1884,11 +1991,12 @@
     if (id === 'customers') loadCustomers();
     if (id === 'coupons') loadCoupons();
     if (id === 'announcements') loadAnnouncementsAdmin();
-    if (id === 'settings-geral' || id === 'settings-pagamento' || id === 'settings-envio' ||
-        id === 'settings-motoboy' || id === 'settings-banners' || id === 'settings-seo' ||
-        id === 'settings-policies' || id === 'settings-security') loadSettings();
-    if (id === 'settings-pagamento' || id === 'settings-envio') loadPaymentCredentials();
-    if (id === 'settings-policies') loadPoliciesAdmin();
+    if (id === 'settings'){
+      loadSettings();
+      loadPaymentCredentials();
+      loadPoliciesAdmin();
+      renderSettingsNav();
+    }
     if (id === 'appearance') loadAppearance();
     if (id === 'admin-appearance') renderAdminThemePanel();
     if (id === 'analytics-ga' || id === 'analytics-pixel') loadAnalyticsSettings();
@@ -1943,6 +2051,7 @@
     switchPanel('dashboard');
     document.querySelector('[data-nav-simple="dashboard"]')?.classList.add('active');
     loadStoreLogoForAdminSidebar();
+    loadAdminThemeFromDatabase();
   }
 
   function formatBRL(v){ return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
@@ -3744,6 +3853,61 @@
   });
 
   // ================= CONFIGURAÇÕES =================
+  const SETTINGS_CATEGORIES = [
+    { label:'LOJA', items:[
+      { key:'geral', label:'Geral' },
+      { key:'logomarca-shortcut', label:'Logomarca' },
+      { key:'seo', label:'SEO' },
+      { key:'policies', label:'Políticas' },
+      { key:'security', label:'Segurança' },
+      { key:'dominio', label:'Domínio' },
+      { key:'usuarios', label:'Usuários' },
+    ]},
+    { label:'VENDAS', items:[
+      { key:'pagamento', label:'Pagamentos' },
+      { key:'checkout', label:'Checkout' },
+      { key:'cupons-shortcut', label:'Cupons' },
+    ]},
+    { label:'ENTREGA', items:[
+      { key:'envio', label:'Frete' },
+      { key:'motoboy', label:'Motoboy' },
+    ]},
+    { label:'INTEGRAÇÕES', items:[
+      { key:'mercadopago', label:'Mercado Pago' },
+      { key:'melhorenvio', label:'Melhor Envio' },
+      { key:'analytics-shortcut', label:'Analytics' },
+      { key:'metapixel-shortcut', label:'Meta Pixel' },
+      { key:'outras-integracoes', label:'Outras integrações' },
+    ]},
+  ];
+  let currentSettingsItem = 'geral';
+
+  function renderSettingsNav(){
+    const nav = document.getElementById('settingsCategoryNav');
+    nav.innerHTML = SETTINGS_CATEGORIES.map(cat => `
+      <p class="settings-cat-label">${cat.label}</p>
+      ${cat.items.map(item => `<button class="settings-cat-item ${item.key===currentSettingsItem?'active':''}" data-settingsitem="${item.key}" type="button">${item.label}</button>`).join('')}
+    `).join('');
+    document.querySelectorAll('[data-settingsitem]').forEach(btn=>{
+      btn.addEventListener('click', ()=> selectSettingsItem(btn.dataset.settingsitem));
+    });
+  }
+
+  function selectSettingsItem(key){
+    currentSettingsItem = key;
+    document.querySelectorAll('[data-settingsitem]').forEach(b=> b.classList.toggle('active', b.dataset.settingsitem===key));
+    document.querySelectorAll('#settingsContentArea .settings-panel').forEach(p=> p.classList.toggle('active', p.dataset.spanel===key));
+  }
+
+  // Atalhos honestos: em vez de duplicar formulários que já têm seu
+  // próprio lugar (Cupons em Marketing, Logo/Paleta em Personalização,
+  // Analytics/Meta Pixel em Analytics), esses botões só levam pra lá.
+  document.getElementById('goToPaymentSettingsBtn')?.addEventListener('click', ()=> selectSettingsItem('pagamento'));
+  document.getElementById('goToCouponsBtn')?.addEventListener('click', ()=> navigateTo({ panel:'coupons', label:'Cupons' }));
+  document.getElementById('goToAnalyticsBtn')?.addEventListener('click', ()=> navigateTo({ panel:'analytics-ga', label:'Google Analytics' }));
+  document.getElementById('goToMetaPixelBtn')?.addEventListener('click', ()=> navigateTo({ panel:'analytics-pixel', label:'Meta Pixel' }));
+  document.getElementById('goToLogoBtn')?.addEventListener('click', ()=> navigateTo({ panel:'appearance', label:'Personalização' }));
+
   // ================= POLÍTICAS (Etapa 6) =================
   let allPoliciesAdmin = [];
   let currentPolicyId = null;
