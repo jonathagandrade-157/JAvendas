@@ -25,9 +25,11 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const client = new mercadopago.MercadoPagoConfig({
-  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
-});
+// O cliente do Mercado Pago é montado DENTRO do handler agora (mais abaixo),
+// depois de buscar o Access Token no banco — assim o lojista pode trocar a
+// credencial pelo painel sem precisar mexer neste arquivo. Se o campo do
+// banco estiver vazio, cai automaticamente na variável de ambiente (não
+// quebra quem ainda não configurou nada pelo painel).
 
 function formatBRLServer(v) {
   return "R$ " + Number(v).toFixed(2).replace(".", ",");
@@ -41,6 +43,23 @@ exports.handler = async (event) => {
   try {
     const body = JSON.parse(event.body || "{}");
     const { customer, address, items, shipping, couponCode, preferredMethod } = body;
+
+    // ---------- credenciais de pagamento (painel tem prioridade sobre a variável de ambiente) ----------
+    const { data: paymentCreds } = await supabase
+      .from("payment_credentials")
+      .select("mercadopago_enabled, mercadopago_access_token")
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (paymentCreds?.mercadopago_enabled === false) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Pagamentos estão temporariamente desativados. Tente novamente mais tarde." }),
+      };
+    }
+
+    const accessToken = paymentCreds?.mercadopago_access_token || process.env.MERCADOPAGO_ACCESS_TOKEN;
+    const client = new mercadopago.MercadoPagoConfig({ accessToken });
 
     // ---------- validação básica ----------
     if (!customer?.name || !customer?.email || !customer?.phone) {
@@ -188,13 +207,27 @@ exports.handler = async (event) => {
     // ---------- busca as configurações reais (fonte única de verdade) ----------
     const { data: settings } = await supabase
       .from("store_settings")
-      .select("free_shipping_threshold, pix_discount_percent, motoboy_free_shipping")
+      .select("free_shipping_threshold, pix_discount_percent, motoboy_free_shipping, payment_pix_enabled, payment_card_enabled, payment_boleto_enabled")
       .eq("id", 1)
       .maybeSingle();
 
     const FREE_SHIPPING_THRESHOLD = settings?.free_shipping_threshold != null ? Number(settings.free_shipping_threshold) : 300;
     const PIX_DISCOUNT_RATE = settings?.pix_discount_percent != null ? Number(settings.pix_discount_percent) / 100 : 0.05;
     const MOTOBOY_FREE_SHIPPING = !!settings?.motoboy_free_shipping;
+
+    // Confirma que a forma de pagamento escolhida realmente está ativada —
+    // nunca confia só na tela (alguém poderia mandar a requisição direto).
+    const methodEnabledMap = {
+      pix: settings?.payment_pix_enabled !== false,
+      credit_card: settings?.payment_card_enabled !== false,
+      boleto: settings?.payment_boleto_enabled !== false,
+    };
+    if (preferredMethod && methodEnabledMap[preferredMethod] === false) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Essa forma de pagamento não está disponível no momento." }),
+      };
+    }
 
     const qualifiesForFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
     const isMotoboy = !!shipping?.isMotoboy;
