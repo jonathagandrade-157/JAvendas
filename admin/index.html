@@ -166,6 +166,26 @@
   .charts-grid{display:grid; grid-template-columns:1fr; gap:16px;}
   @media (min-width:900px){ .charts-grid{grid-template-columns:1fr 1fr;} }
 
+  .period-pills{display:flex; gap:4px; flex-wrap:wrap;}
+  .period-pill{padding:7px 13px; border-radius:999px; border:1px solid var(--line); background:#fff; font-size:12px; font-weight:700; color:var(--ink-soft); white-space:nowrap;}
+  .period-pill:hover{border-color:var(--admin-accent);}
+  .period-pill.active{background:var(--admin-primary); color:#fff; border-color:var(--admin-primary);}
+  .trend{font-size:12px; font-weight:700; margin:6px 0 0; display:flex; align-items:center; gap:3px;}
+  .trend.up{color:var(--green);}
+  .trend.down{color:var(--red);}
+  .trend.flat{color:var(--ink-soft);}
+
+  .alert-row{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--line);}
+  .alert-row:last-child{border-bottom:none;}
+  .alert-row .alert-text{font-size:13px; font-weight:600;}
+  .alert-row .alert-sub{font-size:11.5px; color:var(--ink-soft); margin-top:1px;}
+  .alert-dot{width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-right:8px;}
+
+  .top-product-row{display:flex; align-items:center; gap:10px; padding:11px 0; border-bottom:1px solid var(--line);}
+  .top-product-row:last-child{border-bottom:none;}
+  .top-product-row img, .top-product-row .top-product-fallback{width:40px; height:40px; object-fit:cover; border-radius:8px; border:1px solid var(--line); flex-shrink:0; background:var(--bg);}
+  .top-product-rank{width:20px; font-size:12px; font-weight:800; color:var(--ink-soft); flex-shrink:0;}
+
   .settings-tabs{display:flex; gap:4px; margin-bottom:20px; border-bottom:1px solid var(--line); flex-wrap:wrap;}
   .palette-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin-bottom:24px;}
   .palette-card{border:1.5px solid var(--line); border-radius:10px; padding:12px; text-align:left; background:#fff; cursor:pointer; transition:border-color .15s;}
@@ -265,125 +285,71 @@
         <!-- ---------- DASHBOARD / RELATÓRIOS ---------- -->
         <div class="panel" data-panel="dashboard">
 
-          <div class="card" style="margin-bottom:20px;">
-            <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
-              <div class="field" style="margin-bottom:0; max-width:220px;">
-                <label>Período</label>
-                <select id="dashPeriod">
-                  <option value="today">Hoje</option>
-                  <option value="yesterday">Ontem</option>
-                  <option value="last7">Últimos 7 dias</option>
-                  <option value="last30" selected>Últimos 30 dias</option>
-                  <option value="thisMonth">Este mês</option>
-                  <option value="lastMonth">Mês anterior</option>
-                  <option value="thisYear">Este ano</option>
-                  <option value="custom">Período personalizado</option>
-                </select>
+          <div class="panel-head">
+            <h2 style="margin:0;">Dashboard</h2>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <div class="period-pills" id="dashPeriodPills"></div>
+              <div id="dashCustomWrap" style="display:none; gap:6px; align-items:center;">
+                <input type="date" id="dashDateFrom" style="padding:6px 8px; font-size:12px; border-radius:8px; border:1px solid var(--line);">
+                <input type="date" id="dashDateTo" style="padding:6px 8px; font-size:12px; border-radius:8px; border:1px solid var(--line);">
+                <button class="btn btn-primary" id="dashApplyPeriodBtn" style="padding:7px 12px; font-size:12px;">Aplicar</button>
               </div>
-              <div class="field" id="dashCustomFrom" style="margin-bottom:0; max-width:160px; display:none;">
-                <label>Data inicial</label>
-                <input type="date" id="dashDateFrom">
-              </div>
-              <div class="field" id="dashCustomTo" style="margin-bottom:0; max-width:160px; display:none;">
-                <label>Data final</label>
-                <input type="date" id="dashDateTo">
-              </div>
-              <button class="btn btn-primary" id="dashApplyPeriodBtn">Aplicar</button>
             </div>
           </div>
 
-          <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Resumo do período selecionado</p>
-          <div class="stat-grid">
-            <div class="stat-card"><p class="label">Faturamento</p><p class="value" id="statPeriodRevenue">R$ 0,00</p></div>
-            <div class="stat-card"><p class="label">Pedidos</p><p class="value" id="statPeriodOrders">0</p></div>
-            <div class="stat-card"><p class="label">Ticket médio</p><p class="value" id="statPeriodAvg">R$ 0,00</p></div>
-            <div class="stat-card"><p class="label">Produtos vendidos</p><p class="value" id="statPeriodProductsSold">0</p></div>
-            <div class="stat-card"><p class="label">Clientes</p><p class="value" id="statPeriodCustomers">0</p></div>
-            <div class="stat-card"><p class="label">Pedidos pagos</p><p class="value" id="statPeriodPaid">0</p></div>
-            <div class="stat-card"><p class="label">Pedidos pendentes</p><p class="value" id="statPeriodPending">0</p></div>
-            <div class="stat-card"><p class="label">Pedidos cancelados</p><p class="value" id="statPeriodCanceled">0</p></div>
-          </div>
-
-          <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:24px 0 12px;">Catálogo (total geral, não depende do período)</p>
-          <div class="stat-grid">
-            <div class="stat-card"><p class="label">Produtos cadastrados</p><p class="value" id="statTotalProducts">0</p></div>
-            <div class="stat-card"><p class="label">Produtos ativos</p><p class="value" id="statActiveProducts">0</p></div>
-            <div class="stat-card"><p class="label">Produtos inativos</p><p class="value" id="statInactiveProducts">0</p></div>
-            <div class="stat-card"><p class="label">Sem estoque</p><p class="value" id="statOutOfStock">0</p></div>
-            <div class="stat-card"><p class="label">Estoque baixo</p><p class="value" id="statLowStock">0</p></div>
-            <div class="stat-card"><p class="label">Categorias cadastradas</p><p class="value" id="statTotalCategories">0</p></div>
-          </div>
-
-          <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:24px 0 12px;">Hoje e este mês (fixo, não muda com o filtro acima)</p>
+          <!-- 1. Resumo principal -->
           <div class="stat-grid">
             <div class="stat-card">
-              <p class="label">Vendas hoje</p>
-              <p class="value" id="statSalesToday">R$ 0,00</p>
+              <p class="label">Vendas</p>
+              <p class="value" id="dashRevenue">R$ 0,00</p>
+              <p class="trend" id="dashRevenueTrend"></p>
             </div>
             <div class="stat-card">
-              <p class="label">Vendas do mês</p>
-              <p class="value" id="statSalesMonth">R$ 0,00</p>
-            </div>
-            <div class="stat-card">
-              <p class="label">Pedidos hoje</p>
-              <p class="value" id="statToday">0</p>
-            </div>
-            <div class="stat-card">
-              <p class="label">Pedidos pendentes</p>
-              <p class="value" id="statPending">0</p>
-            </div>
-            <div class="stat-card">
-              <p class="label">Pedidos enviados</p>
-              <p class="value" id="statShipped">0</p>
-            </div>
-            <div class="stat-card">
-              <p class="label">Clientes cadastrados</p>
-              <p class="value" id="statCustomers">0</p>
+              <p class="label">Pedidos</p>
+              <p class="value" id="dashOrders">0</p>
+              <p class="trend" id="dashOrdersTrend"></p>
             </div>
             <div class="stat-card">
               <p class="label">Ticket médio</p>
-              <p class="value" id="statAvg">R$ 0,00</p>
+              <p class="value" id="dashAvgTicket">R$ 0,00</p>
+              <p class="trend" id="dashAvgTicketTrend"></p>
+            </div>
+            <div class="stat-card">
+              <p class="label">Produtos vendidos</p>
+              <p class="value" id="dashProductsSold">0</p>
+              <p class="trend" id="dashProductsSoldTrend"></p>
             </div>
           </div>
 
-          <div class="charts-grid">
-            <div class="card">
-              <div class="panel-head"><h2>Vendas — últimos 30 dias</h2></div>
-              <canvas id="revenueChart" height="180"></canvas>
+          <!-- 2. Gráfico principal -->
+          <div class="card" style="margin-top:4px;">
+            <div class="panel-head">
+              <h2>Vendas ao longo do tempo</h2>
+              <div class="period-pills" id="salesChartPeriodPills"></div>
             </div>
-            <div class="card">
-              <div class="panel-head"><h2>Pedidos por dia</h2></div>
-              <canvas id="ordersChart" height="180"></canvas>
-            </div>
-          </div>
-          <div class="card">
-            <div class="panel-head"><h2>Categorias mais vendidas</h2></div>
-            <canvas id="categoryChart" height="90"></canvas>
+            <canvas id="mainSalesChart" height="85"></canvas>
           </div>
 
-          <div class="charts-grid">
+          <div class="charts-grid" style="margin-top:16px;">
+            <!-- 3. Pedidos por status -->
             <div class="card">
-              <div class="panel-head"><h2>Últimos pedidos</h2></div>
-              <table>
-                <thead><tr><th>Pedido</th><th>Cliente</th><th>Status</th><th>Total</th></tr></thead>
-                <tbody id="recentOrdersBody"></tbody>
-              </table>
+              <div class="panel-head"><h2>Pedidos</h2></div>
+              <canvas id="orderStatusChart" height="200"></canvas>
             </div>
+
+            <!-- 4. Produtos mais vendidos -->
             <div class="card">
-              <div class="panel-head"><h2>Clientes recentes</h2></div>
-              <table>
-                <thead><tr><th>Cliente</th><th>Pedidos</th><th>Total gasto</th></tr></thead>
-                <tbody id="recentCustomersBody"></tbody>
-              </table>
+              <div class="panel-head"><h2>Produtos mais vendidos</h2></div>
+              <div id="topProductsList"></div>
             </div>
           </div>
-          <div class="card">
-            <div class="panel-head"><h2>Produtos com estoque baixo</h2></div>
-            <table>
-              <thead><tr><th>Produto</th><th>Categoria</th><th>Estoque</th></tr></thead>
-              <tbody id="lowStockBody"></tbody>
-            </table>
+
+          <!-- 5. Precisa de atenção -->
+          <div class="card" style="margin-top:16px;">
+            <div class="panel-head"><h2>Precisa de atenção</h2></div>
+            <div id="dashAlertsList"></div>
           </div>
+
         </div>
 
         <!-- ---------- PRODUTOS ---------- -->
@@ -1987,221 +1953,281 @@
 
   // ================= DASHBOARD =================
   let revenueChartInstance = null;
-  let ordersChartInstance = null;
-  let categoryChartInstance = null;
+  let orderStatusChartInstance = null;
   const LOW_STOCK_THRESHOLD = 5;
 
-  // ---------- filtro de período do dashboard ----------
-  function getDashboardDateRange(prefix = 'dash'){
-    const period = document.getElementById(`${prefix}Period`).value;
+  const DASH_PERIODS = [
+    { key:'today', label:'Hoje' },
+    { key:'last7', label:'7 dias' },
+    { key:'last30', label:'30 dias' },
+    { key:'thisMonth', label:'Este mês' },
+    { key:'custom', label:'Personalizado' },
+  ];
+  const SALES_CHART_PERIODS = [
+    { key:'last7', label:'7 dias' },
+    { key:'last30', label:'30 dias' },
+    { key:'last90', label:'90 dias' },
+    { key:'custom', label:'Personalizado' },
+  ];
+  let dashPeriodKey = 'last30';
+  let salesChartPeriodKey = 'last30';
+
+  // Wrapper genérico — calcula o intervalo de datas a partir de uma chave
+  // de período (não depende mais de um <select>, então dá pra usar tanto
+  // nos "pills" novos do Dashboard quanto em qualquer outro lugar).
+  function getDateRangeForPeriod(period, fromId, toId){
     const now = new Date();
     const startOfDay = (d) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
     const endOfDay = (d) => { const x = new Date(d); x.setHours(23,59,59,999); return x; };
-
-    if (period === 'today'){
-      return { start: startOfDay(now), end: endOfDay(now) };
-    }
-    if (period === 'yesterday'){
-      const y = new Date(now.getTime() - 86400000);
-      return { start: startOfDay(y), end: endOfDay(y) };
-    }
-    if (period === 'last7'){
-      return { start: startOfDay(new Date(now.getTime() - 6*86400000)), end: endOfDay(now) };
-    }
-    if (period === 'last30'){
-      return { start: startOfDay(new Date(now.getTime() - 29*86400000)), end: endOfDay(now) };
-    }
-    if (period === 'thisMonth'){
-      return { start: new Date(now.getFullYear(), now.getMonth(), 1), end: endOfDay(now) };
-    }
-    if (period === 'lastMonth'){
-      const start = new Date(now.getFullYear(), now.getMonth()-1, 1);
-      const end = new Date(now.getFullYear(), now.getMonth(), 0, 23,59,59,999);
-      return { start, end };
-    }
-    if (period === 'thisYear'){
-      return { start: new Date(now.getFullYear(), 0, 1), end: endOfDay(now) };
-    }
+    if (period === 'today') return { start: startOfDay(now), end: endOfDay(now) };
+    if (period === 'yesterday'){ const y = new Date(now.getTime()-86400000); return { start: startOfDay(y), end: endOfDay(y) }; }
+    if (period === 'last7') return { start: startOfDay(new Date(now.getTime()-6*86400000)), end: endOfDay(now) };
+    if (period === 'last30') return { start: startOfDay(new Date(now.getTime()-29*86400000)), end: endOfDay(now) };
+    if (period === 'last90') return { start: startOfDay(new Date(now.getTime()-89*86400000)), end: endOfDay(now) };
+    if (period === 'thisMonth') return { start: new Date(now.getFullYear(), now.getMonth(), 1), end: endOfDay(now) };
+    if (period === 'lastMonth'){ const start=new Date(now.getFullYear(),now.getMonth()-1,1); const end=new Date(now.getFullYear(),now.getMonth(),0,23,59,59,999); return { start, end }; }
+    if (period === 'thisYear') return { start: new Date(now.getFullYear(),0,1), end: endOfDay(now) };
     if (period === 'custom'){
-      const fromVal = document.getElementById(`${prefix}DateFrom`).value;
-      const toVal = document.getElementById(`${prefix}DateTo`).value;
+      const fromVal = document.getElementById(fromId)?.value;
+      const toVal = document.getElementById(toId)?.value;
       if (!fromVal || !toVal) return { start: startOfDay(new Date(now.getTime()-29*86400000)), end: endOfDay(now) };
-      return { start: startOfDay(new Date(fromVal + 'T00:00:00')), end: endOfDay(new Date(toVal + 'T00:00:00')) };
+      return { start: startOfDay(new Date(fromVal+'T00:00:00')), end: endOfDay(new Date(toVal+'T00:00:00')) };
     }
     return { start: startOfDay(new Date(now.getTime()-29*86400000)), end: endOfDay(now) };
   }
 
-  document.getElementById('dashPeriod').addEventListener('change', ()=>{
-    const isCustom = document.getElementById('dashPeriod').value === 'custom';
-    document.getElementById('dashCustomFrom').style.display = isCustom ? 'block' : 'none';
-    document.getElementById('dashCustomTo').style.display = isCustom ? 'block' : 'none';
-    if (!isCustom) loadDashboard();
-  });
+  // Continua existindo com esse nome/assinatura por compatibilidade — é
+  // usada por Relatórios, que ainda tem seu próprio <select> de período.
+  function getDashboardDateRange(prefix = 'dash'){
+    const period = document.getElementById(`${prefix}Period`).value;
+    return getDateRangeForPeriod(period, `${prefix}DateFrom`, `${prefix}DateTo`);
+  }
+
+  function getPreviousPeriodRange(start, end){
+    const lengthMs = end.getTime() - start.getTime();
+    const prevEnd = new Date(start.getTime() - 1);
+    const prevStart = new Date(prevEnd.getTime() - lengthMs);
+    return { start: prevStart, end: prevEnd };
+  }
+
+  function renderTrend(elId, current, previous){
+    const el = document.getElementById(elId);
+    if (previous <= 0){
+      el.textContent = current > 0 ? 'Novo neste período' : '';
+      el.className = 'trend flat';
+      return;
+    }
+    const pct = ((current - previous) / previous) * 100;
+    const arrow = pct > 0.5 ? '↑' : (pct < -0.5 ? '↓' : '→');
+    const cls = pct > 0.5 ? 'up' : (pct < -0.5 ? 'down' : 'flat');
+    el.textContent = `${arrow} ${Math.abs(pct).toFixed(1)}% vs. período anterior`;
+    el.className = `trend ${cls}`;
+  }
+
+  function renderDashPeriodPills(){
+    document.getElementById('dashPeriodPills').innerHTML = DASH_PERIODS.map(p => `
+      <button class="period-pill ${p.key===dashPeriodKey?'active':''}" data-dperiod="${p.key}" type="button">${p.label}</button>
+    `).join('');
+    document.querySelectorAll('[data-dperiod]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        dashPeriodKey = btn.dataset.dperiod;
+        renderDashPeriodPills();
+        document.getElementById('dashCustomWrap').style.display = dashPeriodKey === 'custom' ? 'flex' : 'none';
+        if (dashPeriodKey !== 'custom') loadDashboard();
+      });
+    });
+  }
   document.getElementById('dashApplyPeriodBtn').addEventListener('click', ()=> loadDashboard());
 
-  async function loadDashboard(){
-    const [ordersRes, productsRes, categoriesRes] = await Promise.all([
-      sb.from('orders').select('id, customer_name, customer_email, total, created_at, payment_status, order_status, order_items(product_name, quantity, product_id)').order('created_at', { ascending: true }),
-      sb.from('products').select('id, name, category, stock, active'),
-      sb.from('categories').select('id', { count: 'exact', head: true }),
-    ]);
+  function renderSalesChartPeriodPills(){
+    document.getElementById('salesChartPeriodPills').innerHTML = SALES_CHART_PERIODS.map(p => `
+      <button class="period-pill ${p.key===salesChartPeriodKey?'active':''}" data-schartperiod="${p.key}" type="button" style="padding:5px 10px; font-size:11px;">${p.label}</button>
+    `).join('');
+    document.querySelectorAll('[data-schartperiod]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        if (btn.dataset.schartperiod === 'custom'){
+          const from = prompt('Data inicial (AAAA-MM-DD):');
+          const to = prompt('Data final (AAAA-MM-DD):');
+          if (!from || !to) return;
+          salesChartPeriodKey = 'custom';
+          window.__salesChartCustomFrom = from;
+          window.__salesChartCustomTo = to;
+        } else {
+          salesChartPeriodKey = btn.dataset.schartperiod;
+        }
+        renderSalesChartPeriodPills();
+        loadDashboard();
+      });
+    });
+  }
 
+  function goToOrdersFiltered(status){
+    navigateTo({ panel:'orders', label:'Pedidos' });
+    setTimeout(()=>{
+      currentOrderStatus = status;
+      renderOrderTabs();
+      renderOrdersTable();
+    }, 60);
+  }
+
+  async function loadDashboard(){
+    renderDashPeriodPills();
+    renderSalesChartPeriodPills();
+
+    const [ordersRes, productsRes] = await Promise.all([
+      sb.from('orders').select('id, customer_email, total, created_at, payment_status, order_status, order_items(product_name, product_id, quantity, unit_price)').order('created_at', { ascending: true }),
+      sb.from('products').select('id, name, image_url, category, stock, active'),
+    ]);
     if (ordersRes.error){ showToast('Erro ao carregar dashboard'); console.error(ordersRes.error); return; }
     if (productsRes.error){ showToast('Erro ao carregar produtos do dashboard'); console.error(productsRes.error); return; }
 
     const orders = ordersRes.data;
     const products = productsRes.data;
-    const paidOrders = orders.filter(o => o.payment_status === 'pago');
+    const productById = {};
+    products.forEach(p => { productById[p.id] = p; });
 
-    const now = new Date();
-    const todayStr = now.toISOString().slice(0,10);
-    const monthStr = now.toISOString().slice(0,7);
+    // ---------- 1. resumo principal (com comparação vs. período anterior) ----------
+    const { start, end } = getDateRangeForPeriod(dashPeriodKey, 'dashDateFrom', 'dashDateTo');
+    const { start: prevStart, end: prevEnd } = getPreviousPeriodRange(start, end);
 
-    // ---------- catálogo (total geral, não depende do período) ----------
-    const totalProducts = products.length;
-    const activeProductsCount = products.filter(p => p.active).length;
-    const inactiveProductsCount = totalProducts - activeProductsCount;
-    const outOfStockProducts = products.filter(p => p.stock <= 0);
-    const lowStockOnlyProducts = products.filter(p => p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD);
-
-    document.getElementById('statTotalProducts').textContent = totalProducts;
-    document.getElementById('statActiveProducts').textContent = activeProductsCount;
-    document.getElementById('statInactiveProducts').textContent = inactiveProductsCount;
-    document.getElementById('statOutOfStock').textContent = outOfStockProducts.length;
-    document.getElementById('statLowStock').textContent = lowStockOnlyProducts.length;
-    document.getElementById('statTotalCategories').textContent = categoriesRes.count ?? 0;
-
-    // ---------- resumo do período selecionado ----------
-    const { start, end } = getDashboardDateRange();
-    const ordersInPeriod = orders.filter(o => {
-      const d = new Date(o.created_at);
-      return d >= start && d <= end;
-    });
+    const inRange = (o, s, e) => { const d = new Date(o.created_at); return d >= s && d <= e; };
+    const ordersInPeriod = orders.filter(o => inRange(o, start, end));
+    const ordersInPrevPeriod = orders.filter(o => inRange(o, prevStart, prevEnd));
     const paidInPeriod = ordersInPeriod.filter(o => o.payment_status === 'pago');
-    const periodRevenue = paidInPeriod.reduce((s,o)=> s + Number(o.total), 0);
-    const periodAvg = paidInPeriod.length ? periodRevenue / paidInPeriod.length : 0;
-    const periodProductsSold = paidInPeriod.reduce((s,o)=> s + (o.order_items||[]).reduce((s2,i)=> s2 + i.quantity, 0), 0);
-    const periodCustomers = new Set(ordersInPeriod.map(o => o.customer_email)).size;
-    const periodPaid = paidInPeriod.length;
-    const periodPending = ordersInPeriod.filter(o => o.order_status === 'Aguardando pagamento').length;
-    const periodCanceled = ordersInPeriod.filter(o => o.order_status === 'Cancelado').length;
+    const paidInPrevPeriod = ordersInPrevPeriod.filter(o => o.payment_status === 'pago');
 
-    document.getElementById('statPeriodRevenue').textContent = formatBRL(periodRevenue);
-    document.getElementById('statPeriodOrders').textContent = ordersInPeriod.length;
-    document.getElementById('statPeriodAvg').textContent = formatBRL(periodAvg);
-    document.getElementById('statPeriodProductsSold').textContent = periodProductsSold;
-    document.getElementById('statPeriodCustomers').textContent = periodCustomers;
-    document.getElementById('statPeriodPaid').textContent = periodPaid;
-    document.getElementById('statPeriodPending').textContent = periodPending;
-    document.getElementById('statPeriodCanceled').textContent = periodCanceled;
+    const revenue = paidInPeriod.reduce((s,o)=> s + Number(o.total), 0);
+    const prevRevenue = paidInPrevPeriod.reduce((s,o)=> s + Number(o.total), 0);
+    const avgTicket = paidInPeriod.length ? revenue / paidInPeriod.length : 0;
+    const prevAvgTicket = paidInPrevPeriod.length ? prevRevenue / paidInPrevPeriod.length : 0;
+    const productsSold = paidInPeriod.reduce((s,o)=> s + (o.order_items||[]).reduce((s2,i)=> s2+i.quantity, 0), 0);
+    const prevProductsSold = paidInPrevPeriod.reduce((s,o)=> s + (o.order_items||[]).reduce((s2,i)=> s2+i.quantity, 0), 0);
 
-    // ---------- cartões fixos (hoje / este mês — sempre os mesmos, não mudam com o filtro acima) ----------
-    const salesToday = paidOrders.filter(o => o.created_at.slice(0,10) === todayStr).reduce((s,o)=> s + Number(o.total), 0);
-    const salesMonth = paidOrders.filter(o => o.created_at.slice(0,7) === monthStr).reduce((s,o)=> s + Number(o.total), 0);
-    const ordersToday = orders.filter(o => o.created_at.slice(0,10) === todayStr).length;
-    const pendingOrders = orders.filter(o => o.order_status === 'Aguardando pagamento').length;
-    const shippedOrders = orders.filter(o => o.order_status === 'Enviado').length;
-    const uniqueCustomers = new Set(orders.map(o => o.customer_email)).size;
-    const avgTicket = paidOrders.length ? paidOrders.reduce((s,o)=> s + Number(o.total),0) / paidOrders.length : 0;
-    const activeProducts = products.filter(p => p.active).length;
-    const lowStockProducts = products.filter(p => p.stock <= LOW_STOCK_THRESHOLD);
+    document.getElementById('dashRevenue').textContent = formatBRL(revenue);
+    renderTrend('dashRevenueTrend', revenue, prevRevenue);
+    document.getElementById('dashOrders').textContent = ordersInPeriod.length;
+    renderTrend('dashOrdersTrend', ordersInPeriod.length, ordersInPrevPeriod.length);
+    document.getElementById('dashAvgTicket').textContent = formatBRL(avgTicket);
+    renderTrend('dashAvgTicketTrend', avgTicket, prevAvgTicket);
+    document.getElementById('dashProductsSold').textContent = productsSold;
+    renderTrend('dashProductsSoldTrend', productsSold, prevProductsSold);
 
-    document.getElementById('statSalesToday').textContent = formatBRL(salesToday);
-    document.getElementById('statSalesMonth').textContent = formatBRL(salesMonth);
-    document.getElementById('statToday').textContent = ordersToday;
-    document.getElementById('statPending').textContent = pendingOrders;
-    document.getElementById('statShipped').textContent = shippedOrders;
-    document.getElementById('statCustomers').textContent = uniqueCustomers;
-    document.getElementById('statAvg').textContent = formatBRL(avgTicket);
-
-    // ---------- gráfico: vendas e pedidos últimos 30 dias ----------
+    // ---------- 2. gráfico principal: vendas ao longo do tempo (período próprio) ----------
+    let chartRange;
+    if (salesChartPeriodKey === 'custom' && window.__salesChartCustomFrom && window.__salesChartCustomTo){
+      chartRange = getDateRangeForPeriod('custom', null, null);
+      chartRange.start = new Date(window.__salesChartCustomFrom + 'T00:00:00');
+      chartRange.end = new Date(window.__salesChartCustomTo + 'T23:59:59');
+    } else {
+      chartRange = getDateRangeForPeriod(salesChartPeriodKey === 'custom' ? 'last30' : salesChartPeriodKey, null, null);
+    }
+    const dayCount = Math.max(1, Math.round((chartRange.end - chartRange.start) / 86400000) + 1);
     const byDayRevenue = {};
-    const byDayCount = {};
-    paidOrders.forEach(o => {
+    orders.filter(o => o.payment_status === 'pago').forEach(o => {
       const day = o.created_at.slice(0,10);
       byDayRevenue[day] = (byDayRevenue[day] || 0) + Number(o.total);
     });
-    orders.forEach(o => {
-      const day = o.created_at.slice(0,10);
-      byDayCount[day] = (byDayCount[day] || 0) + 1;
-    });
-    const days = [];
-    for (let i=29;i>=0;i--){
-      const d = new Date(now.getTime() - i*86400000).toISOString().slice(0,10);
-      days.push(d);
+    const chartDays = [];
+    for (let i = dayCount-1; i >= 0; i--){
+      chartDays.push(new Date(chartRange.end.getTime() - i*86400000).toISOString().slice(0,10));
     }
-    const revenueValues = days.map(d => byDayRevenue[d] || 0);
-    const countValues = days.map(d => byDayCount[d] || 0);
-    const labels = days.map(d => d.slice(5).split('-').reverse().join('/'));
+    const chartValues = chartDays.map(d => byDayRevenue[d] || 0);
+    const chartLabels = chartDays.map(d => d.slice(5).split('-').reverse().join('/'));
 
-    const revCtx = document.getElementById('revenueChart').getContext('2d');
+    const salesCtx = document.getElementById('mainSalesChart').getContext('2d');
     if (revenueChartInstance) revenueChartInstance.destroy();
-    revenueChartInstance = new Chart(revCtx, {
+    revenueChartInstance = new Chart(salesCtx, {
       type: 'line',
-      data: { labels, datasets: [{ label:'Vendas (R$)', data: revenueValues, borderColor:'#111', backgroundColor:'rgba(17,17,17,0.06)', fill:true, tension:.3, pointRadius:0 }] },
+      data: { labels: chartLabels, datasets: [{ label:'Vendas (R$)', data: chartValues, borderColor: (getComputedStyle(document.documentElement).getPropertyValue('--admin-accent') || '#111').trim(), backgroundColor:'rgba(17,17,17,0.06)', fill:true, tension:.3, pointRadius:0 }] },
       options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
     });
 
-    const ordCtx = document.getElementById('ordersChart').getContext('2d');
-    if (ordersChartInstance) ordersChartInstance.destroy();
-    ordersChartInstance = new Chart(ordCtx, {
+    // ---------- 3. pedidos por status (respeita o período principal, clicável) ----------
+    const ORDER_STATUS_CHART = [
+      { status:'Aguardando pagamento', label:'Pendentes', color:'#B8860B' },
+      { status:'Pago', label:'Pagos', color:'#1F7A44' },
+      { status:'Enviado', label:'Enviados', color:'#1D5F92' },
+      { status:'Entregue', label:'Concluídos', color:'#4C4C50' },
+      { status:'Cancelado', label:'Cancelados', color:'#B23A2E' },
+    ];
+    const statusCounts = ORDER_STATUS_CHART.map(s => ordersInPeriod.filter(o => o.order_status === s.status).length);
+
+    const statusCtx = document.getElementById('orderStatusChart').getContext('2d');
+    if (orderStatusChartInstance) orderStatusChartInstance.destroy();
+    orderStatusChartInstance = new Chart(statusCtx, {
       type: 'bar',
-      data: { labels, datasets: [{ label:'Pedidos', data: countValues, backgroundColor:'#111' }] },
-      options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{stepSize:1}}} }
+      data: { labels: ORDER_STATUS_CHART.map(s=>s.label), datasets: [{ data: statusCounts, backgroundColor: ORDER_STATUS_CHART.map(s=>s.color) }] },
+      options: {
+        indexAxis:'y', responsive:true, plugins:{legend:{display:false}},
+        scales:{x:{beginAtZero:true, ticks:{stepSize:1}}},
+        onClick: (evt, elements) => {
+          if (!elements.length) return;
+          goToOrdersFiltered(ORDER_STATUS_CHART[elements[0].index].status);
+        },
+        onHover: (evt, elements) => { evt.native.target.style.cursor = elements.length ? 'pointer' : 'default'; },
+      }
     });
 
-    // ---------- gráfico: categorias mais vendidas ----------
-    const productCategoryMap = {};
-    products.forEach(p => { productCategoryMap[p.id] = p.category; });
-    const byCategory = {};
-    paidOrders.forEach(o => {
-      (o.order_items || []).forEach(item => {
-        const cat = productCategoryMap[item.product_id] || 'outros';
-        byCategory[cat] = (byCategory[cat] || 0) + item.quantity;
+    // ---------- 4. produtos mais vendidos (top 5, no período principal) ----------
+    const salesByProduct = {};
+    paidInPeriod.forEach(o => {
+      (o.order_items||[]).forEach(item => {
+        if (!salesByProduct[item.product_id]) salesByProduct[item.product_id] = { name:item.product_name, qty:0, revenue:0, productId:item.product_id };
+        salesByProduct[item.product_id].qty += item.quantity;
+        salesByProduct[item.product_id].revenue += Number(item.unit_price) * item.quantity;
       });
     });
-    const catLabels = Object.keys(byCategory);
-    const catValues = catLabels.map(c => byCategory[c]);
+    const topProducts = Object.values(salesByProduct).sort((a,b)=> b.qty - a.qty).slice(0,5);
+    document.getElementById('topProductsList').innerHTML = topProducts.map((p, i) => {
+      const prod = productById[p.productId];
+      const img = prod?.image_url
+        ? `<img src="${prod.image_url}" alt="">`
+        : `<div class="top-product-fallback" style="display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--ink-soft);">Sem foto</div>`;
+      return `
+        <div class="top-product-row">
+          <span class="top-product-rank">${i+1}º</span>
+          ${img}
+          <div style="flex:1; min-width:0;">
+            <p style="font-size:13px; font-weight:600; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</p>
+            <p style="font-size:11.5px; color:var(--ink-soft); margin:1px 0 0;">${p.qty} vendido(s)</p>
+          </div>
+          <p style="font-size:13px; font-weight:800; margin:0; flex-shrink:0;">${formatBRL(p.revenue)}</p>
+        </div>
+      `;
+    }).join('') || `<p style="text-align:center;color:var(--ink-soft);padding:20px 0; font-size:13px;">Nenhuma venda nesse período.</p>`;
 
-    const catCtx = document.getElementById('categoryChart').getContext('2d');
-    if (categoryChartInstance) categoryChartInstance.destroy();
-    categoryChartInstance = new Chart(catCtx, {
-      type: 'bar',
-      data: { labels: catLabels, datasets: [{ label:'Unidades vendidas', data: catValues, backgroundColor:'#111' }] },
-      options: { indexAxis:'y', responsive:true, plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true, ticks:{stepSize:1}}} }
-    });
+    // ---------- 5. precisa de atenção (situação atual, não depende do período) ----------
+    const outOfStock = products.filter(p => p.active && p.stock <= 0);
+    const lowStock = products.filter(p => p.active && p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD);
+    const pendingPayment = orders.filter(o => o.order_status === 'Aguardando pagamento').length;
+    const awaitingShipment = orders.filter(o => o.order_status === 'Pago').length;
 
-    // ---------- últimos pedidos ----------
-    const recentOrders = [...orders].sort((a,b)=> new Date(b.created_at)-new Date(a.created_at)).slice(0,5);
-    document.getElementById('recentOrdersBody').innerHTML = recentOrders.map(o => `
-      <tr>
-        <td>#${o.id.slice(0,8)}</td>
-        <td>${o.customer_name}</td>
-        <td>${statusBadge(o.order_status)}</td>
-        <td>${formatBRL(o.total)}</td>
-      </tr>
-    `).join('') || `<tr><td colspan="4" style="text-align:center;color:var(--ink-soft);padding:16px;">Nenhum pedido ainda.</td></tr>`;
+    const alerts = [];
+    if (outOfStock.length) alerts.push({ color:'var(--red)', text:`${outOfStock.length} produto(s) sem estoque`, sub:'Cliente não consegue comprar', action:()=> navigateTo({ panel:'stock', label:'Estoque' }) });
+    if (lowStock.length) alerts.push({ color:'var(--amber, #B8860B)', text:`${lowStock.length} produto(s) com estoque baixo`, sub:`${LOW_STOCK_THRESHOLD} unidades ou menos`, action:()=> navigateTo({ panel:'stock', label:'Estoque' }) });
+    if (pendingPayment) alerts.push({ color:'var(--amber, #B8860B)', text:`${pendingPayment} pedido(s) aguardando pagamento`, sub:'', action:()=> goToOrdersFiltered('Aguardando pagamento') });
+    if (awaitingShipment) alerts.push({ color:'var(--blue, #1D5F92)', text:`${awaitingShipment} pedido(s) pagos aguardando envio`, sub:'', action:()=> goToOrdersFiltered('Pago') });
 
-    // ---------- clientes recentes ----------
-    const customerMap = {};
-    orders.forEach(o=>{
-      const key = o.customer_email;
-      if (!customerMap[key]) customerMap[key] = { name:o.customer_name, orders:0, spent:0, last:o.created_at };
-      customerMap[key].orders += 1;
-      if (o.payment_status === 'pago') customerMap[key].spent += Number(o.total);
-      if (new Date(o.created_at) > new Date(customerMap[key].last)) customerMap[key].last = o.created_at;
-    });
-    const recentCustomers = Object.values(customerMap).sort((a,b)=> new Date(b.last)-new Date(a.last)).slice(0,5);
-    document.getElementById('recentCustomersBody').innerHTML = recentCustomers.map(c => `
-      <tr><td>${c.name}</td><td>${c.orders}</td><td>${formatBRL(c.spent)}</td></tr>
-    `).join('') || `<tr><td colspan="3" style="text-align:center;color:var(--ink-soft);padding:16px;">Nenhum cliente ainda.</td></tr>`;
-
-    // ---------- estoque baixo ----------
-    document.getElementById('lowStockBody').innerHTML = lowStockProducts
-      .sort((a,b)=> a.stock - b.stock)
-      .map(p => `
-        <tr><td>${p.name}</td><td>${p.category}</td><td>${p.stock <= 0 ? '<span class="badge badge-red">Esgotado</span>' : `<span class="badge badge-amber">${p.stock} un.</span>`}</td></tr>
-      `).join('') || `<tr><td colspan="3" style="text-align:center;color:var(--ink-soft);padding:16px;">Nenhum produto com estoque baixo.</td></tr>`;
+    const alertsListEl = document.getElementById('dashAlertsList');
+    if (!alerts.length){
+      alertsListEl.innerHTML = `<p style="text-align:center;color:var(--ink-soft);padding:20px 0; font-size:13px;">Tudo em dia — nenhum ponto de atenção agora.</p>`;
+    } else {
+      alertsListEl.innerHTML = alerts.map((a, i) => `
+        <div class="alert-row">
+          <div style="display:flex; align-items:center;">
+            <span class="alert-dot" style="background:${a.color};"></span>
+            <div>
+              <p class="alert-text">${a.text}</p>
+              ${a.sub ? `<p class="alert-sub">${a.sub}</p>` : ''}
+            </div>
+          </div>
+          <button class="btn btn-ghost" data-alert-action="${i}" style="padding:6px 12px; font-size:12px;">Ver</button>
+        </div>
+      `).join('');
+      alerts.forEach((a, i) => {
+        document.querySelector(`[data-alert-action="${i}"]`).addEventListener('click', a.action);
+      });
+    }
   }
 
   // ================= ESTOQUE =================
