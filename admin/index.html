@@ -6,11 +6,50 @@
 <title>Painel Admin | JA Store</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+// Aplica o tema salvo (se houver) ANTES da página desenhar, pra não piscar
+// o tema padrão por uma fração de segundo. Só lê o localStorage deste
+// navegador — não toca no banco de dados nem em nada da loja pública.
+(function(){
+  try {
+    var raw = localStorage.getItem('ja_admin_theme');
+    if (!raw) return;
+    var theme = JSON.parse(raw);
+    var c = theme.colors || {};
+    var root = document.documentElement.style;
+    ['bg','ink','sidebar'].forEach(function(k){ if (c[k]) root.setProperty('--'+k, c[k]); });
+    if (c.admin_primary) root.setProperty('--admin-primary', c.admin_primary);
+    if (c.admin_secondary) root.setProperty('--admin-secondary', c.admin_secondary);
+    if (c.admin_accent) root.setProperty('--admin-accent', c.admin_accent);
+    if (c.admin_btn) root.setProperty('--admin-btn', c.admin_btn);
+    if (c.sidebar){
+      var hex = c.sidebar.replace('#','');
+      var r = parseInt(hex.substr(0,2),16)||0, g = parseInt(hex.substr(2,2),16)||0, b = parseInt(hex.substr(4,2),16)||0;
+      var isDark = (0.299*r + 0.587*g + 0.114*b) < 128;
+      function shade(pct){
+        var t = pct < 0 ? 0 : 255, p = Math.abs(pct)/100;
+        var nr = Math.round((t-r)*p+r), ng = Math.round((t-g)*p+g), nb = Math.round((t-b)*p+b);
+        return '#' + [nr,ng,nb].map(function(v){ return Math.max(0,Math.min(255,v)).toString(16).padStart(2,'0'); }).join('');
+      }
+      root.setProperty('--sidebar-hover', shade(isDark?15:-8));
+      root.setProperty('--sidebar-active', shade(isDark?25:-14));
+      root.setProperty('--sidebar-text', isDark?'#C9C9CC':'#5A5A5E');
+      root.setProperty('--sidebar-text-active', isDark?'#FFFFFF':'#111111');
+    }
+    var styleDefs = { classic:{radius:'10px',shadow:'none'}, modern:{radius:'16px',shadow:'0 6px 20px rgba(17,17,17,0.08)'}, premium:{radius:'12px',shadow:'0 4px 18px rgba(0,0,0,0.22)'}, minimal:{radius:'4px',shadow:'none'} };
+    var sd = styleDefs[theme.style] || styleDefs.classic;
+    root.setProperty('--admin-radius', sd.radius);
+    root.setProperty('--admin-shadow', sd.shadow);
+  } catch (err) { /* se der qualquer erro, só mantém o padrão — nunca quebra o carregamento */ }
+})();
+</script>
 <style>
   :root{
-    --sidebar:#0B0B0C; --sidebar-hover:#1C1C1E; --sidebar-active:#232326;
+    --sidebar:#0B0B0C; --sidebar-hover:#1C1C1E; --sidebar-active:#232326; --sidebar-text:#C9C9CC; --sidebar-text-active:#FFFFFF;
     --bg:#F4F4F5; --ink:#111111; --ink-soft:#6E6E73; --line:#E4E4E4; --card:#FFFFFF;
     --accent:#111111; --green:#1F7A44; --blue:#1D5F92; --amber:#B8860B; --red:#B23A2E;
+    --admin-primary:#111111; --admin-secondary:#6E6E73; --admin-accent:#111111; --admin-btn:#111111;
+    --admin-radius:12px; --admin-shadow:none;
   }
   *{box-sizing:border-box;}
   body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif; font-size:14px;}
@@ -22,7 +61,7 @@
   td{padding:12px; border-bottom:1px solid var(--line); vertical-align:middle;}
   tr:last-child td{border-bottom:none;}
   .btn{padding:9px 15px; border:none; border-radius:7px; font-size:13px; font-weight:600;}
-  .btn-primary{background:var(--ink); color:#fff;}
+  .btn-primary{background:var(--admin-btn); color:#fff;}
   .btn-danger{background:var(--red); color:#fff;}
   .btn-ghost{background:transparent; border:1px solid var(--line); color:var(--ink);}
   .icon-btn{width:30px; height:30px; border-radius:6px; border:1px solid var(--line); background:#fff; display:inline-flex; align-items:center; justify-content:center;}
@@ -40,27 +79,27 @@
   #dashboard{display:none;}
   .layout{display:flex; min-height:100vh;}
 
-  .sidebar{width:236px; flex-shrink:0; background:var(--sidebar); color:#fff; display:flex; flex-direction:column; position:sticky; top:0; height:100vh;}
-  .sidebar-brand{display:flex; align-items:center; gap:9px; padding:20px 18px; border-bottom:1px solid #232326;}
-  .sidebar-brand .mark{width:28px; height:28px; border-radius:6px; background:#fff; color:#0B0B0C; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px; flex-shrink:0;}
+  .sidebar{width:236px; flex-shrink:0; background:var(--sidebar); color:var(--sidebar-text-active); display:flex; flex-direction:column; position:sticky; top:0; height:100vh;}
+  .sidebar-brand{display:flex; align-items:center; gap:9px; padding:20px 18px; border-bottom:1px solid var(--sidebar-hover);}
+  .sidebar-brand .mark{width:28px; height:28px; border-radius:6px; background:var(--sidebar-text-active); color:var(--sidebar); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px; flex-shrink:0;}
   .sidebar-brand span{font-weight:800; font-size:14.5px; letter-spacing:.02em;}
-  .sidebar-label{padding:16px 18px 6px; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:#7A7A7E; font-weight:700;}
+  .sidebar-label{padding:16px 18px 6px; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--sidebar-text); font-weight:700;}
   .side-nav{flex:1; padding:4px 10px; overflow-y:auto;}
   .side-btn{
     width:100%; display:flex; align-items:center; gap:11px; padding:10px 12px; border:none; background:transparent;
-    color:#C9C9CC; font-size:13.5px; font-weight:600; border-radius:8px; text-align:left; margin-bottom:2px;
+    color:var(--sidebar-text); font-size:13.5px; font-weight:600; border-radius:8px; text-align:left; margin-bottom:2px;
   }
   .side-btn svg{flex-shrink:0; opacity:.85;}
-  .side-btn:hover{background:var(--sidebar-hover); color:#fff;}
-  .side-btn.active{background:var(--sidebar-active); color:#fff;}
+  .side-btn:hover{background:var(--sidebar-hover); color:var(--sidebar-text-active);}
+  .side-btn.active{background:var(--admin-primary); color:var(--sidebar-text-active);}
   .side-btn.active svg{opacity:1;}
-  .sidebar-foot{padding:10px; border-top:1px solid #232326;}
+  .sidebar-foot{padding:10px; border-top:1px solid var(--sidebar-hover);}
 
   .side-group-head{
     width:100%; display:flex; align-items:center; gap:11px; padding:10px 12px; border:none; background:transparent;
     color:#C9C9CC; font-size:13.5px; font-weight:600; border-radius:8px; text-align:left; margin-bottom:2px; cursor:pointer;
   }
-  .side-group-head:hover{background:var(--sidebar-hover); color:#fff;}
+  .side-group-head:hover{background:var(--sidebar-hover); color:var(--sidebar-text-active);}
   .side-group-head svg.chev{margin-left:auto; flex-shrink:0; transition:transform .15s ease;}
   .side-group.open .side-group-head svg.chev{transform:rotate(90deg);}
   .side-group-children{display:none; padding-left:30px; margin-bottom:2px;}
@@ -69,14 +108,14 @@
     width:100%; display:block; padding:8px 10px; border:none; background:transparent;
     color:#A6A6AA; font-size:12.5px; font-weight:600; border-radius:6px; text-align:left; margin-bottom:1px;
   }
-  .side-subbtn:hover{background:var(--sidebar-hover); color:#fff;}
+  .side-subbtn:hover{background:var(--sidebar-hover); color:var(--sidebar-text-active);}
   .policy-list-btn{
     width:100%; display:block; padding:8px 10px; background:#fff; cursor:pointer;
   }
   .policy-list-btn:hover{background:var(--bg);}
   .policy-list-btn.active{background:var(--ink); border-color:var(--ink) !important;}
   .policy-list-btn.active span{color:#fff !important;}
-  .side-subbtn.active{background:var(--sidebar-active); color:#fff;}
+  .side-subbtn.active{background:var(--sidebar-active); color:var(--sidebar-text-active);}
 
   .main{flex:1; min-width:0;}
   .topbar{
@@ -92,7 +131,7 @@
   .content{padding:24px 26px;}
   .panel{display:none;}
   .panel.active{display:block;}
-  .card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin-bottom:18px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--admin-radius); box-shadow:var(--admin-shadow); padding:18px 20px; margin-bottom:18px;}
   .panel-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;}
   .panel-head h2{font-size:16px; margin:0; font-weight:800;}
 
@@ -120,9 +159,9 @@
   .page-btn:disabled{opacity:.4;}
 
   .stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:20px;}
-  .stat-card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px;}
+  .stat-card{background:var(--card); border:1px solid var(--line); border-radius:var(--admin-radius); box-shadow:var(--admin-shadow); padding:18px;}
   .stat-card p.label{font-size:12.5px; color:var(--ink-soft); margin:0 0 8px;}
-  .stat-card p.value{font-size:24px; font-weight:800; margin:0; display:flex; align-items:baseline; gap:8px;}
+  .stat-card p.value{font-size:24px; font-weight:800; margin:0; display:flex; align-items:baseline; gap:8px; color:var(--admin-accent);}
   .stat-card .delta{font-size:12px; color:var(--green); font-weight:700;}
   .charts-grid{display:grid; grid-template-columns:1fr; gap:16px;}
   @media (min-width:900px){ .charts-grid{grid-template-columns:1fr 1fr;} }
@@ -774,6 +813,98 @@
         </div>
 
         <!-- ---------- PERSONALIZAÇÃO (aba própria, fora de Configurações) ---------- -->
+        <!-- ---------- PERSONALIZAÇÃO → PAINEL ADMINISTRATIVO ---------- -->
+        <div class="panel" data-panel="admin-appearance">
+          <div class="card">
+            <div class="panel-head">
+              <h2>Prévia do Painel Administrativo</h2>
+            </div>
+            <p style="font-size:11.5px; color:var(--ink-soft); margin:0 0 14px;">
+              Uma maquete fiel ao painel real (o painel exige login, então não dá pra usar o mesmo iframe da Loja Online aqui) — atualiza ao vivo com o que você for ajustando abaixo.
+            </p>
+            <div id="adminPreviewMock" style="border:1px solid var(--line); border-radius:12px; overflow:hidden; display:flex; height:260px;">
+              <div id="mockSidebar" style="width:150px; flex-shrink:0; display:flex; flex-direction:column; padding:14px 10px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+                  <div id="mockLogoWrap" style="width:24px; height:24px; border-radius:6px; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:11px;">JA</div>
+                  <span id="mockBrandText" style="font-weight:800; font-size:12px;">STORE</span>
+                </div>
+                <div id="mockNavActive" style="border-radius:6px; padding:7px 8px; font-size:11px; font-weight:700; margin-bottom:4px;">Dashboard</div>
+                <div id="mockNavItem1" style="border-radius:6px; padding:7px 8px; font-size:11px; margin-bottom:4px;">Pedidos</div>
+                <div id="mockNavItem2" style="border-radius:6px; padding:7px 8px; font-size:11px;">Produtos</div>
+              </div>
+              <div style="flex:1; display:flex; flex-direction:column;">
+                <div id="mockTopbar" style="display:flex; align-items:center; justify-content:flex-end; gap:8px; padding:10px 16px; border-bottom:1px solid var(--line);">
+                  <div id="mockAvatarWrap" style="width:26px; height:26px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#fff;">JA</div>
+                </div>
+                <div style="flex:1; padding:16px; display:flex; gap:10px;">
+                  <div id="mockCard1" style="flex:1; border:1px solid var(--line); padding:12px;">
+                    <p style="font-size:9.5px; color:var(--ink-soft); margin:0 0 6px;">Faturamento</p>
+                    <p id="mockCardValue" style="font-size:15px; font-weight:800; margin:0;">R$ 4.230</p>
+                  </div>
+                  <div id="mockCard2" style="flex:1; border:1px solid var(--line); padding:12px;">
+                    <p style="font-size:9.5px; color:var(--ink-soft); margin:0 0 6px;">Pedidos</p>
+                    <p style="font-size:15px; font-weight:800; margin:0;">18</p>
+                  </div>
+                </div>
+                <div style="padding:0 16px 16px;">
+                  <span id="mockBtn" style="display:inline-block; padding:8px 16px; border-radius:7px; font-size:11px; font-weight:700; color:#fff;">Botão de exemplo</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:20px;">
+            <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Logo do painel</p>
+            <p style="font-size:12px; color:var(--ink-soft); margin:0 0 12px;">É a marca que aparece no topo do menu lateral do painel — diferente da logo da loja pública.</p>
+            <div id="adminLogoPreviewWrap" style="display:none; margin-bottom:8px;">
+              <img id="adminLogoPreview" style="width:44px; height:44px; object-fit:contain; border-radius:8px; border:1px solid var(--line); background:#0B0B0C; padding:6px;">
+            </div>
+            <input type="hidden" id="adminLogoUrlInput">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <input type="file" id="adminLogoFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:180px; font-size:12.5px;">
+              <button class="btn btn-ghost" id="removeAdminLogoBtn" type="button">Remover</button>
+            </div>
+            <p id="adminLogoUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:6px 0 0;"></p>
+          </div>
+
+          <div class="card" style="margin-top:20px;">
+            <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Foto do administrador</p>
+            <p style="font-size:12px; color:var(--ink-soft); margin:0 0 12px;">Aparece no avatar circular, no canto superior do painel.</p>
+            <div id="adminPhotoPreviewWrap" style="display:none; margin-bottom:8px;">
+              <img id="adminPhotoPreview" style="width:56px; height:56px; object-fit:cover; border-radius:50%; border:1px solid var(--line);">
+            </div>
+            <input type="hidden" id="adminPhotoUrlInput">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <input type="file" id="adminPhotoFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:180px; font-size:12.5px;">
+              <button class="btn btn-ghost" id="removeAdminPhotoBtn" type="button">Remover</button>
+            </div>
+            <p id="adminPhotoUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:6px 0 0;"></p>
+          </div>
+
+          <div class="card" style="margin-top:20px;">
+            <p style="font-size:12px; color:var(--ink-soft); margin:0 0 16px;">
+              Isso muda só a aparência do painel administrativo (pra você que usa) — não afeta a loja pública, nem o menu, nem nenhuma funcionalidade. Fica salvo neste navegador.
+            </p>
+
+            <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Estilo</p>
+            <div class="palette-grid" id="adminStyleGrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));"></div>
+
+            <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:24px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Paletas prontas</p>
+            <div class="palette-grid" id="adminPaletteGrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));"></div>
+
+            <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:24px 0 4px; border-top:1px solid var(--line); padding-top:20px;">Personalizar manualmente</p>
+            <p style="font-size:12px; color:var(--ink-soft); margin:0 0 10px;">Ajuste fino por cima do estilo/paleta escolhidos acima.</p>
+            <div id="adminColorRows"></div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:20px;">
+              <button class="btn btn-ghost" id="previewAdminThemeBtn" type="button">Visualizar</button>
+              <button class="btn btn-primary" id="applyAdminThemeBtn" type="button">Aplicar</button>
+              <button class="btn btn-ghost" id="resetAdminThemeBtn" type="button">Restaurar padrão</button>
+            </div>
+            <p id="adminThemeStatus" style="font-size:12.5px; margin-top:10px;"></p>
+          </div>
+        </div>
+
         <div class="panel" data-panel="appearance">
           <div class="card">
             <div class="panel-head">
@@ -1216,6 +1347,322 @@
 (function(){
   const sb = window.getSupabaseClient();
 
+  // ================= APARÊNCIA DO PAINEL (tema visual do admin) =================
+  // Só muda a aparência — nunca a estrutura, o menu ou as funcionalidades.
+  // Fica salvo neste navegador (localStorage), nunca no banco de dados.
+  const ADMIN_THEME_STORAGE_KEY = 'ja_admin_theme';
+
+  const ADMIN_STYLES = [
+    { key:'classic', name:'Clássico', description:'Profissional, limpo, cards simples e bem distribuídos.', radius:'10px', shadow:'none', defaultSidebar:'#0B0B0C' },
+    { key:'modern', name:'Moderno', description:'Estilo SaaS atual — cards refinados, mais espaço.', radius:'16px', shadow:'0 6px 20px rgba(17,17,17,0.08)', defaultSidebar:'#0B0B0C' },
+    { key:'premium', name:'Premium', description:'Sofisticado, contraste elegante, aparência exclusiva.', radius:'12px', shadow:'0 4px 18px rgba(0,0,0,0.22)', defaultSidebar:'#000000' },
+    { key:'minimal', name:'Minimalista', description:'Extremamente limpo, foco total nas informações.', radius:'4px', shadow:'none', defaultSidebar:'#FFFFFF' },
+  ];
+
+  const ADMIN_PALETTES = [
+    { key:'original', name:'Original', colors:{ bg:'#F4F4F5', ink:'#111111', sidebar:'#0B0B0C', admin_primary:'#111111', admin_secondary:'#6E6E73', admin_accent:'#111111', admin_btn:'#111111' } },
+    { key:'blue', name:'Azul profissional', colors:{ bg:'#F3F6F9', ink:'#111827', sidebar:'#0F3D63', admin_primary:'#1D5F92', admin_secondary:'#5A7A99', admin_accent:'#1E6FB8', admin_btn:'#1D5F92' } },
+    { key:'purple', name:'Roxo moderno', colors:{ bg:'#F6F4FA', ink:'#1D1730', sidebar:'#2E1F52', admin_primary:'#5B3AA0', admin_secondary:'#8A72B8', admin_accent:'#7C4DE0', admin_btn:'#5B3AA0' } },
+    { key:'black_premium', name:'Preto premium', colors:{ bg:'#F4F4F4', ink:'#111111', sidebar:'#000000', admin_primary:'#C79A3C', admin_secondary:'#8A8A8A', admin_accent:'#C79A3C', admin_btn:'#111111' } },
+    { key:'neutral', name:'Neutro minimalista', colors:{ bg:'#FAFAFA', ink:'#222222', sidebar:'#FFFFFF', admin_primary:'#3A3A3D', admin_secondary:'#8A8A8E', admin_accent:'#3A3A3D', admin_btn:'#3A3A3D' } },
+  ];
+
+  const ADMIN_COLOR_FIELDS = [
+    { key:'admin_primary', label:'Cor principal' },
+    { key:'admin_secondary', label:'Cor secundária' },
+    { key:'admin_accent', label:'Cor de destaque' },
+    { key:'bg', label:'Fundo' },
+    { key:'ink', label:'Texto' },
+    { key:'sidebar', label:'Menu lateral' },
+    { key:'admin_btn', label:'Botões' },
+  ];
+
+  function hexLuminance(hex){
+    const h = (hex||'#000000').replace('#','');
+    const r = parseInt(h.substr(0,2),16)||0, g = parseInt(h.substr(2,2),16)||0, b = parseInt(h.substr(4,2),16)||0;
+    return 0.299*r + 0.587*g + 0.114*b;
+  }
+  function shadeHex(hex, pct){
+    const h = (hex||'#000000').replace('#','');
+    const r = parseInt(h.substr(0,2),16)||0, g = parseInt(h.substr(2,2),16)||0, b = parseInt(h.substr(4,2),16)||0;
+    const t = pct < 0 ? 0 : 255, p = Math.abs(pct)/100;
+    const nr = Math.round((t-r)*p+r), ng = Math.round((t-g)*p+g), nb = Math.round((t-b)*p+b);
+    return '#' + [nr,ng,nb].map(v=>Math.max(0,Math.min(255,v)).toString(16).padStart(2,'0')).join('');
+  }
+
+  function getDefaultAdminTheme(){
+    return { style:'classic', colors:{ ...ADMIN_PALETTES[0].colors }, logoUrl:null, photoUrl:null };
+  }
+
+  function applyAdminTheme(theme){
+    const root = document.documentElement.style;
+    const c = theme.colors;
+    root.setProperty('--bg', c.bg);
+    root.setProperty('--ink', c.ink);
+    root.setProperty('--sidebar', c.sidebar);
+    root.setProperty('--admin-primary', c.admin_primary);
+    root.setProperty('--admin-secondary', c.admin_secondary);
+    root.setProperty('--admin-accent', c.admin_accent);
+    root.setProperty('--admin-btn', c.admin_btn);
+
+    const isDark = hexLuminance(c.sidebar) < 128;
+    root.setProperty('--sidebar-hover', shadeHex(c.sidebar, isDark ? 15 : -8));
+    root.setProperty('--sidebar-active', shadeHex(c.sidebar, isDark ? 25 : -14));
+    root.setProperty('--sidebar-text', isDark ? '#C9C9CC' : '#5A5A5E');
+    root.setProperty('--sidebar-text-active', isDark ? '#FFFFFF' : '#111111');
+
+    const styleDef = ADMIN_STYLES.find(s=>s.key===theme.style) || ADMIN_STYLES[0];
+    root.setProperty('--admin-radius', styleDef.radius);
+    root.setProperty('--admin-shadow', styleDef.shadow);
+
+    // ---------- aplica de verdade no sidebar/avatar reais do painel ----------
+    const realMark = document.querySelector('.sidebar-brand .mark');
+    if (realMark){
+      realMark.innerHTML = theme.logoUrl ? `<img src="${theme.logoUrl}" style="width:100%;height:100%;object-fit:contain;" onerror="this.parentElement.textContent='JA';">` : 'JA';
+    }
+    const realAvatar = document.getElementById('userAvatar');
+    if (realAvatar){
+      if (theme.photoUrl){
+        realAvatar.innerHTML = `<img src="${theme.photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent=(window.__adminAvatarInitials||'JA');">`;
+      } else if (window.__adminAvatarInitials) {
+        realAvatar.textContent = window.__adminAvatarInitials;
+      }
+    }
+
+    updateAdminPreviewMock(theme);
+  }
+
+  function updateAdminPreviewMock(theme){
+    const c = theme.colors;
+    const mockSidebar = document.getElementById('mockSidebar');
+    if (!mockSidebar) return; // maquete só existe na tela "Painel Administrativo"
+    const isDark = hexLuminance(c.sidebar) < 128;
+    const hover = shadeHex(c.sidebar, isDark ? 15 : -8);
+    const active = shadeHex(c.sidebar, isDark ? 25 : -14);
+    const textColor = isDark ? '#C9C9CC' : '#5A5A5E';
+    const textActive = isDark ? '#FFFFFF' : '#111111';
+    const styleDef = ADMIN_STYLES.find(s=>s.key===theme.style) || ADMIN_STYLES[0];
+
+    mockSidebar.style.background = c.sidebar;
+    mockSidebar.style.color = textColor;
+    document.getElementById('mockBrandText').style.color = textActive;
+    document.getElementById('mockLogoWrap').style.background = textActive;
+    document.getElementById('mockLogoWrap').style.color = c.sidebar;
+    document.getElementById('mockLogoWrap').innerHTML = theme.logoUrl ? `<img src="${theme.logoUrl}" style="width:100%;height:100%;object-fit:contain;">` : 'JA';
+
+    document.getElementById('mockNavActive').style.background = c.admin_primary;
+    document.getElementById('mockNavActive').style.color = textActive;
+    [document.getElementById('mockNavItem1'), document.getElementById('mockNavItem2')].forEach(el=>{ el.style.color = textColor; });
+
+    document.getElementById('mockTopbar').style.background = c.bg;
+    document.getElementById('mockTopbar').style.borderColor = '#00000014';
+    const avatarWrap = document.getElementById('mockAvatarWrap');
+    avatarWrap.style.background = c.ink;
+    avatarWrap.innerHTML = theme.photoUrl ? `<img src="${theme.photoUrl}" style="width:100%;height:100%;object-fit:cover;">` : 'JA';
+
+    document.getElementById('adminPreviewMock').style.background = c.bg;
+    [document.getElementById('mockCard1'), document.getElementById('mockCard2')].forEach(el=>{
+      el.style.borderRadius = styleDef.radius;
+      el.style.boxShadow = styleDef.shadow;
+      el.style.background = '#fff';
+      el.style.color = c.ink;
+    });
+    document.getElementById('mockCardValue').style.color = c.admin_accent;
+    const mockBtn = document.getElementById('mockBtn');
+    mockBtn.style.background = c.admin_btn;
+    mockBtn.style.borderRadius = styleDef.radius;
+  }
+
+  function loadAdminThemeFromStorage(){
+    try {
+      const raw = localStorage.getItem(ADMIN_THEME_STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (err) {}
+    return null;
+  }
+
+  let savedAdminTheme = loadAdminThemeFromStorage() || getDefaultAdminTheme();
+  let currentAdminTheme = JSON.parse(JSON.stringify(savedAdminTheme));
+  applyAdminTheme(currentAdminTheme); // reaplica (o <head> já fez isso antes da tela desenhar; aqui é só pra preencher o estado do JS)
+
+  function renderAdminThemePanel(){
+    document.getElementById('adminLogoUrlInput').value = currentAdminTheme.logoUrl || '';
+    updateAdminLogoPreview();
+    document.getElementById('adminPhotoUrlInput').value = currentAdminTheme.photoUrl || '';
+    updateAdminPhotoPreview();
+    updateAdminPreviewMock(currentAdminTheme);
+
+    document.getElementById('adminStyleGrid').innerHTML = ADMIN_STYLES.map(s => `
+      <button class="palette-card ${currentAdminTheme.style===s.key ? 'selected' : ''}" type="button" data-admin-style="${s.key}">
+        <b>${s.name}</b>
+        <p style="font-size:11px; color:var(--ink-soft); margin:6px 0 0;">${s.description}</p>
+      </button>
+    `).join('');
+    document.querySelectorAll('[data-admin-style]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const styleDef = ADMIN_STYLES.find(s=>s.key===btn.dataset.adminStyle);
+        currentAdminTheme.style = styleDef.key;
+        currentAdminTheme.colors.sidebar = styleDef.defaultSidebar;
+        document.querySelectorAll('#adminStyleGrid .palette-card').forEach(c=>c.classList.remove('selected'));
+        btn.classList.add('selected');
+        renderAdminColorRows();
+        applyAdminTheme(currentAdminTheme);
+      });
+    });
+
+    document.getElementById('adminPaletteGrid').innerHTML = ADMIN_PALETTES.map(p => `
+      <button class="palette-card" type="button" data-admin-palette="${p.key}">
+        <div class="palette-swatches">
+          <span style="background:${p.colors.admin_primary}"></span>
+          <span style="background:${p.colors.admin_accent}"></span>
+          <span style="background:${p.colors.sidebar}"></span>
+          <span style="background:${p.colors.bg}; border-color:var(--line);"></span>
+        </div>
+        <b>${p.name}</b>
+      </button>
+    `).join('');
+    document.querySelectorAll('[data-admin-palette]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const paletteDef = ADMIN_PALETTES.find(p=>p.key===btn.dataset.adminPalette);
+        currentAdminTheme.colors = { ...paletteDef.colors };
+        document.querySelectorAll('#adminPaletteGrid .palette-card').forEach(c=>c.classList.remove('selected'));
+        btn.classList.add('selected');
+        renderAdminColorRows();
+        applyAdminTheme(currentAdminTheme);
+      });
+    });
+
+    renderAdminColorRows();
+  }
+
+  function renderAdminColorRows(){
+    document.getElementById('adminColorRows').innerHTML = ADMIN_COLOR_FIELDS.map(f => `
+      <div class="color-row">
+        <label>${f.label}</label>
+        <input type="color" id="admin_picker_${f.key}" value="${currentAdminTheme.colors[f.key]}">
+        <input type="text" id="admin_hex_${f.key}" value="${currentAdminTheme.colors[f.key]}" maxlength="7">
+      </div>
+    `).join('');
+
+    ADMIN_COLOR_FIELDS.forEach(f=>{
+      const picker = document.getElementById(`admin_picker_${f.key}`);
+      const hex = document.getElementById(`admin_hex_${f.key}`);
+      picker.addEventListener('input', ()=>{
+        hex.value = picker.value.toUpperCase();
+        currentAdminTheme.colors[f.key] = picker.value;
+        applyAdminTheme(currentAdminTheme);
+      });
+      hex.addEventListener('input', ()=>{
+        const v = hex.value.trim();
+        if (/^#[0-9A-Fa-f]{6}$/.test(v)){
+          picker.value = v;
+          currentAdminTheme.colors[f.key] = v;
+          applyAdminTheme(currentAdminTheme);
+        }
+      });
+    });
+  }
+
+  // ================= LOGO DO PAINEL E FOTO DO ADMINISTRADOR (reaproveita o mesmo sistema de upload) =================
+  function updateAdminLogoPreview(){
+    const url = document.getElementById('adminLogoUrlInput').value.trim();
+    const wrap = document.getElementById('adminLogoPreviewWrap');
+    const img = document.getElementById('adminLogoPreview');
+    if (url){ img.src = url; wrap.style.display = 'block'; } else { wrap.style.display = 'none'; }
+  }
+  function updateAdminPhotoPreview(){
+    const url = document.getElementById('adminPhotoUrlInput').value.trim();
+    const wrap = document.getElementById('adminPhotoPreviewWrap');
+    const img = document.getElementById('adminPhotoPreview');
+    if (url){ img.src = url; wrap.style.display = 'block'; } else { wrap.style.display = 'none'; }
+  }
+
+  function persistAdminThemeAsset(field, url){
+    currentAdminTheme[field] = url;
+    // Logo e foto são salvas na hora (diferente das cores, que só valem
+    // depois de "Aplicar") — evita perder um upload que já terminou de
+    // subir pro Storage se a pessoa navegar pra outra aba sem querer.
+    try {
+      savedAdminTheme = { ...savedAdminTheme, [field]: url };
+      localStorage.setItem(ADMIN_THEME_STORAGE_KEY, JSON.stringify(savedAdminTheme));
+    } catch (err) {}
+    applyAdminTheme(currentAdminTheme);
+  }
+
+  document.getElementById('adminLogoFileInput').addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('adminLogoUploadStatus');
+    if (!validateImageFile(file, statusEl)) return;
+    const url = await uploadProductImage(file, statusEl);
+    if (url){
+      document.getElementById('adminLogoUrlInput').value = url;
+      updateAdminLogoPreview();
+      persistAdminThemeAsset('logoUrl', url);
+    }
+    e.target.value = '';
+  });
+  document.getElementById('removeAdminLogoBtn').addEventListener('click', ()=>{
+    const currentUrl = document.getElementById('adminLogoUrlInput').value.trim();
+    document.getElementById('adminLogoUrlInput').value = '';
+    updateAdminLogoPreview();
+    document.getElementById('adminLogoUploadStatus').textContent = '';
+    persistAdminThemeAsset('logoUrl', null);
+    if (currentUrl.includes(`/storage/v1/object/public/${STORAGE_BUCKET}/`)){
+      const fileName = currentUrl.split(`/${STORAGE_BUCKET}/`).pop();
+      sb.storage.from(STORAGE_BUCKET).remove([fileName]).catch(()=>{});
+    }
+  });
+
+  document.getElementById('adminPhotoFileInput').addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('adminPhotoUploadStatus');
+    if (!validateImageFile(file, statusEl)) return;
+    const url = await uploadProductImage(file, statusEl);
+    if (url){
+      document.getElementById('adminPhotoUrlInput').value = url;
+      updateAdminPhotoPreview();
+      persistAdminThemeAsset('photoUrl', url);
+    }
+    e.target.value = '';
+  });
+  document.getElementById('removeAdminPhotoBtn').addEventListener('click', ()=>{
+    const currentUrl = document.getElementById('adminPhotoUrlInput').value.trim();
+    document.getElementById('adminPhotoUrlInput').value = '';
+    updateAdminPhotoPreview();
+    document.getElementById('adminPhotoUploadStatus').textContent = '';
+    persistAdminThemeAsset('photoUrl', null);
+    if (currentUrl.includes(`/storage/v1/object/public/${STORAGE_BUCKET}/`)){
+      const fileName = currentUrl.split(`/${STORAGE_BUCKET}/`).pop();
+      sb.storage.from(STORAGE_BUCKET).remove([fileName]).catch(()=>{});
+    }
+  });
+
+  document.getElementById('previewAdminThemeBtn').addEventListener('click', ()=>{
+    applyAdminTheme(currentAdminTheme);
+    document.getElementById('adminThemeStatus').innerHTML = '<span style="color:var(--ink-soft);">Visualizando — clique em "Aplicar" pra manter, ou "Restaurar padrão" pra descartar.</span>';
+  });
+
+  document.getElementById('applyAdminThemeBtn').addEventListener('click', ()=>{
+    try {
+      localStorage.setItem(ADMIN_THEME_STORAGE_KEY, JSON.stringify(currentAdminTheme));
+      savedAdminTheme = JSON.parse(JSON.stringify(currentAdminTheme));
+      document.getElementById('adminThemeStatus').innerHTML = '<span style="color:var(--green);">Aparência aplicada e salva neste navegador!</span>';
+    } catch (err) {
+      document.getElementById('adminThemeStatus').innerHTML = '<span style="color:var(--red);">Não foi possível salvar (armazenamento do navegador indisponível).</span>';
+    }
+  });
+
+  document.getElementById('resetAdminThemeBtn').addEventListener('click', ()=>{
+    currentAdminTheme = getDefaultAdminTheme();
+    applyAdminTheme(currentAdminTheme);
+    try { localStorage.removeItem(ADMIN_THEME_STORAGE_KEY); } catch (err) {}
+    savedAdminTheme = JSON.parse(JSON.stringify(currentAdminTheme));
+    renderAdminThemePanel();
+    document.getElementById('adminThemeStatus').innerHTML = '<span style="color:var(--green);">Restaurado pro padrão original.</span>';
+  });
+
   const loginScreen = document.getElementById('loginScreen');
   const dashboard = document.getElementById('dashboard');
 
@@ -1233,7 +1680,10 @@
       { label:'Estoque', panel:'stock' },
     ]},
     { id:'customers', label:'Clientes', icon:'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75', panel:'customers' },
-    { id:'appearance', label:'Personalização', icon:'M12 2l2.4 6.5L21 9l-5 4.4L17.4 20 12 16.5 6.6 20 8 13.4 3 9l6.6-.5z', panel:'appearance' },
+    { id:'appearance-group', label:'Personalização', icon:'M12 2l2.4 6.5L21 9l-5 4.4L17.4 20 12 16.5 6.6 20 8 13.4 3 9l6.6-.5z', children:[
+      { label:'Loja Online', panel:'appearance' },
+      { label:'Painel Administrativo', panel:'admin-appearance' },
+    ]},
     { id:'marketing-group', label:'Marketing', icon:'M3 11l18-5v12L3 14v-3z M11 13v5a2 2 0 002 2h0a2 2 0 002-2v-4', children:[
       { label:'Cupons', panel:'coupons' },
       { label:'Banners', panel:'settings', tab:'banners' },
@@ -1343,6 +1793,7 @@
     if (id === 'announcements') loadAnnouncementsAdmin();
     if (id === 'settings') loadSettings();
     if (id === 'appearance') loadAppearance();
+    if (id === 'admin-appearance') renderAdminThemePanel();
     if (id === 'analytics-ga' || id === 'analytics-pixel') loadAnalyticsSettings();
     if (id === 'analytics-events') renderEventsFlowList();
   }
@@ -1383,7 +1834,13 @@
     dashboard.style.display = 'block';
     const name = user?.email?.split('@')[0] || 'Admin';
     document.getElementById('userName').textContent = name;
-    document.getElementById('userAvatar').textContent = name.slice(0,2).toUpperCase();
+    const initials = name.slice(0,2).toUpperCase();
+    window.__adminAvatarInitials = initials;
+    if (currentAdminTheme.photoUrl){
+      document.getElementById('userAvatar').innerHTML = `<img src="${currentAdminTheme.photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.textContent='${initials}';">`;
+    } else {
+      document.getElementById('userAvatar').textContent = initials;
+    }
     renderSideNav();
     switchPanel('dashboard');
     document.querySelector('[data-nav-simple="dashboard"]')?.classList.add('active');
