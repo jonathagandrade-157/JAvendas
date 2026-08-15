@@ -609,12 +609,34 @@
 
               <button class="btn btn-primary" id="savePaymentBtn" style="margin-bottom:20px;">Salvar</button>
 
-              <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.6;max-width:520px; border-top:1px solid var(--line); padding-top:16px;">
-                As chaves do Mercado Pago são configuradas como variáveis de ambiente na Netlify
-                (<code>MERCADOPAGO_ACCESS_TOKEN</code>) — por segurança, não ficam editáveis por aqui,
-                já que são credenciais sensíveis. Para trocar, acesse
-                <b>Netlify → Project configuration → Environment variables</b>.
+              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Mercado Pago</p>
+              <div class="field"><label><input type="checkbox" id="setMercadoPagoEnabled" style="width:auto;display:inline-block;margin-right:6px;">Mercado Pago ativado</label></div>
+              <div class="field" style="max-width:480px;"><label>Access Token (privado — nunca aparece pro cliente)</label><input id="setMpAccessToken" type="password" placeholder="Deixe em branco pra continuar usando a variável de ambiente"></div>
+              <div class="field" style="max-width:480px;"><label>Public Key</label><input id="setMpPublicKey" placeholder="Deixe em branco pra continuar usando a variável de ambiente"></div>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 16px; max-width:520px;">
+                Preenchendo aqui, o sistema passa a usar essa credencial automaticamente — não precisa mais mexer em código nem na Netlify. Deixando em branco, continua usando <code>MERCADOPAGO_ACCESS_TOKEN</code> da Netlify normalmente (nada quebra).
               </p>
+              <button class="btn btn-primary" id="saveMercadoPagoBtn" style="margin-bottom:8px;">Salvar credenciais do Mercado Pago</button>
+              <p id="mpCredsStatus" style="font-size:12.5px; margin:0 0 20px;"></p>
+
+              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Chave Pix</p>
+              <p style="font-size:12px; color:var(--rust); margin:0 0 12px; max-width:520px;">
+                ⚠️ Importante: hoje o Pix do checkout é processado <b>dentro do Mercado Pago</b> — o QR Code é gerado usando a chave Pix cadastrada na sua própria conta do Mercado Pago, não a que você digitar aqui. Guardar a chave aqui serve só como <b>registro/referência</b> — não muda como o pagamento é processado.
+              </p>
+              <div class="settings-grid">
+                <div class="field"><label>Tipo da chave</label>
+                  <select id="setPixKeyType">
+                    <option value="cpf">CPF</option>
+                    <option value="cnpj">CNPJ</option>
+                    <option value="email">E-mail</option>
+                    <option value="telefone">Telefone</option>
+                    <option value="aleatoria">Chave aleatória</option>
+                  </select>
+                </div>
+                <div class="field"><label>Chave Pix</label><input id="setPixKeyValue" placeholder="Sua chave Pix"></div>
+              </div>
+              <button class="btn btn-ghost" id="savePixKeyBtn" style="margin-bottom:8px;">Salvar chave Pix (registro)</button>
+              <p id="pixKeyStatus" style="font-size:12.5px;"></p>
             
           </div>
         </div>
@@ -635,10 +657,16 @@
 
               <button class="btn btn-primary" id="saveShippingBtn" style="margin-bottom:20px;">Salvar</button>
 
-              <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.6;max-width:520px; border-top:1px solid var(--line); padding-top:16px;">
-                As credenciais do Melhor Envio (<code>MELHORENVIO_TOKEN</code>, <code>STORE_ORIGIN_CEP</code>)
-                também ficam nas variáveis de ambiente da Netlify, pelo mesmo motivo de segurança.
+              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Melhor Envio</p>
+              <div class="field" style="max-width:480px;"><label>Token de acesso (privado)</label><input id="setMelhorEnvioToken" type="password" placeholder="Deixe em branco pra continuar usando a variável de ambiente"></div>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 12px; max-width:520px;">
+                Preenchendo aqui, o sistema passa a usar esse token automaticamente. Deixando em branco, continua usando <code>MELHORENVIO_TOKEN</code> da Netlify (nada quebra).
               </p>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px; max-width:520px;">
+                O <b>CEP de origem</b> (usado pra calcular a distância do frete) é o mesmo já cadastrado em <b>Configurações → Geral → CEP da loja</b> — não duplicamos esse campo aqui.
+              </p>
+              <button class="btn btn-ghost" id="saveMelhorEnvioTokenBtn" style="margin-bottom:8px;">Salvar token do Melhor Envio</button>
+              <p id="melhorEnvioTokenStatus" style="font-size:12.5px;"></p>
             
           </div>
         </div>
@@ -1893,6 +1921,7 @@
     if (id === 'settings-geral' || id === 'settings-pagamento' || id === 'settings-envio' ||
         id === 'settings-motoboy' || id === 'settings-banners' || id === 'settings-seo' ||
         id === 'settings-policies' || id === 'settings-security') loadSettings();
+    if (id === 'settings-pagamento' || id === 'settings-envio') loadPaymentCredentials();
     if (id === 'settings-policies') loadPoliciesAdmin();
     if (id === 'appearance') loadAppearance();
     if (id === 'admin-appearance') renderAdminThemePanel();
@@ -4040,6 +4069,54 @@
     const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
     if (error){ showToast('Erro ao salvar: ' + error.message); return; }
     showToast('Configurações de frete salvas!');
+  });
+
+  // ================= CREDENCIAIS DE PAGAMENTO (tabela protegida, sem leitura pública) =================
+  async function loadPaymentCredentials(){
+    const { data, error } = await sb.from('payment_credentials').select('*').eq('id', 1).maybeSingle();
+    if (error){ console.error('Erro ao carregar credenciais de pagamento:', error); return; }
+    document.getElementById('setMercadoPagoEnabled').checked = data?.mercadopago_enabled !== false;
+    document.getElementById('setMpAccessToken').value = data?.mercadopago_access_token || '';
+    document.getElementById('setMpPublicKey').value = data?.mercadopago_public_key || '';
+    document.getElementById('setPixKeyType').value = data?.pix_key_type || 'cpf';
+    document.getElementById('setPixKeyValue').value = data?.pix_key || '';
+    document.getElementById('setMelhorEnvioToken').value = data?.melhor_envio_token || '';
+  }
+
+  document.getElementById('saveMercadoPagoBtn').addEventListener('click', async ()=>{
+    const statusEl = document.getElementById('mpCredsStatus');
+    const payload = {
+      mercadopago_enabled: document.getElementById('setMercadoPagoEnabled').checked,
+      mercadopago_access_token: document.getElementById('setMpAccessToken').value.trim() || null,
+      mercadopago_public_key: document.getElementById('setMpPublicKey').value.trim() || null,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from('payment_credentials').update(payload).eq('id', 1);
+    if (error){ statusEl.innerHTML = `<span style="color:var(--red);">Erro ao salvar: ${error.message}</span>`; return; }
+    statusEl.innerHTML = '<span style="color:var(--green);">Salvo! O checkout já está usando essa credencial.</span>';
+  });
+
+  document.getElementById('savePixKeyBtn').addEventListener('click', async ()=>{
+    const statusEl = document.getElementById('pixKeyStatus');
+    const payload = {
+      pix_key_type: document.getElementById('setPixKeyType').value,
+      pix_key: document.getElementById('setPixKeyValue').value.trim() || null,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from('payment_credentials').update(payload).eq('id', 1);
+    if (error){ statusEl.innerHTML = `<span style="color:var(--red);">Erro ao salvar: ${error.message}</span>`; return; }
+    statusEl.innerHTML = '<span style="color:var(--ink-soft);">Salvo como registro — lembre-se, isso não altera como o Mercado Pago processa o Pix.</span>';
+  });
+
+  document.getElementById('saveMelhorEnvioTokenBtn').addEventListener('click', async ()=>{
+    const statusEl = document.getElementById('melhorEnvioTokenStatus');
+    const payload = {
+      melhor_envio_token: document.getElementById('setMelhorEnvioToken').value.trim() || null,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from('payment_credentials').update(payload).eq('id', 1);
+    if (error){ statusEl.innerHTML = `<span style="color:var(--red);">Erro ao salvar: ${error.message}</span>`; return; }
+    statusEl.innerHTML = '<span style="color:var(--green);">Token salvo!</span>';
   });
 
   document.getElementById('verifyMotoboyOriginBtn').addEventListener('click', async ()=>{
