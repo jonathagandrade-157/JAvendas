@@ -21,6 +21,11 @@
     --accent-dark:#000000;
     --font-body:'Inter', sans-serif;
     --font-heading:'Inter', sans-serif;
+    --tpl-radius:12px;
+    --tpl-radius-sm:6px;
+    --tpl-shadow:0 1px 2px rgba(0,0,0,0.03);
+    --tpl-shadow-hover:0 8px 20px rgba(0,0,0,0.08);
+    --tpl-label-tracking:0.01em;
   }
   *{box-sizing:border-box;}
   body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); -webkit-font-smoothing:antialiased;}
@@ -38,10 +43,10 @@
   .category-tiles{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
   @media (min-width:640px){ .category-tiles{grid-template-columns:repeat(5,1fr);} }
   .category-tile{
-    background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 10px; text-align:center;
-    font-size:13px; font-weight:700; cursor:pointer; transition:border-color .15s;
+    background:var(--card); border:1px solid var(--line); border-radius:var(--tpl-radius); padding:18px 10px; text-align:center;
+    font-size:13px; font-weight:700; cursor:pointer; transition:border-color .15s; font-family:var(--font-heading);
   }
-  .category-tile:hover{border-color:var(--ink);}
+  .category-tile:hover{border-color:var(--accent);}
 
   .section-head-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
   .scroll-row{display:flex; gap:14px; overflow-x:auto; padding-bottom:6px; scroll-snap-type:x proximity;}
@@ -233,7 +238,7 @@
   .hero-copy h1{color:#fff; font-size:32px; line-height:1.08; margin:0;}
   @media (min-width:640px){ .hero-copy h1{font-size:44px;} }
   .hero-copy p.lead{color:#C7C7C7; max-width:460px; margin:0 auto 28px; font-size:15.5px; line-height:1.6;}
-  .hero-cta{display:inline-flex; align-items:center; gap:8px; padding:13px 26px; background:#fff; color:#0B0B0C; border-radius:6px; font-size:13.5px; font-weight:800; letter-spacing:.03em; text-transform:uppercase;}
+  .hero-cta{display:inline-flex; align-items:center; gap:8px; padding:13px 26px; background:#fff; color:#0B0B0C; border-radius:var(--tpl-radius-sm); font-size:13.5px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; font-family:var(--font-body);}
   .hero-cta-ghost{background:transparent; color:#fff; border:1.5px solid #3A3A3C;}
 
   /* ---------- TRUST BADGES ---------- */
@@ -262,13 +267,13 @@
   .skeleton-line.w-40{width:40%;}
   .skeleton-row-card{min-width:180px; max-width:180px; flex-shrink:0;}
 
-  .tag-card{background:var(--card); border:1px solid var(--line); position:relative; text-align:left; width:100%; padding:0; box-shadow:0 1px 2px rgba(0,0,0,0.03); transition:box-shadow .2s ease, transform .2s ease;}
-  .tag-card:hover{box-shadow:0 8px 20px rgba(0,0,0,0.08); transform:translateY(-2px);}
+  .tag-card{background:var(--card); border:1px solid var(--line); border-radius:var(--tpl-radius); position:relative; text-align:left; width:100%; padding:0; box-shadow:var(--tpl-shadow); transition:box-shadow .2s ease, transform .2s ease; overflow:hidden;}
+  .tag-card:hover{box-shadow:var(--tpl-shadow-hover); transform:translateY(-2px);}
   .tag-hole{position:absolute; left:50%; top:-8px; transform:translateX(-50%); width:16px; height:16px; border-radius:50%; background:var(--bg); border:1px solid var(--line); z-index:2;}
   .product-thumb{width:100%; height:180px; display:flex; align-items:center; justify-content:center; border-bottom:1px solid var(--line); overflow:hidden;}
   .product-thumb img{width:100%; height:100%; object-fit:cover;}
   .tag-card .info{padding:14px;}
-  .tag-card h3{font-size:14.5px; line-height:1.3; margin:0 0 4px; font-weight:600;}
+  .tag-card h3{font-size:14.5px; line-height:1.3; margin:0 0 4px; font-weight:600; font-family:var(--font-heading);}
   .tag-card .price{font-size:13.5px; color:var(--ink-soft); margin:0;}
 
   /* ---------- FOOTER ---------- */
@@ -1107,12 +1112,92 @@
     minimal: headerTemplateMinimal,
   };
 
+  // Sistemas de design do Stitch (referência visual), um por modelo —
+  // valores usados como PADRÃO de cada modelo. Se o admin já tiver
+  // personalizado cores manualmente em Personalização → Cores, essa
+  // escolha manual continua tendo prioridade (aplicada depois, mais
+  // abaixo em applyPersonalizationData) — isso aqui só define o ponto
+  // de partida de cada modelo, não substitui a personalização existente.
+  const TEMPLATE_DESIGN_TOKENS = {
+    // Clássico ← referência "Vivid Pulse" (fast-fashion, alto contraste)
+    classic: {
+      bg:'#131313', card:'#1E1E1E', ink:'#F5F3F2', inkSoft:'#8E8E93', line:'#2A2A2A',
+      accent:'#FF5168', rust:'#FF5168', green:'#FF5168',
+      radius:'4px', radiusSm:'2px', shadow:'0 1px 3px rgba(0,0,0,0.4)', shadowHover:'0 10px 24px rgba(255,81,104,0.18)',
+      fontHeading:"'Montserrat', sans-serif", fontHeadingImport:'Montserrat:wght@700;800',
+      fontBody:"'Be Vietnam Pro', sans-serif", fontBodyImport:'Be+Vietnam+Pro:wght@400;500;700',
+      tracking:'0.02em',
+    },
+    // Premium ← referência "Lux Noir & Gold" (luxo, preto e dourado)
+    premium: {
+      bg:'#131313', card:'#1A1A1A', ink:'#E5E2E1', inkSoft:'#D0C5AF', line:'#333333',
+      accent:'#F2CA50', rust:'#F2CA50', green:'#F2CA50',
+      radius:'0px', radiusSm:'0px', shadow:'none', shadowHover:'0 0 30px rgba(0,0,0,0.4)',
+      fontHeading:"'Libre Caslon Text', serif", fontHeadingImport:'Libre+Caslon+Text',
+      fontBody:"'Manrope', sans-serif", fontBodyImport:'Manrope:wght@400;500;600',
+      tracking:'0.1em',
+    },
+    // E-commerce ← referência "Vivid Kinetic" (tech, índigo/roxo, glass)
+    ecommerce: {
+      bg:'#F8FAFC', card:'#FFFFFF', ink:'#191C1E', inkSoft:'#464554', line:'#E2E8F0',
+      accent:'#4648D4', rust:'#8127CF', green:'#4648D4',
+      radius:'16px', radiusSm:'8px', shadow:'0 10px 30px rgba(70,72,212,0.08)', shadowHover:'0 16px 38px rgba(70,72,212,0.16)',
+      fontHeading:"'Hanken Grotesk', sans-serif", fontHeadingImport:'Hanken+Grotesk:wght@700;800',
+      fontBody:"'Plus Jakarta Sans', sans-serif", fontBodyImport:'Plus+Jakarta+Sans:wght@400;500;600',
+      tracking:'0.02em',
+    },
+    // Minimalista ← referência "Pure Essence" (acromático, ultra-minimal)
+    minimal: {
+      bg:'#F9F9F9', card:'#FFFFFF', ink:'#1A1C1C', inkSoft:'#757575', line:'#F0F0F0',
+      accent:'#111111', rust:'#111111', green:'#111111',
+      radius:'0px', radiusSm:'0px', shadow:'none', shadowHover:'none',
+      fontHeading:"'Manrope', sans-serif", fontHeadingImport:'Manrope:wght@600;700',
+      fontBody:"'Inter', sans-serif", fontBodyImport:'Inter:wght@400;500',
+      tracking:'0.05em',
+    },
+  };
+
+  const loadedGoogleFonts = new Set();
+  function ensureGoogleFontLoaded(importName){
+    if (!importName || loadedGoogleFonts.has(importName)) return;
+    loadedGoogleFonts.add(importName);
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${importName}&display=swap`;
+    document.head.appendChild(link);
+  }
+
+  function applyTemplateDesignTokens(key){
+    const tokens = TEMPLATE_DESIGN_TOKENS[key];
+    if (!tokens) return; // "sem seleção": não mexe em nada, mantém o visual atual
+    const root = document.documentElement.style;
+    root.setProperty('--bg', tokens.bg);
+    root.setProperty('--card', tokens.card);
+    root.setProperty('--ink', tokens.ink);
+    root.setProperty('--ink-soft', tokens.inkSoft);
+    root.setProperty('--line', tokens.line);
+    root.setProperty('--accent', tokens.accent);
+    root.setProperty('--gold', tokens.accent);
+    root.setProperty('--rust', tokens.rust);
+    root.setProperty('--green', tokens.green);
+    root.setProperty('--tpl-radius', tokens.radius);
+    root.setProperty('--tpl-radius-sm', tokens.radiusSm);
+    root.setProperty('--tpl-shadow', tokens.shadow);
+    root.setProperty('--tpl-shadow-hover', tokens.shadowHover);
+    root.setProperty('--tpl-label-tracking', tokens.tracking);
+    root.setProperty('--font-heading', tokens.fontHeading);
+    root.setProperty('--font-body', tokens.fontBody);
+    ensureGoogleFontLoaded(tokens.fontHeadingImport);
+    ensureGoogleFontLoaded(tokens.fontBodyImport);
+  }
+
   function applyHeaderTemplate(key){
     const root = document.getElementById('headerRoot');
     if (!root) return;
     const builder = HEADER_TEMPLATES[key];
     if (!builder) return; // valor vazio/inválido: mantém o header que já está no HTML (não mexe em nada)
 
+    applyTemplateDesignTokens(key);
     root.innerHTML = builder();
 
     // Como o header inteiro foi trocado por um novo pedaço de HTML, os
@@ -1146,7 +1231,13 @@
     }
 
     // ---------- tipografia ----------
-    if (data.font_body || data.font_heading){
+    // "Inter" é o valor padrão salvo no banco (ninguém escolheu de
+    // propósito) — nesse caso, deixa a fonte do MODELO valer, em vez de
+    // forçar Inter por cima dela. Só sobrescreve se o admin realmente
+    // trocou a fonte manualmente em Personalização → Cores.
+    const bodyIsCustom = data.font_body && data.font_body !== 'Inter';
+    const headingIsCustom = data.font_heading && data.font_heading !== 'Inter';
+    if (bodyIsCustom || headingIsCustom){
       const fontsToLoad = [...new Set([data.font_body, data.font_heading].filter(Boolean))];
       if (fontsToLoad.length && fontsToLoad.some(f => f !== 'Inter')){
         const familiesParam = fontsToLoad.map(f => f.replace(/ /g,'+') + ':wght@400;600;700;800').join('&family=');
@@ -1155,8 +1246,8 @@
         fontLink.href = `https://fonts.googleapis.com/css2?family=${familiesParam}&display=swap`;
         document.head.appendChild(fontLink);
       }
-      if (data.font_body) document.documentElement.style.setProperty('--font-body', `'${data.font_body}', sans-serif`);
-      if (data.font_heading) document.documentElement.style.setProperty('--font-heading', `'${data.font_heading}', sans-serif`);
+      if (bodyIsCustom) document.documentElement.style.setProperty('--font-body', `'${data.font_body}', sans-serif`);
+      if (headingIsCustom) document.documentElement.style.setProperty('--font-heading', `'${data.font_heading}', sans-serif`);
     }
 
     // ---------- modelo de layout da Home ----------
@@ -1175,6 +1266,15 @@
     }
 
     // ---------- cores de aparência ----------
+    // Mesma lógica da tipografia: os campos de cor também têm um valor
+    // "padrão de fábrica" salvo no banco (ninguém escolheu de propósito).
+    // Só deixamos a cor do admin sobrescrever a do MODELO quando ela for
+    // diferente desse padrão — ou seja, quando for uma escolha real feita
+    // em Personalização → Cores.
+    const APPEARANCE_FACTORY_DEFAULTS = {
+      color_background: '#FFFFFF', color_text: '#111111', color_primary: '#000000',
+      color_secondary: '#6E6E73', color_accent: '#111111', color_button: '#34493A', color_link: '#8B3A2B',
+    };
     const colorMap = {
       color_background: '--bg',
       color_text: '--ink',
@@ -1185,7 +1285,8 @@
       color_link: '--rust',
     };
     Object.entries(colorMap).forEach(([field, cssVar])=>{
-      if (data[field]){
+      const isCustom = data[field] && data[field].toUpperCase() !== (APPEARANCE_FACTORY_DEFAULTS[field] || '').toUpperCase();
+      if (isCustom){
         document.documentElement.style.setProperty(cssVar, data[field]);
       }
     });
@@ -1533,7 +1634,7 @@
     return `
       <button class="tag-card" data-id="${p.id}" ${soldOut ? 'style="opacity:.55"' : ''}>
         <span class="tag-hole"></span>
-        ${onSale && !soldOut ? '<span style="position:absolute;top:10px;left:10px;background:var(--rust);color:#fff;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:4px;z-index:2;">OFERTA</span>' : ''}
+        ${onSale && !soldOut ? '<span style="position:absolute;top:10px;left:10px;background:var(--rust);color:#fff;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:var(--tpl-radius-sm);letter-spacing:var(--tpl-label-tracking);text-transform:uppercase;z-index:2;">OFERTA</span>' : ''}
         <span class="fav-heart ${isFav?'active':''}" data-fav-toggle="${p.id}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z" stroke="#111" stroke-width="1.8"/></svg>
         </span>
