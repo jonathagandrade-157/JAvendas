@@ -161,13 +161,14 @@
   let PIX_DISCOUNT_RATE = 0.05;
   let FREE_SHIPPING_THRESHOLD = 300;
   let MOTOBOY_FREE_SHIPPING = false;
+  let MELHOR_ENVIO_ENABLED = true;
 
   async function loadStoreConfig(){
     try {
       const sb = window.getSupabaseClient();
       const { data, error } = await sb
         .from('store_settings')
-        .select('free_shipping_threshold, pix_discount_percent, motoboy_free_shipping, logo_url')
+        .select('free_shipping_threshold, pix_discount_percent, motoboy_free_shipping, logo_url, payment_pix_enabled, payment_card_enabled, payment_boleto_enabled, melhor_envio_enabled')
         .eq('id', 1)
         .maybeSingle();
       if (error) throw error;
@@ -175,6 +176,24 @@
         if (data.free_shipping_threshold != null) FREE_SHIPPING_THRESHOLD = Number(data.free_shipping_threshold);
         if (data.pix_discount_percent != null) PIX_DISCOUNT_RATE = Number(data.pix_discount_percent) / 100;
         MOTOBOY_FREE_SHIPPING = !!data.motoboy_free_shipping;
+        MELHOR_ENVIO_ENABLED = data.melhor_envio_enabled !== false;
+
+        // Esconde de verdade (não só visualmente) as formas de pagamento
+        // desativadas no admin — se o cliente tentar escolher uma
+        // desativada, ela simplesmente não existe na tela.
+        if (data.payment_pix_enabled === false){
+          const el = document.querySelector('[data-method="pix"]');
+          if (el) el.remove();
+        }
+        if (data.payment_card_enabled === false){
+          const el = document.querySelector('[data-method="credit_card"]');
+          if (el) el.remove();
+        }
+        if (data.payment_boleto_enabled === false){
+          const el = document.querySelector('[data-method="boleto"]');
+          if (el) el.remove();
+        }
+
         if (data.logo_url){
           const logoEl = document.getElementById('logoImgCheckout');
           if (logoEl) logoEl.innerHTML = `<img src="${data.logo_url}" alt="JA Store" onerror="this.parentElement.innerHTML='<svg width=&quot;100%&quot; height=&quot;100%&quot; viewBox=&quot;0 0 40 40&quot;><rect width=&quot;40&quot; height=&quot;40&quot; rx=&quot;9&quot; fill=&quot;%23fff&quot;/><text x=&quot;20&quot; y=&quot;27&quot; text-anchor=&quot;middle&quot; font-family=&quot;Inter,sans-serif&quot; font-weight=&quot;800&quot; font-size=&quot;17&quot; fill=&quot;%23111&quot;>JA</text></svg>';">`;
@@ -382,11 +401,13 @@
     msgEl.textContent = 'Calculando frete...';
     optsEl.innerHTML = '';
     try {
-      const correiosPromise = fetch('/.netlify/functions/shipping-quote', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ cepDestino: cep, items: cart.map(i=>({quantity:i.qty})) })
-      }).then(r=>r.json());
+      const correiosPromise = MELHOR_ENVIO_ENABLED
+        ? fetch('/.netlify/functions/shipping-quote', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ cepDestino: cep, items: cart.map(i=>({quantity:i.qty})) })
+          }).then(r=>r.json())
+        : Promise.resolve({ options: [] });
 
       // Monta o endereço (sem o número, que o cliente ainda não digitou
       // nesse momento) só pra estimar a região — suficiente pra calcular
