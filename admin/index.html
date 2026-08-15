@@ -600,6 +600,13 @@
               <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px;">
                 Esse valor é usado de verdade no cálculo do checkout — não é só um texto.
               </p>
+
+              <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px; border-top:1px solid var(--line); padding-top:20px;">Formas de pagamento aceitas</p>
+              <div class="field"><label><input type="checkbox" id="setPaymentPixEnabled" style="width:auto;display:inline-block;margin-right:6px;">Pix</label></div>
+              <div class="field"><label><input type="checkbox" id="setPaymentCardEnabled" style="width:auto;display:inline-block;margin-right:6px;">Cartão de crédito</label></div>
+              <div class="field"><label><input type="checkbox" id="setPaymentBoletoEnabled" style="width:auto;display:inline-block;margin-right:6px;">Boleto</label></div>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px;">Desmarcar aqui remove a opção de verdade da tela de pagamento do checkout — não é só visual.</p>
+
               <button class="btn btn-primary" id="savePaymentBtn" style="margin-bottom:20px;">Salvar</button>
 
               <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.6;max-width:520px; border-top:1px solid var(--line); padding-top:16px;">
@@ -622,6 +629,10 @@
               <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px;">
                 Esse valor é a fonte única de verdade — usado no carrossel de avisos, no checkout e na cobrança real.
               </p>
+
+              <div class="field"><label><input type="checkbox" id="setMelhorEnvioEnabled" style="width:auto;display:inline-block;margin-right:6px;">Ativar cálculo de frete pelo Melhor Envio (Correios)</label></div>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px;">Se desmarcado, o checkout deixa de oferecer as opções de frete pelo Melhor Envio — útil se as credenciais ainda não estiverem configuradas, ou se você quiser trabalhar só com Motoboy por um tempo.</p>
+
               <button class="btn btn-primary" id="saveShippingBtn" style="margin-bottom:20px;">Salvar</button>
 
               <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.6;max-width:520px; border-top:1px solid var(--line); padding-top:16px;">
@@ -833,6 +844,11 @@
           <div class="card">
             <div class="panel-head">
               <h2>Prévia do Painel Administrativo</h2>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn btn-ghost preview-mode-btn active-preview-mode" id="adminPreviewDesktopBtn" type="button" style="padding:7px 12px; font-size:12px;">🖥️ Desktop</button>
+                <button class="btn btn-ghost preview-mode-btn" id="adminPreviewMobileBtn" type="button" style="padding:7px 12px; font-size:12px;">📱 Mobile</button>
+                <button class="btn btn-primary" id="openAdminFullPreviewBtn" type="button" style="padding:7px 14px; font-size:12px;">Abrir prévia ↗</button>
+              </div>
             </div>
             <p style="font-size:11.5px; color:var(--ink-soft); margin:0 0 14px;">
               Uma maquete fiel ao painel real (o painel exige login, então não dá pra usar o mesmo iframe da Loja Online aqui) — atualiza ao vivo com o que você for ajustando abaixo.
@@ -1059,6 +1075,45 @@
                 <button class="btn btn-primary" id="saveAppearanceBtn">Salvar alterações</button>
                 <button class="btn btn-ghost" id="resetAppearanceBtn">Restaurar padrão</button>
               </div>
+          </div>
+        </div>
+
+        <!-- ---------- EM BREVE (áreas do menu ainda não implementadas) ---------- -->
+        <!-- ---------- ANALYTICS: RELATÓRIOS ---------- -->
+        <div class="panel" data-panel="reports">
+          <div class="card" style="max-width:560px;">
+            <h2 style="margin:0 0 6px;">Relatórios</h2>
+            <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 20px;">Baixe os dados reais da loja em CSV (abre certinho no Excel/Google Sheets) pro período que você escolher.</p>
+
+            <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; margin-bottom:20px;">
+              <div class="field" style="margin-bottom:0; max-width:220px;">
+                <label>Período</label>
+                <select id="reportPeriod">
+                  <option value="today">Hoje</option>
+                  <option value="yesterday">Ontem</option>
+                  <option value="last7">Últimos 7 dias</option>
+                  <option value="last30" selected>Últimos 30 dias</option>
+                  <option value="thisMonth">Este mês</option>
+                  <option value="lastMonth">Mês anterior</option>
+                  <option value="thisYear">Este ano</option>
+                  <option value="custom">Período personalizado</option>
+                </select>
+              </div>
+              <div class="field" id="reportCustomFrom" style="margin-bottom:0; max-width:160px; display:none;">
+                <label>Data inicial</label>
+                <input type="date" id="reportDateFrom">
+              </div>
+              <div class="field" id="reportCustomTo" style="margin-bottom:0; max-width:160px; display:none;">
+                <label>Data final</label>
+                <input type="date" id="reportDateTo">
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn btn-primary" id="downloadOrdersReportBtn" type="button">Baixar pedidos (CSV)</button>
+              <button class="btn btn-ghost" id="downloadProductsReportBtn" type="button">Baixar estoque de produtos (CSV)</button>
+            </div>
+            <p id="reportsStatus" style="font-size:12.5px; margin-top:10px;"></p>
           </div>
         </div>
 
@@ -1499,7 +1554,56 @@
     const mockBtn = document.getElementById('mockBtn');
     mockBtn.style.background = c.admin_btn;
     mockBtn.style.borderRadius = styleDef.radius;
+
+    applyAdminPreviewMockMode(); // reaplica o modo Desktop/Mobile por cima das cores que acabaram de mudar
   }
+
+  // No painel de verdade, em telas pequenas o menu lateral fica ESCONDIDO
+  // por padrão (só aparece ao tocar no ícone de hambúrguer) — é assim que
+  // a maquete "Mobile" representa fielmente o comportamento real.
+  let adminPreviewMode = 'desktop';
+  function applyAdminPreviewMockMode(){
+    const mock = document.getElementById('adminPreviewMock');
+    const sidebar = document.getElementById('mockSidebar');
+    if (!mock) return;
+    if (adminPreviewMode === 'mobile'){
+      mock.style.width = '230px';
+      mock.style.margin = '0 auto';
+      sidebar.style.display = 'none';
+      document.getElementById('mockTopbar').style.justifyContent = 'space-between';
+      if (!document.getElementById('mockHamburger')){
+        const hamburger = document.createElement('span');
+        hamburger.id = 'mockHamburger';
+        hamburger.innerHTML = '☰';
+        hamburger.style.fontSize = '15px';
+        document.getElementById('mockTopbar').prepend(hamburger);
+      }
+      document.getElementById('mockHamburger').style.display = 'inline';
+    } else {
+      mock.style.width = '100%';
+      mock.style.margin = '0';
+      sidebar.style.display = 'flex';
+      document.getElementById('mockTopbar').style.justifyContent = 'flex-end';
+      const hamburger = document.getElementById('mockHamburger');
+      if (hamburger) hamburger.style.display = 'none';
+    }
+  }
+
+  function setAdminPreviewMode(mode){
+    adminPreviewMode = mode;
+    applyAdminPreviewMockMode();
+    document.getElementById('adminPreviewDesktopBtn').classList.toggle('active-preview-mode', mode==='desktop');
+    document.getElementById('adminPreviewMobileBtn').classList.toggle('active-preview-mode', mode==='mobile');
+  }
+  document.getElementById('adminPreviewDesktopBtn').addEventListener('click', ()=> setAdminPreviewMode('desktop'));
+  document.getElementById('adminPreviewMobileBtn').addEventListener('click', ()=> setAdminPreviewMode('mobile'));
+
+  document.getElementById('openAdminFullPreviewBtn').addEventListener('click', ()=>{
+    // "Abrir prévia" aqui não pode abrir uma aba anônima do painel (ele
+    // exige login) — em vez disso, leva direto pro painel de verdade, já
+    // logado, que é a única forma honesta de "ver em tamanho grande".
+    window.open(window.location.pathname, '_blank');
+  });
 
   function loadAdminThemeFromStorage(){
     try {
@@ -1683,13 +1787,13 @@
       { label:'Cupons', panel:'coupons' },
       { label:'Banners', panel:'settings-banners' },
       { label:'Avisos', panel:'announcements' },
-      { label:'Campanhas', panel:'coming-soon', title:'Campanhas' },
+      { label:'Campanhas', panel:'coming-soon', title:'Campanhas', reason:'Ainda não existe nenhuma parte desse sistema construída (e-mail marketing, SMS, etc.) — vai precisar ser uma etapa própria, do zero.' },
     ]},
     { id:'analytics-group', label:'Analytics', icon:'M4 19V10M11 19V4M18 19v-7', children:[
       { label:'Google Analytics', panel:'analytics-ga' },
       { label:'Meta Pixel', panel:'analytics-pixel' },
       { label:'Eventos', panel:'analytics-events' },
-      { label:'Relatórios', panel:'coming-soon', title:'Relatórios' },
+      { label:'Relatórios', panel:'reports' },
     ]},
     { id:'settings-group', label:'Configurações', icon:'M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c.14.32.22.68.22 1.05V10a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z', children:[
       { label:'Geral', panel:'settings-geral' },
@@ -1699,8 +1803,8 @@
       { label:'SEO', panel:'settings-seo' },
       { label:'Políticas', panel:'settings-policies' },
       { label:'Segurança', panel:'settings-security' },
-      { label:'Domínio', panel:'coming-soon', title:'Domínio' },
-      { label:'Usuários', panel:'coming-soon', title:'Usuários' },
+      { label:'Domínio', panel:'coming-soon', title:'Domínio', reason:'A troca de domínio é feita direto no painel da Netlify (Site settings → Domain management) — não é algo que o Supabase ou este painel controla, então não dá pra trazer pra cá sem acesso a essa conta.' },
+      { label:'Usuários', panel:'coming-soon', title:'Usuários', reason:'Adicionar mais administradores exigiria mexer no sistema de login/permissões — e isso está fora do que foi pedido nesta etapa. Se quiser mesmo múltiplos usuários, é melhor tratar como uma etapa própria, com atenção redobrada em segurança.' },
     ]},
   ];
 
@@ -1764,7 +1868,7 @@
 
     if (item.panel === 'coming-soon'){
       document.getElementById('comingSoonTitle').textContent = item.title || 'Essa área ainda não está pronta';
-      document.getElementById('comingSoonText').textContent = `A área "${item.title}" já está organizada no menu, mas a funcionalidade ainda será construída numa próxima etapa.`;
+      document.getElementById('comingSoonText').textContent = item.reason || `A área "${item.title}" já está organizada no menu, mas a funcionalidade ainda será construída numa próxima etapa.`;
     }
 
     switchPanel(item.panel);
@@ -1794,6 +1898,7 @@
     if (id === 'admin-appearance') renderAdminThemePanel();
     if (id === 'analytics-ga' || id === 'analytics-pixel') loadAnalyticsSettings();
     if (id === 'analytics-events') renderEventsFlowList();
+    if (id === 'reports') initReportsPanel();
   }
 
   document.getElementById('menuToggle').addEventListener('click', ()=>{
@@ -1858,8 +1963,8 @@
   const LOW_STOCK_THRESHOLD = 5;
 
   // ---------- filtro de período do dashboard ----------
-  function getDashboardDateRange(){
-    const period = document.getElementById('dashPeriod').value;
+  function getDashboardDateRange(prefix = 'dash'){
+    const period = document.getElementById(`${prefix}Period`).value;
     const now = new Date();
     const startOfDay = (d) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
     const endOfDay = (d) => { const x = new Date(d); x.setHours(23,59,59,999); return x; };
@@ -1889,8 +1994,8 @@
       return { start: new Date(now.getFullYear(), 0, 1), end: endOfDay(now) };
     }
     if (period === 'custom'){
-      const fromVal = document.getElementById('dashDateFrom').value;
-      const toVal = document.getElementById('dashDateTo').value;
+      const fromVal = document.getElementById(`${prefix}DateFrom`).value;
+      const toVal = document.getElementById(`${prefix}DateTo`).value;
       if (!fromVal || !toVal) return { start: startOfDay(new Date(now.getTime()-29*86400000)), end: endOfDay(now) };
       return { start: startOfDay(new Date(fromVal + 'T00:00:00')), end: endOfDay(new Date(toVal + 'T00:00:00')) };
     }
@@ -3718,7 +3823,11 @@
     document.getElementById('setMotoboyEnabled').checked = !!data.motoboy_enabled;
     document.getElementById('setMotoboyFreeShipping').checked = !!data.motoboy_free_shipping;
     document.getElementById('setPixDiscount').value = data.pix_discount_percent ?? 5;
+    document.getElementById('setPaymentPixEnabled').checked = data.payment_pix_enabled !== false;
+    document.getElementById('setPaymentCardEnabled').checked = data.payment_card_enabled !== false;
+    document.getElementById('setPaymentBoletoEnabled').checked = data.payment_boleto_enabled !== false;
     document.getElementById('setFreeShippingThreshold').value = data.free_shipping_threshold ?? 300;
+    document.getElementById('setMelhorEnvioEnabled').checked = data.melhor_envio_enabled !== false;
     document.getElementById('setMotoboyRadius').value = data.motoboy_radius_km ?? 15;
     document.getElementById('setMotoboyBaseFee').value = data.motoboy_base_fee ?? 9.90;
     document.getElementById('setMotoboyPerKm').value = data.motoboy_per_km ?? 2.50;
@@ -3912,21 +4021,25 @@
   document.getElementById('savePaymentBtn').addEventListener('click', async ()=>{
     const payload = {
       pix_discount_percent: Number(document.getElementById('setPixDiscount').value || 5),
+      payment_pix_enabled: document.getElementById('setPaymentPixEnabled').checked,
+      payment_card_enabled: document.getElementById('setPaymentCardEnabled').checked,
+      payment_boleto_enabled: document.getElementById('setPaymentBoletoEnabled').checked,
       updated_at: new Date().toISOString(),
     };
     const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
     if (error){ showToast('Erro ao salvar: ' + error.message); return; }
-    showToast('Desconto do Pix salvo!');
+    showToast('Configurações de pagamento salvas!');
   });
 
   document.getElementById('saveShippingBtn').addEventListener('click', async ()=>{
     const payload = {
       free_shipping_threshold: Number(document.getElementById('setFreeShippingThreshold').value || 300),
+      melhor_envio_enabled: document.getElementById('setMelhorEnvioEnabled').checked,
       updated_at: new Date().toISOString(),
     };
     const { error } = await sb.from('store_settings').update(payload).eq('id', 1);
     if (error){ showToast('Erro ao salvar: ' + error.message); return; }
-    showToast('Valor de frete grátis salvo!');
+    showToast('Configurações de frete salvas!');
   });
 
   document.getElementById('verifyMotoboyOriginBtn').addEventListener('click', async ()=>{
@@ -4142,6 +4255,93 @@
       `).join('')}
     `;
   }
+
+  // ================= RELATÓRIOS (Etapa: "Em breve" virou funcionalidade real) =================
+  function initReportsPanel(){
+    document.getElementById('reportPeriod').addEventListener('change', ()=>{
+      const isCustom = document.getElementById('reportPeriod').value === 'custom';
+      document.getElementById('reportCustomFrom').style.display = isCustom ? 'block' : 'none';
+      document.getElementById('reportCustomTo').style.display = isCustom ? 'block' : 'none';
+    }, { once: true }); // evita empilhar o mesmo listener toda vez que a aba é reaberta
+  }
+
+  function csvEscape(value){
+    const str = String(value ?? '');
+    if (str.includes(',') || str.includes('"') || str.includes('\n')){
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  }
+
+  function downloadCSV(filename, rows){
+    // BOM no início pra acentuação abrir certinho no Excel
+    const csvContent = '\uFEFF' + rows.map(row => row.map(csvEscape).join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('downloadOrdersReportBtn').addEventListener('click', async ()=>{
+    const statusEl = document.getElementById('reportsStatus');
+    statusEl.textContent = 'Gerando relatório...';
+    const { start, end } = getDashboardDateRange('report');
+    const { data, error } = await sb
+      .from('orders')
+      .select('id, created_at, customer_name, customer_email, total, payment_status, order_status, payment_method')
+      .gte('created_at', start.toISOString())
+      .lte('created_at', end.toISOString())
+      .order('created_at', { ascending: true });
+    if (error){ statusEl.innerHTML = `<span style="color:var(--red);">Erro ao gerar: ${error.message}</span>`; return; }
+    if (!data.length){ statusEl.innerHTML = '<span style="color:var(--ink-soft);">Nenhum pedido nesse período.</span>'; return; }
+
+    const rows = [
+      ['Pedido', 'Data', 'Cliente', 'E-mail', 'Total (R$)', 'Pagamento', 'Status do pedido', 'Forma de pagamento'],
+      ...data.map(o => [
+        o.id.slice(0,8),
+        new Date(o.created_at).toLocaleString('pt-BR'),
+        o.customer_name || '',
+        o.customer_email || '',
+        Number(o.total).toFixed(2).replace('.',','),
+        o.payment_status || '',
+        o.order_status || '',
+        o.payment_method || '',
+      ]),
+    ];
+    downloadCSV(`pedidos_${new Date().toISOString().slice(0,10)}.csv`, rows);
+    statusEl.innerHTML = `<span style="color:var(--green);">${data.length} pedido(s) baixado(s)!</span>`;
+  });
+
+  document.getElementById('downloadProductsReportBtn').addEventListener('click', async ()=>{
+    const statusEl = document.getElementById('reportsStatus');
+    statusEl.textContent = 'Gerando relatório...';
+    const { data, error } = await sb
+      .from('products')
+      .select('name, sku, category, price, sale_price, stock, active')
+      .order('name', { ascending: true });
+    if (error){ statusEl.innerHTML = `<span style="color:var(--red);">Erro ao gerar: ${error.message}</span>`; return; }
+    if (!data.length){ statusEl.innerHTML = '<span style="color:var(--ink-soft);">Nenhum produto cadastrado.</span>'; return; }
+
+    const rows = [
+      ['Produto', 'SKU', 'Categoria', 'Preço (R$)', 'Preço promocional (R$)', 'Estoque', 'Status'],
+      ...data.map(p => [
+        p.name,
+        p.sku || '',
+        p.category || '',
+        Number(p.price).toFixed(2).replace('.',','),
+        p.sale_price ? Number(p.sale_price).toFixed(2).replace('.',',') : '',
+        p.stock,
+        p.active ? 'Ativo' : 'Inativo',
+      ]),
+    ];
+    downloadCSV(`produtos_${new Date().toISOString().slice(0,10)}.csv`, rows);
+    statusEl.innerHTML = `<span style="color:var(--green);">${data.length} produto(s) baixado(s)!</span>`;
+  });
 
   // ================= APARÊNCIA (Etapa 3) =================
   // Os valores abaixo são EXATAMENTE os mesmos defaults gravados no banco
