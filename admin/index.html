@@ -6,7 +6,7 @@
 <title>Painel Admin | JA Store</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script>
 // Aplica o tema salvo (se houver) ANTES da página desenhar, pra não piscar
 // o tema padrão por uma fração de segundo. Só lê o localStorage deste
@@ -42,10 +42,22 @@
       root.setProperty('--sidebar-text', isDark?'#C9C9CC':'#5A5A5E');
       root.setProperty('--sidebar-text-active', isDark?'#FFFFFF':'#111111');
     }
-    var styleDefs = { classic:{radius:'10px',shadow:'none'}, modern:{radius:'16px',shadow:'0 6px 20px rgba(17,17,17,0.08)'}, premium:{radius:'12px',shadow:'0 16px 40px rgba(0,0,0,0.45)'}, minimal:{radius:'4px',shadow:'none'} };
-    var sd = styleDefs[theme.style] || styleDefs.classic;
+    // 4 modelos completos (arquitetura do Google Stitch) — cada um com sua
+    // própria tipografia, raio, sombra e largura de menu lateral, não só cor.
+    var styleDefs = {
+      classic:{radius:'6px',shadow:'0 4px 6px -1px rgba(0,0,0,0.08)',fontHeading:"'Hanken Grotesk',sans-serif",fontBody:"'Hanken Grotesk',sans-serif",tracking:'0.02em',sidebarWidth:'256px'},
+      ecommerce:{radius:'16px',shadow:'none',fontHeading:"'Montserrat',sans-serif",fontBody:"'Montserrat',sans-serif",tracking:'0.01em',sidebarWidth:'256px'},
+      premium:{radius:'0px',shadow:'none',fontHeading:"'Libre Caslon Text',serif",fontBody:"'Manrope',sans-serif",tracking:'0.1em',sidebarWidth:'280px'},
+      minimal:{radius:'4px',shadow:'none',fontHeading:"'Manrope',sans-serif",fontBody:"'Manrope',sans-serif",tracking:'0.03em',sidebarWidth:'256px'}
+    };
+    var sd = styleDefs[theme.style] || styleDefs.premium;
     root.setProperty('--admin-radius', sd.radius);
     root.setProperty('--admin-shadow', sd.shadow);
+    root.setProperty('--font-display', sd.fontHeading);
+    root.setProperty('--font-body', sd.fontBody);
+    root.setProperty('--admin-tracking', sd.tracking);
+    root.setProperty('--sidebar-width', sd.sidebarWidth);
+    document.documentElement.setAttribute('data-admin-model', theme.style || 'premium');
   } catch (err) { /* se der qualquer erro, só mantém o padrão — nunca quebra o carregamento */ }
 })();
 </script>
@@ -61,9 +73,11 @@
     --accent:#D9B44A; --green:#4CAF7D; --blue:#5FA0D6; --amber:#D9A441; --red:#E2695C;
     --admin-primary:#D9B44A; --admin-secondary:#9C9284; --admin-accent:#D9B44A; --admin-btn:#D9B44A;
     --admin-on-btn:#1C1200;
-    --admin-radius:12px; --admin-shadow:0 16px 40px rgba(0,0,0,0.45);
+    --admin-radius:0px; --admin-shadow:none;
     --font-display:'Libre Caslon Text', Georgia, serif;
     --font-body:'Manrope','Inter',sans-serif;
+    --admin-tracking:0.1em;
+    --sidebar-width:280px;
   }
   *{box-sizing:border-box;}
   body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:14px; -webkit-font-smoothing:antialiased;}
@@ -107,7 +121,7 @@
   #dashboard{display:none;}
   .layout{display:flex; min-height:100vh;}
 
-  .sidebar{width:236px; flex-shrink:0; background:var(--sidebar); color:var(--sidebar-text-active); display:flex; flex-direction:column; position:sticky; top:0; height:100vh;}
+  .sidebar{width:var(--sidebar-width,236px); flex-shrink:0; background:var(--sidebar); color:var(--sidebar-text-active); display:flex; flex-direction:column; position:sticky; top:0; height:100vh; transition:width .2s ease;}
   .sidebar-brand{display:flex; align-items:center; gap:10px; padding:22px 18px; border-bottom:1px solid var(--sidebar-hover);}
   .sidebar-brand .mark{width:30px; height:30px; border-radius:6px; background:var(--admin-primary); color:var(--admin-on-btn); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; flex-shrink:0; overflow:hidden; font-family:var(--font-display);}
   .sidebar-brand span{font-family:var(--font-display); font-size:16px; letter-spacing:.06em;}
@@ -190,6 +204,43 @@
   .page-btn.active{background:var(--admin-accent); color:var(--admin-on-btn); border-color:var(--admin-accent);}
   .page-btn:disabled{opacity:.35;}
 
+  /* ===== Variações por modelo (data-admin-model) pros componentes de lista/tabela
+     compartilhados (Produtos, Estoque, Categorias, Pedidos, Clientes, Cupons) —
+     mesma estrutura HTML/JS, só a apresentação muda pra bater com cada
+     referência Stitch, sem duplicar a lógica de renderização. ===== */
+
+  /* Clássico (Classic Admin): filtros dentro de um cartão próprio, cabeçalho
+     de tabela com fundo sutil, badges com contorno, ações só aparecem no hover. */
+  [data-admin-model="classic"] .filters-row{background:var(--card); border:1px solid var(--line); border-radius:var(--admin-radius); padding:14px; align-items:center;}
+  [data-admin-model="classic"] th{background:var(--card-alt);}
+  [data-admin-model="classic"] .badge{border:1px solid currentColor; background:transparent;}
+  [data-admin-model="classic"] tbody tr .icon-btn{opacity:0; transition:opacity .12s ease, border-color .15s ease, color .15s ease;}
+  [data-admin-model="classic"] tbody tr:hover .icon-btn{opacity:1;}
+
+  /* E-commerce (Vivid Pulse): zebra striping, badges "sticker" sólidos, thumbs
+     com glow sutil no hover. */
+  [data-admin-model="ecommerce"] tbody tr:nth-child(even){background:color-mix(in srgb, var(--card-alt) 60%, transparent);}
+  [data-admin-model="ecommerce"] tbody tr:hover{background:color-mix(in srgb, var(--admin-accent) 8%, var(--card-alt));}
+  [data-admin-model="ecommerce"] .badge{border-radius:4px; font-weight:800;}
+  [data-admin-model="ecommerce"] .thumb{transition:box-shadow .15s ease;}
+  [data-admin-model="ecommerce"] tr:hover .thumb{box-shadow:0 0 0 2px color-mix(in srgb, var(--admin-accent) 50%, transparent);}
+
+  /* Premium (Lux Noir Admin): sem zebra, badges como "pips" quadrados, cabeçalho
+     com tracking largo, ações discretas (sem borda até o hover). */
+  [data-admin-model="premium"] th{letter-spacing:.14em; font-weight:600;}
+  [data-admin-model="premium"] .badge{border-radius:2px; padding:4px 9px 4px 7px;}
+  [data-admin-model="premium"] .badge::before{content:''; display:inline-block; width:6px; height:6px; margin-right:6px; background:currentColor; vertical-align:1px;}
+  [data-admin-model="premium"] .icon-btn{border-color:transparent; background:transparent;}
+  [data-admin-model="premium"] .icon-btn:hover{border-color:var(--admin-accent);}
+
+  /* Minimalista (Pure Essence Admin): sem cartão ao redor dos filtros, cabeçalho
+     de tabela em caixa alta bem espaçada, badges retangulares e sem sombras. */
+  [data-admin-model="minimal"] .filters-row{border-bottom:1px solid var(--line); padding-bottom:14px;}
+  [data-admin-model="minimal"] th{letter-spacing:.08em; font-weight:700;}
+  [data-admin-model="minimal"] .badge{border-radius:0; border:1px solid var(--line); background:transparent; letter-spacing:.06em;}
+  [data-admin-model="minimal"] .icon-btn{border-radius:0;}
+  [data-admin-model="minimal"] .thumb{border-radius:0;}
+
   .stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:20px;}
   .stat-card{background:var(--card); border:1px solid var(--line); border-radius:var(--admin-radius); box-shadow:var(--admin-shadow); padding:20px;}
   .stat-card p.label{font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--ink-soft); margin:0 0 10px;}
@@ -212,6 +263,10 @@
   .alert-row .alert-text{font-size:13px; font-weight:600;}
   .alert-row .alert-sub{font-size:11.5px; color:var(--ink-soft); margin-top:1px;}
   .alert-dot{width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-right:8px;}
+  /* usado pelos modelos Clássico/E-commerce do Dashboard — mesmos dados de
+     #dashAlertsList, só que em cards horizontais no lugar de lista vertical */
+  .alerts-row-compact{display:flex; gap:12px; overflow-x:auto; padding-bottom:2px;}
+  .alerts-row-compact .alert-row{flex:1 0 220px; border:1px solid var(--line); border-radius:var(--admin-radius); padding:14px; border-bottom:1px solid var(--line); background:var(--bg);}
 
   .top-product-row{display:flex; align-items:center; gap:10px; padding:11px 0; border-bottom:1px solid var(--line);}
   .top-product-row:last-child{border-bottom:none;}
@@ -244,12 +299,35 @@
   .settings-cat-item{display:block; width:100%; text-align:left; padding:9px 10px; border:none; background:none; border-radius:6px; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:1px; transition:background .15s ease, color .15s ease;}
   .settings-cat-item:hover{background:var(--card-alt); color:var(--ink);}
   .settings-cat-item.active{background:var(--admin-accent); color:var(--admin-on-btn);}
+  [data-admin-model="premium"] .settings-cat-item.active{background:transparent; color:var(--admin-accent); border-left:3px solid var(--admin-accent); padding-left:8px; font-weight:700;}
+  [data-admin-model="ecommerce"] .settings-cat-item.active{border-radius:999px;}
+  [data-admin-model="minimal"] .settings-cat-item{border-radius:0;}
+  [data-admin-model="minimal"] .settings-cat-item.active{background:transparent; color:var(--ink); border-bottom:2px solid var(--admin-accent); font-weight:700;}
   @media (max-width:820px){ .settings-layout-grid{grid-template-columns:1fr !important;} }
   .settings-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
   @media (max-width:700px){ .settings-grid{grid-template-columns:1fr;} }
   .field{margin-bottom:14px;}
   .field label{display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); margin-bottom:7px;}
   .field input, .field select, .field textarea{width:100%;}
+
+  /* Cartões de integração (Pagamentos/Frete em Configurações) — mesmos campos
+     e IDs de sempre, só que apresentados como blocos com ícone/status,
+     batendo com a referência Stitch de "Métodos de Pagamento". */
+  .integration-tile-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin-bottom:20px;}
+  .integration-tile{background:var(--card); border:1px solid var(--line); border-radius:var(--admin-radius); box-shadow:var(--admin-shadow); padding:20px;}
+  .integration-tile-head{display:flex; align-items:flex-start; gap:12px;}
+  .integration-tile-icon{width:36px; height:36px; border-radius:8px; background:var(--card-alt); border:1px solid var(--line); color:var(--admin-accent); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .integration-tile-title{font-size:14px; font-weight:700; margin:0;}
+  .integration-tile-sub{font-size:12px; color:var(--ink-soft); margin:2px 0 0;}
+  .integration-tile-toggle{margin-left:auto; position:relative; display:inline-block; width:34px; height:20px; flex-shrink:0;}
+  .integration-tile-toggle input{opacity:0; width:0; height:0;}
+  .integration-tile-toggle span{position:absolute; inset:0; background:var(--line); border-radius:999px; transition:background .15s ease;}
+  .integration-tile-toggle span::before{content:''; position:absolute; width:14px; height:14px; left:3px; top:3px; background:var(--card); border-radius:50%; transition:transform .15s ease;}
+  .integration-tile-toggle input:checked + span{background:var(--admin-accent);}
+  .integration-tile-toggle input:checked + span::before{transform:translateX(14px); background:var(--admin-on-btn);}
+  [data-admin-model="premium"] .integration-tile-icon{border-radius:0;}
+  [data-admin-model="ecommerce"] .integration-tile{border-color:color-mix(in srgb, var(--admin-accent) 25%, var(--line));}
+  [data-admin-model="minimal"] .integration-tile-icon{border-radius:0; background:transparent;}
 
   .logo-preview{width:100%; height:120px; border-radius:10px; background:var(--sidebar); display:flex; align-items:center; justify-content:center; margin-bottom:12px; overflow:hidden;}
   .logo-preview img{max-width:70%; max-height:70%;}
@@ -272,13 +350,27 @@
   .card:has(> table) > table{min-width:640px;}
 
   @media (max-width:820px){
-    .sidebar{position:fixed; left:-236px; z-index:40; transition:left .2s ease;}
+    .sidebar{position:fixed; left:calc(-1 * var(--sidebar-width,236px)); z-index:40; transition:left .2s ease;}
     .sidebar.open{left:0;}
     .menu-toggle{display:flex !important;}
     .content{padding:18px 16px;}
     .topbar{padding:14px 16px;}
     #loginScreen{margin:18vh 20px; padding:32px 24px;}
   }
+
+  .mobile-tabbar{display:none;}
+  @media (max-width:820px){
+    [data-admin-model="ecommerce"] .mobile-tabbar{
+      display:flex; position:fixed; left:0; right:0; bottom:0; z-index:50;
+      background:var(--sidebar); border-top:1px solid var(--line);
+      padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px));
+    }
+    [data-admin-model="ecommerce"] .sidebar{display:none;}
+    [data-admin-model="ecommerce"] .menu-toggle{display:none !important;}
+    [data-admin-model="ecommerce"] .content{padding-bottom:88px;}
+  }
+  .mobile-tab{flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px; border:none; background:none; color:var(--sidebar-text); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.02em;}
+  .mobile-tab.active{color:var(--admin-accent);}
 </style>
 </head>
 <body>
@@ -293,6 +385,27 @@
 
 <div id="dashboard">
   <div class="layout">
+    <!-- Referência Stitch "Vivid Pulse" (E-commerce): no mobile, a navegação
+         principal vira uma barra de abas fixa embaixo em vez do menu lateral
+         em drawer usado pelos outros 3 modelos — só aparece nesse modelo. -->
+    <nav class="mobile-tabbar" id="mobileTabbar">
+      <button class="mobile-tab active" data-tab-panel="dashboard" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="mobile-tab" data-tab-panel="orders" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Pedidos</span>
+      </button>
+      <button class="mobile-tab" data-tab-panel="products" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Produtos</span>
+      </button>
+      <button class="mobile-tab" data-tab-panel="settings" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Perfil</span>
+      </button>
+    </nav>
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
         <span class="mark">JA</span>
@@ -328,72 +441,13 @@
       <div class="content">
 
         <!-- ---------- DASHBOARD / RELATÓRIOS ---------- -->
+        <!-- O conteúdo real é montado por renderDashboardShell(), que escolhe
+             entre os 4 modelos (Clássico/E-commerce/Premium/Minimalista) —
+             todos usam os MESMOS ids abaixo, então loadDashboard() (dados
+             reais) funciona igual não importa qual modelo está ativo. -->
         <div class="panel" data-panel="dashboard">
-
-          <div class="panel-head">
-            <h2 style="margin:0;">Dashboard</h2>
-            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-              <div class="period-pills" id="dashPeriodPills"></div>
-              <div id="dashCustomWrap" style="display:none; gap:6px; align-items:center;">
-                <input type="date" id="dashDateFrom" style="padding:6px 8px; font-size:12px; border-radius:8px; border:1px solid var(--line);">
-                <input type="date" id="dashDateTo" style="padding:6px 8px; font-size:12px; border-radius:8px; border:1px solid var(--line);">
-                <button class="btn btn-primary" id="dashApplyPeriodBtn" style="padding:7px 12px; font-size:12px;">Aplicar</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 1. Resumo principal -->
-          <div class="stat-grid">
-            <div class="stat-card">
-              <p class="label">Vendas</p>
-              <p class="value" id="dashRevenue">R$ 0,00</p>
-              <p class="trend" id="dashRevenueTrend"></p>
-            </div>
-            <div class="stat-card">
-              <p class="label">Pedidos</p>
-              <p class="value" id="dashOrders">0</p>
-              <p class="trend" id="dashOrdersTrend"></p>
-            </div>
-            <div class="stat-card">
-              <p class="label">Ticket médio</p>
-              <p class="value" id="dashAvgTicket">R$ 0,00</p>
-              <p class="trend" id="dashAvgTicketTrend"></p>
-            </div>
-            <div class="stat-card">
-              <p class="label">Produtos vendidos</p>
-              <p class="value" id="dashProductsSold">0</p>
-              <p class="trend" id="dashProductsSoldTrend"></p>
-            </div>
-          </div>
-
-          <!-- 2. Gráfico principal -->
-          <div class="card" style="margin-top:4px;">
-            <div class="panel-head">
-              <h2>Vendas ao longo do tempo</h2>
-              <div class="period-pills" id="salesChartPeriodPills"></div>
-            </div>
-            <canvas id="mainSalesChart" height="85"></canvas>
-          </div>
-
-          <div class="charts-grid" style="margin-top:16px;">
-            <!-- 3. Pedidos por status -->
-            <div class="card">
-              <div class="panel-head"><h2>Pedidos</h2></div>
-              <canvas id="orderStatusChart" height="200"></canvas>
-            </div>
-
-            <!-- 4. Produtos mais vendidos -->
-            <div class="card">
-              <div class="panel-head"><h2>Produtos mais vendidos</h2></div>
-              <div id="topProductsList"></div>
-            </div>
-          </div>
-
-          <!-- 5. Precisa de atenção -->
-          <div class="card" style="margin-top:16px;">
-            <div class="panel-head"><h2>Precisa de atenção</h2></div>
-            <div id="dashAlertsList"></div>
-          </div>
+          <div id="dashboardShell"></div>
+        </div>
 
         </div>
 
@@ -520,38 +574,16 @@
         </div>
 
         <!-- ---------- CUPONS ---------- -->
-        <div class="panel" data-panel="coupons">
-          <div class="card">
-            <div class="panel-head">
-              <h2>Cupons</h2>
-              <button class="btn btn-primary" id="newCouponBtn">+ Novo cupom</button>
-            </div>
-            <div class="filters-row">
-              <input type="text" id="coupSearch" placeholder="Buscar por código...">
-              <select id="coupStatusFilter">
-                <option value="">Todos os status</option>
-                <option value="active">Ativos</option>
-                <option value="inactive">Inativos</option>
-              </select>
-              <select id="coupScopeFilter">
-                <option value="">Todos os tipos</option>
-                <option value="percent">Percentual</option>
-                <option value="fixed">Fixo</option>
-                <option value="free_shipping">Frete grátis</option>
-                <option value="first_purchase">1ª compra</option>
-                <option value="products">Produtos específicos</option>
-                <option value="category">Categoria</option>
-              </select>
-            </div>
-            <table>
-              <thead><tr><th>Cupom</th><th>Desconto</th><th>Tipo</th><th>Mín. compra</th><th>Usos</th><th>Validade</th><th>Status</th><th></th></tr></thead>
-              <tbody id="couponsBody"></tbody>
-            </table>
+        <!-- ---------- MARKETING (hub único: Banners + Cupons + Avisos) ----------
+             Referência Stitch "Gestão de Marketing" — as 3 áreas que antes eram
+             itens separados no menu agora vivem numa página só, cada uma no seu
+             cartão. Mesmos ids/lógica de sempre, só a organização visual mudou. -->
+        <div class="panel" data-panel="marketing">
+          <div class="panel-head">
+            <h2>Marketing</h2>
+            <button class="btn btn-primary" id="newAnnouncementBtn">+ Novo aviso</button>
           </div>
-        </div>
 
-        <!-- ---------- MARKETING → BANNERS ---------- -->
-        <div class="panel" data-panel="marketing-banners">
           <div class="card">
             <div class="panel-head"><h2>Banners</h2></div>
             <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 20px;">
@@ -596,17 +628,13 @@
 
             <button class="btn btn-primary" id="saveBannersBtn" style="margin-top:8px;">Salvar banners</button>
           </div>
-        </div>
 
-        <!-- ---------- AVISOS ---------- -->
-        <div class="panel" data-panel="announcements">
           <div class="card">
             <div class="panel-head">
-              <h2>Avisos (faixa em movimento no topo)</h2>
-              <button class="btn btn-primary" id="newAnnouncementBtn">+ Novo aviso</button>
+              <h2>Avisos e comunicados</h2>
             </div>
             <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 16px;">
-              Todos os avisos ativos se movem juntos, numa faixa contínua (estilo painel de notícias). Se não houver nenhum ativo, a faixa some por completo.
+              Todos os avisos ativos se movem juntos, numa faixa contínua no topo da loja (estilo painel de notícias). Se não houver nenhum ativo, a faixa some por completo.
             </p>
 
             <div style="display:flex; align-items:flex-end; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
@@ -623,6 +651,34 @@
             <table>
               <thead><tr><th>Ordem</th><th>Ícone</th><th>Texto</th><th>Link</th><th>Status</th><th></th></tr></thead>
               <tbody id="announcementsBody"></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="panel-head">
+              <h2>Cupons</h2>
+              <button class="btn btn-primary" id="newCouponBtn">+ Novo cupom</button>
+            </div>
+            <div class="filters-row">
+              <input type="text" id="coupSearch" placeholder="Buscar por código...">
+              <select id="coupStatusFilter">
+                <option value="">Todos os status</option>
+                <option value="active">Ativos</option>
+                <option value="inactive">Inativos</option>
+              </select>
+              <select id="coupScopeFilter">
+                <option value="">Todos os tipos</option>
+                <option value="percent">Percentual</option>
+                <option value="fixed">Fixo</option>
+                <option value="free_shipping">Frete grátis</option>
+                <option value="first_purchase">1ª compra</option>
+                <option value="products">Produtos específicos</option>
+                <option value="category">Categoria</option>
+              </select>
+            </div>
+            <table>
+              <thead><tr><th>Cupom</th><th>Desconto</th><th>Tipo</th><th>Mín. compra</th><th>Usos</th><th>Validade</th><th>Status</th><th></th></tr></thead>
+              <tbody id="couponsBody"></tbody>
             </table>
           </div>
         </div>
@@ -831,32 +887,55 @@
               </div>
             </div>
             <div class="settings-panel " data-spanel="mercadopago">
-              <div class="card">
-<p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Mercado Pago</p>
-              <div class="field"><label><input type="checkbox" id="setMercadoPagoEnabled" style="width:auto;display:inline-block;margin-right:6px;">Mercado Pago ativado</label></div>
-              <div class="field" style="max-width:480px;"><label>Access Token (privado — nunca aparece pro cliente)</label><input id="setMpAccessToken" type="password" placeholder="Deixe em branco pra continuar usando a variável de ambiente"></div>
-              <div class="field" style="max-width:480px;"><label>Public Key</label><input id="setMpPublicKey" placeholder="Deixe em branco pra continuar usando a variável de ambiente"></div>
-              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 16px; max-width:520px;">
-                Preenchendo aqui, o sistema passa a usar essa credencial automaticamente — não precisa mais mexer em código nem na Netlify. Deixando em branco, continua usando <code>MERCADOPAGO_ACCESS_TOKEN</code> da Netlify normalmente (nada quebra).
-              </p>
-              <button class="btn btn-primary" id="saveMercadoPagoBtn" style="margin-bottom:8px;">Salvar credenciais do Mercado Pago</button>
-              <p id="mpCredsStatus" style="font-size:12.5px; margin:0 0 20px;"></p>
-
-              
+              <p class="settings-cat-label" style="margin:0 0 12px;">Métodos de pagamento</p>
+              <div class="integration-tile-grid">
+                <div class="integration-tile">
+                  <div class="integration-tile-head">
+                    <div class="integration-tile-icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M2 10h20" stroke="currentColor" stroke-width="1.7"/></svg>
+                    </div>
+                    <div>
+                      <p class="integration-tile-title">Mercado Pago</p>
+                      <p class="integration-tile-sub">Cartão, Pix e boleto</p>
+                    </div>
+                    <label class="integration-tile-toggle">
+                      <input type="checkbox" id="setMercadoPagoEnabled">
+                      <span></span>
+                    </label>
+                  </div>
+                  <div class="field" style="margin-top:14px;"><label>Access Token (privado — nunca aparece pro cliente)</label><input id="setMpAccessToken" type="password" placeholder="Deixe em branco pra continuar usando a variável de ambiente"></div>
+                  <div class="field"><label>Public Key</label><input id="setMpPublicKey" placeholder="Deixe em branco pra continuar usando a variável de ambiente"></div>
+                  <p style="font-size:12px; color:var(--ink-soft); margin:0 0 14px;">
+                    Preenchendo aqui, o sistema passa a usar essa credencial automaticamente — não precisa mais mexer em código nem na Netlify. Deixando em branco, continua usando <code>MERCADOPAGO_ACCESS_TOKEN</code> da Netlify normalmente (nada quebra).
+                  </p>
+                  <button class="btn btn-primary" id="saveMercadoPagoBtn">Configurar</button>
+                  <p id="mpCredsStatus" style="font-size:12.5px; margin:10px 0 0;"></p>
+                </div>
               </div>
             </div>
             <div class="settings-panel " data-spanel="melhorenvio">
-              <div class="card">
-<p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Melhor Envio</p>
-              <div class="field" style="max-width:480px;"><label>Token de acesso (privado)</label><input id="setMelhorEnvioToken" type="password" placeholder="Deixe em branco pra continuar usando a variável de ambiente"></div>
-              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 12px; max-width:520px;">
-                Preenchendo aqui, o sistema passa a usar esse token automaticamente. Deixando em branco, continua usando <code>MELHORENVIO_TOKEN</code> da Netlify (nada quebra).
-              </p>
-              <p style="font-size:12px; color:var(--ink-soft); margin:0 0 20px; max-width:520px;">
-                O <b>CEP de origem</b> (usado pra calcular a distância do frete) é o mesmo já cadastrado em <b>Configurações → Geral → CEP da loja</b> — não duplicamos esse campo aqui.
-              </p>
-              <button class="btn btn-ghost" id="saveMelhorEnvioTokenBtn" style="margin-bottom:8px;">Salvar token do Melhor Envio</button>
-              <p id="melhorEnvioTokenStatus" style="font-size:12.5px;"></p>
+              <p class="settings-cat-label" style="margin:0 0 12px;">Logística &amp; frete</p>
+              <div class="integration-tile-grid">
+                <div class="integration-tile">
+                  <div class="integration-tile-head">
+                    <div class="integration-tile-icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="7" cy="18" r="1.6" stroke="currentColor" stroke-width="1.5"/><circle cx="17.5" cy="18" r="1.6" stroke="currentColor" stroke-width="1.5"/></svg>
+                    </div>
+                    <div>
+                      <p class="integration-tile-title">Melhor Envio</p>
+                      <p class="integration-tile-sub">Correios, Jadlog e outras transportadoras</p>
+                    </div>
+                  </div>
+                  <div class="field" style="margin-top:14px;"><label>Token de acesso (privado)</label><input id="setMelhorEnvioToken" type="password" placeholder="Deixe em branco pra continuar usando a variável de ambiente"></div>
+                  <p style="font-size:12px; color:var(--ink-soft); margin:0 0 6px;">
+                    Preenchendo aqui, o sistema passa a usar esse token automaticamente. Deixando em branco, continua usando <code>MELHORENVIO_TOKEN</code> da Netlify (nada quebra).
+                  </p>
+                  <p style="font-size:12px; color:var(--ink-soft); margin:0 0 14px;">
+                    O <b>CEP de origem</b> (usado pra calcular a distância do frete) é o mesmo já cadastrado em <b>Configurações → Geral → CEP da loja</b> — não duplicamos esse campo aqui.
+                  </p>
+                  <button class="btn btn-ghost" id="saveMelhorEnvioTokenBtn">Configurar</button>
+                  <p id="melhorEnvioTokenStatus" style="font-size:12.5px; margin:10px 0 0;"></p>
+                </div>
               </div>
             </div>
             <div class="settings-panel " data-spanel="analytics-shortcut">
@@ -1033,14 +1112,12 @@
               Isso muda só a aparência do painel administrativo (pra você que usa) — não afeta a loja pública, nem o menu, nem nenhuma funcionalidade. Fica salvo neste navegador.
             </p>
 
-            <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Estilo</p>
-            <div class="palette-grid" id="adminStyleGrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));"></div>
-
-            <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:24px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Paletas prontas</p>
-            <div class="palette-grid" id="adminPaletteGrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));"></div>
+            <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Modelo do painel</p>
+            <p style="font-size:12px; color:var(--ink-soft); margin:0 0 14px;">Cada modelo é um sistema completo (cor, tipografia, formato) baseado nos designs do Google Stitch — escolher um já aplica tudo, sem precisar combinar com uma paleta separada.</p>
+            <div class="palette-grid" id="adminStyleGrid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));"></div>
 
             <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:24px 0 4px; border-top:1px solid var(--line); padding-top:20px;">Personalizar manualmente</p>
-            <p style="font-size:12px; color:var(--ink-soft); margin:0 0 10px;">Ajuste fino por cima do estilo/paleta escolhidos acima.</p>
+            <p style="font-size:12px; color:var(--ink-soft); margin:0 0 10px;">Ajuste fino por cima do modelo escolhido acima.</p>
             <div id="adminColorRows"></div>
 
             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:20px;">
@@ -1554,19 +1631,36 @@
   // Fica salvo neste navegador (localStorage), nunca no banco de dados.
   const ADMIN_THEME_STORAGE_KEY = 'ja_admin_theme';
 
+  // Os 4 modelos completos do painel administrativo (arquitetura do Google
+  // Stitch) — cada um é um sistema de design inteiro (cor, tipografia, raio,
+  // sombra, largura de menu), não apenas uma paleta de cores. Escolher um
+  // modelo aplica tudo de uma vez, pra nunca misturar peças de modelos
+  // diferentes (ex: raio retо do Premium com cor de outro modelo).
   const ADMIN_STYLES = [
-    { key:'classic', name:'Clássico', description:'Profissional, limpo, cards simples e bem distribuídos.', radius:'10px', shadow:'none', defaultSidebar:'#0B0B0C' },
-    { key:'modern', name:'Moderno', description:'Estilo SaaS atual — cards refinados, mais espaço.', radius:'16px', shadow:'0 6px 20px rgba(17,17,17,0.08)', defaultSidebar:'#0B0B0C' },
-    { key:'premium', name:'Premium', description:'Sofisticado, contraste elegante, aparência exclusiva.', radius:'12px', shadow:'0 16px 40px rgba(0,0,0,0.45)', defaultSidebar:'#000000' },
-    { key:'minimal', name:'Minimalista', description:'Extremamente limpo, foco total nas informações.', radius:'4px', shadow:'none', defaultSidebar:'#FFFFFF' },
-  ];
-
-  const ADMIN_PALETTES = [
-    { key:'original', name:'Original', colors:{ bg:'#F4F4F5', ink:'#111111', sidebar:'#0B0B0C', admin_primary:'#111111', admin_secondary:'#6E6E73', admin_accent:'#111111', admin_btn:'#111111' } },
-    { key:'blue', name:'Azul profissional', colors:{ bg:'#F3F6F9', ink:'#111827', sidebar:'#0F3D63', admin_primary:'#1D5F92', admin_secondary:'#5A7A99', admin_accent:'#1E6FB8', admin_btn:'#1D5F92' } },
-    { key:'purple', name:'Roxo moderno', colors:{ bg:'#F6F4FA', ink:'#1D1730', sidebar:'#2E1F52', admin_primary:'#5B3AA0', admin_secondary:'#8A72B8', admin_accent:'#7C4DE0', admin_btn:'#5B3AA0' } },
-    { key:'black_premium', name:'Premium — Lux Noir', colors:{ bg:'#131313', ink:'#EDE8DE', sidebar:'#0B0B0C', admin_primary:'#D9B44A', admin_secondary:'#9C9284', admin_accent:'#D9B44A', admin_btn:'#D9B44A' } },
-    { key:'neutral', name:'Neutro minimalista', colors:{ bg:'#FAFAFA', ink:'#222222', sidebar:'#FFFFFF', admin_primary:'#3A3A3D', admin_secondary:'#8A8A8E', admin_accent:'#3A3A3D', admin_btn:'#3A3A3D' } },
+    { key:'classic', name:'Clássico', description:'Corporativo, denso, tabelas com bordas sutis — referência Stitch "Classic Admin".',
+      radius:'6px', radiusLg:'8px', shadow:'0 4px 6px -1px rgba(0,0,0,0.08)', shadowHover:'0 4px 6px -1px rgba(0,0,0,0.12)',
+      fontHeading:"'Hanken Grotesk',sans-serif", fontHeadingImport:'Hanken+Grotesk:wght@600;700',
+      fontBody:"'Hanken Grotesk',sans-serif", fontBodyImport:'Hanken+Grotesk:wght@400;500',
+      tracking:'0.02em', sidebarWidth:'256px', navIndicator:'left-bar',
+      colors:{ bg:'#F8FAFC', ink:'#1E293B', sidebar:'#0F172A', admin_primary:'#2563EB', admin_secondary:'#64748B', admin_accent:'#2563EB', admin_btn:'#2563EB' } },
+    { key:'ecommerce', name:'E-commerce', description:'Vibrante, alto contraste, cantos arredondados — referência Stitch "Vivid Pulse".',
+      radius:'16px', radiusLg:'20px', shadow:'none', shadowHover:'0 10px 26px rgba(234,1,17,0.22)',
+      fontHeading:"'Montserrat',sans-serif", fontHeadingImport:'Montserrat:wght@700;800',
+      fontBody:"'Montserrat',sans-serif", fontBodyImport:'Montserrat:wght@400;500;600',
+      tracking:'0.01em', sidebarWidth:'256px', navIndicator:'pill',
+      colors:{ bg:'#131313', ink:'#F5DADB', sidebar:'#131313', admin_primary:'#EA0111', admin_secondary:'#C8A2A3', admin_accent:'#EA0111', admin_btn:'#EA0111' } },
+    { key:'premium', name:'Premium', description:'Preto e dourado, cantos retos, tipografia serifada — referência Stitch "Lux Noir Admin".',
+      radius:'0px', radiusLg:'0px', shadow:'none', shadowHover:'0 0 30px rgba(0,0,0,0.4)',
+      fontHeading:"'Libre Caslon Text',serif", fontHeadingImport:'Libre+Caslon+Text',
+      fontBody:"'Manrope',sans-serif", fontBodyImport:'Manrope:wght@400;500;600',
+      tracking:'0.1em', sidebarWidth:'280px', navIndicator:'left-bar-gold',
+      colors:{ bg:'#131313', ink:'#E5E2E1', sidebar:'#1C1B1B', admin_primary:'#F2CA50', admin_secondary:'#D0C5AF', admin_accent:'#F2CA50', admin_btn:'#F2CA50' } },
+    { key:'minimal', name:'Minimalista', description:'Preto e branco, ultra limpo, bordas finas — referência Stitch "Pure Essence Admin".',
+      radius:'4px', radiusLg:'4px', shadow:'none', shadowHover:'none',
+      fontHeading:"'Manrope',sans-serif", fontHeadingImport:'Manrope:wght@600;700',
+      fontBody:"'Manrope',sans-serif", fontBodyImport:'Manrope:wght@400;500',
+      tracking:'0.03em', sidebarWidth:'256px', navIndicator:'underline',
+      colors:{ bg:'#F9F9F9', ink:'#1B1B1B', sidebar:'#FFFFFF', admin_primary:'#000000', admin_secondary:'#645C5D', admin_accent:'#000000', admin_btn:'#000000' } },
   ];
 
   const ADMIN_COLOR_FIELDS = [
@@ -1592,9 +1686,19 @@
     return '#' + [nr,ng,nb].map(v=>Math.max(0,Math.min(255,v)).toString(16).padStart(2,'0')).join('');
   }
 
+  const loadedAdminFonts = new Set();
+  function ensureAdminFontLoaded(importName){
+    if (!importName || loadedAdminFonts.has(importName)) return;
+    loadedAdminFonts.add(importName);
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${importName}&display=swap`;
+    document.head.appendChild(link);
+  }
+
   function getDefaultAdminTheme(){
-    const luxNoir = ADMIN_PALETTES.find(p=>p.key==='black_premium') || ADMIN_PALETTES[0];
-    return { style:'premium', colors:{ ...luxNoir.colors }, photoUrl:null };
+    const premium = ADMIN_STYLES.find(s=>s.key==='premium');
+    return { style:'premium', colors:{ ...premium.colors }, photoUrl:null };
   }
 
   function applyAdminTheme(theme){
@@ -1620,7 +1724,16 @@
 
     const styleDef = ADMIN_STYLES.find(s=>s.key===theme.style) || ADMIN_STYLES[0];
     root.setProperty('--admin-radius', styleDef.radius);
+    root.setProperty('--admin-radius-lg', styleDef.radiusLg);
     root.setProperty('--admin-shadow', styleDef.shadow);
+    root.setProperty('--admin-shadow-hover', styleDef.shadowHover);
+    root.setProperty('--font-display', styleDef.fontHeading);
+    root.setProperty('--font-body', styleDef.fontBody);
+    root.setProperty('--admin-tracking', styleDef.tracking);
+    root.setProperty('--sidebar-width', styleDef.sidebarWidth);
+    document.documentElement.setAttribute('data-admin-model', styleDef.key);
+    ensureAdminFontLoaded(styleDef.fontHeadingImport);
+    ensureAdminFontLoaded(styleDef.fontBodyImport);
 
     // ---------- aplica de verdade no avatar real do painel ----------
     const realAvatar = document.getElementById('userAvatar');
@@ -1816,6 +1929,12 @@
 
     document.getElementById('adminStyleGrid').innerHTML = ADMIN_STYLES.map(s => `
       <button class="palette-card ${currentAdminTheme.style===s.key ? 'selected' : ''}" type="button" data-admin-style="${s.key}">
+        <div class="palette-swatches">
+          <span style="background:${s.colors.admin_primary}"></span>
+          <span style="background:${s.colors.sidebar}"></span>
+          <span style="background:${s.colors.bg}; border-color:var(--line);"></span>
+          <span style="background:${s.colors.ink}"></span>
+        </div>
         <b>${s.name}</b>
         <p style="font-size:11px; color:var(--ink-soft); margin:6px 0 0;">${s.description}</p>
       </button>
@@ -1824,30 +1943,10 @@
       btn.addEventListener('click', ()=>{
         const styleDef = ADMIN_STYLES.find(s=>s.key===btn.dataset.adminStyle);
         currentAdminTheme.style = styleDef.key;
-        currentAdminTheme.colors.sidebar = styleDef.defaultSidebar;
+        // Escolher um modelo aplica o sistema completo dele (cor, fonte, raio) —
+        // não fica misturado com cores de um modelo diferente escolhidas antes.
+        currentAdminTheme.colors = { ...styleDef.colors };
         document.querySelectorAll('#adminStyleGrid .palette-card').forEach(c=>c.classList.remove('selected'));
-        btn.classList.add('selected');
-        renderAdminColorRows();
-        applyAdminTheme(currentAdminTheme);
-      });
-    });
-
-    document.getElementById('adminPaletteGrid').innerHTML = ADMIN_PALETTES.map(p => `
-      <button class="palette-card" type="button" data-admin-palette="${p.key}">
-        <div class="palette-swatches">
-          <span style="background:${p.colors.admin_primary}"></span>
-          <span style="background:${p.colors.admin_accent}"></span>
-          <span style="background:${p.colors.sidebar}"></span>
-          <span style="background:${p.colors.bg}; border-color:var(--line);"></span>
-        </div>
-        <b>${p.name}</b>
-      </button>
-    `).join('');
-    document.querySelectorAll('[data-admin-palette]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const paletteDef = ADMIN_PALETTES.find(p=>p.key===btn.dataset.adminPalette);
-        currentAdminTheme.colors = { ...paletteDef.colors };
-        document.querySelectorAll('#adminPaletteGrid .palette-card').forEach(c=>c.classList.remove('selected'));
         btn.classList.add('selected');
         renderAdminColorRows();
         applyAdminTheme(currentAdminTheme);
@@ -2004,12 +2103,7 @@
       { label:'Loja Online', panel:'appearance' },
       { label:'Painel Administrativo', panel:'admin-appearance' },
     ]},
-    { id:'marketing-group', label:'Marketing', icon:'M3 11l18-5v12L3 14v-3z M11 13v5a2 2 0 002 2h0a2 2 0 002-2v-4', children:[
-      { label:'Cupons', panel:'coupons' },
-      { label:'Banners', panel:'marketing-banners' },
-      { label:'Avisos', panel:'announcements' },
-      { label:'Campanhas', panel:'coming-soon', title:'Campanhas', reason:'Ainda não existe nenhuma parte desse sistema construída (e-mail marketing, SMS, etc.) — vai precisar ser uma etapa própria, do zero.' },
-    ]},
+    { id:'marketing', label:'Marketing', icon:'M3 11l18-5v12L3 14v-3z M11 13v5a2 2 0 002 2h0a2 2 0 002-2v-4', panel:'marketing' },
     { id:'analytics-group', label:'Analytics', icon:'M4 19V10M11 19V4M18 19v-7', children:[
       { label:'Google Analytics', panel:'analytics-ga' },
       { label:'Meta Pixel', panel:'analytics-pixel' },
@@ -2090,18 +2184,136 @@
     document.getElementById('sidebar').classList.remove('open');
   }
 
+  // ================= DASHBOARD: 4 modelos completos =================
+  // Cada função devolve o HTML inteiro do painel Dashboard, usando sempre os
+  // MESMOS ids (dashRevenue, mainSalesChart, topProductsList, etc.) — assim
+  // loadDashboard() (dados reais do Supabase) funciona igual não importa
+  // qual dos 4 modelos está ativo, só muda a organização visual.
+  const dashPeriodPillsHTML = `<div class="period-pills" id="dashPeriodPills"></div>
+    <div id="dashCustomWrap" style="display:none; gap:6px; align-items:center;">
+      <input type="date" id="dashDateFrom" style="padding:6px 8px; font-size:12px; border-radius:var(--admin-radius); border:1px solid var(--line);">
+      <input type="date" id="dashDateTo" style="padding:6px 8px; font-size:12px; border-radius:var(--admin-radius); border:1px solid var(--line);">
+      <button class="btn btn-primary" id="dashApplyPeriodBtn" style="padding:7px 12px; font-size:12px;">Aplicar</button>
+    </div>`;
+  const dashStatCardsHTML = `
+    <div class="stat-card"><p class="label">Vendas</p><p class="value" id="dashRevenue">R$ 0,00</p><p class="trend" id="dashRevenueTrend"></p></div>
+    <div class="stat-card"><p class="label">Pedidos</p><p class="value" id="dashOrders">0</p><p class="trend" id="dashOrdersTrend"></p></div>
+    <div class="stat-card"><p class="label">Ticket médio</p><p class="value" id="dashAvgTicket">R$ 0,00</p><p class="trend" id="dashAvgTicketTrend"></p></div>
+    <div class="stat-card"><p class="label">Produtos vendidos</p><p class="value" id="dashProductsSold">0</p><p class="trend" id="dashProductsSoldTrend"></p></div>
+  `;
+  const dashChartCardHTML = `
+    <div class="card" style="margin-top:4px;">
+      <div class="panel-head"><h2>Vendas ao longo do tempo</h2><div class="period-pills" id="salesChartPeriodPills"></div></div>
+      <canvas id="mainSalesChart" height="85"></canvas>
+    </div>
+  `;
+
+  function dashboardTemplatePremium(){
+    // Referência Stitch "Lux Noir Admin": bento 8/4, métricas em destaque,
+    // divisões finas em vez de sombra.
+    return `
+      <div class="panel-head"><h2 style="margin:0;">Dashboard</h2><div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">${dashPeriodPillsHTML}</div></div>
+      <div class="stat-grid">${dashStatCardsHTML}</div>
+      ${dashChartCardHTML}
+      <div class="charts-grid" style="margin-top:16px; grid-template-columns:1fr;" id="dashBentoGrid">
+        <div style="display:grid; grid-template-columns:1fr; gap:16px;" class="bento-8-4">
+          <div class="card"><div class="panel-head"><h2>Pedidos por status</h2></div><canvas id="orderStatusChart" height="200"></canvas></div>
+          <div class="card"><div class="panel-head"><h2>Produtos mais vendidos</h2></div><div id="topProductsList"></div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px;"><div class="panel-head"><h2>Precisa de atenção</h2></div><div id="dashAlertsList"></div></div>
+    `;
+  }
+
+  function dashboardTemplateClassic(){
+    // Referência Stitch "Classic Admin": seletor de período em pílulas +
+    // Exportar no topo, "Ações pendentes" em cards horizontais logo abaixo,
+    // depois as métricas — tabelas/cards com sombra suave.
+    return `
+      <div class="panel-head">
+        <h2 style="margin:0;">Dashboard</h2>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          ${dashPeriodPillsHTML}
+          <button class="btn btn-ghost" type="button" onclick="navigateTo({panel:'reports', label:'Relatórios'})">Exportar</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="panel-head"><h2 style="font-size:14px;">Ações pendentes</h2></div>
+        <div class="alerts-row-compact"><div id="dashAlertsList" style="display:contents;"></div></div>
+      </div>
+      <div class="stat-grid">${dashStatCardsHTML}</div>
+      ${dashChartCardHTML}
+      <div class="charts-grid" style="margin-top:16px;">
+        <div class="card"><div class="panel-head"><h2>Pedidos por status</h2></div><canvas id="orderStatusChart" height="200"></canvas></div>
+        <div class="card"><div class="panel-head"><h2>Produtos mais vendidos</h2></div><div id="topProductsList"></div></div>
+      </div>
+    `;
+  }
+
+  function dashboardTemplateEcommerce(){
+    // Referência Stitch "Vivid Pulse": "Checklist de hoje" em destaque no
+    // topo (cards vibrantes, cantos arredondados), métricas logo abaixo.
+    return `
+      <div class="panel-head"><h2 style="margin:0;">Dashboard</h2><div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">${dashPeriodPillsHTML}</div></div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="panel-head"><h2 style="font-size:14px;">Checklist de hoje</h2></div>
+        <div class="alerts-row-compact"><div id="dashAlertsList" style="display:contents;"></div></div>
+      </div>
+      <div class="stat-grid">${dashStatCardsHTML}</div>
+      <div class="charts-grid" style="margin-top:16px; grid-template-columns:2fr 1fr;">
+        ${dashChartCardHTML.replace('style="margin-top:4px;"', 'style="margin-top:0;"')}
+        <div class="card"><div class="panel-head"><h2>Produtos mais vendidos</h2></div><div id="topProductsList"></div></div>
+      </div>
+      <div class="card" style="margin-top:16px;"><div class="panel-head"><h2>Pedidos por status</h2></div><canvas id="orderStatusChart" height="200"></canvas></div>
+    `;
+  }
+
+  function dashboardTemplateMinimal(){
+    // Referência Stitch "Pure Essence Admin": preto e branco, sem sombra,
+    // alertas em faixas simples, foco total nos números e na tabela.
+    return `
+      <div class="panel-head">
+        <h2 style="margin:0;">Dashboard</h2>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          ${dashPeriodPillsHTML}
+          <button class="btn btn-ghost" type="button" onclick="navigateTo({panel:'reports', label:'Relatórios'})">Exportar</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px; padding:6px 20px;"><div id="dashAlertsList"></div></div>
+      <div class="stat-grid">${dashStatCardsHTML}</div>
+      <div class="charts-grid" style="margin-top:16px;">
+        ${dashChartCardHTML.replace('class="card" style="margin-top:4px;"', 'class="card" style="margin-top:0;"')}
+        <div class="card"><div class="panel-head"><h2>Produtos mais vendidos</h2></div><div id="topProductsList"></div></div>
+      </div>
+      <div class="card" style="margin-top:16px;"><div class="panel-head"><h2>Pedidos por status</h2></div><canvas id="orderStatusChart" height="200"></canvas></div>
+    `;
+  }
+
+  const DASHBOARD_TEMPLATES = {
+    classic: dashboardTemplateClassic,
+    ecommerce: dashboardTemplateEcommerce,
+    premium: dashboardTemplatePremium,
+    minimal: dashboardTemplateMinimal,
+  };
+
+  function renderDashboardShell(){
+    const wrap = document.getElementById('dashboardShell');
+    if (!wrap) return;
+    const builder = DASHBOARD_TEMPLATES[currentAdminTheme.style] || dashboardTemplatePremium;
+    wrap.innerHTML = builder();
+    document.getElementById('dashApplyPeriodBtn').addEventListener('click', ()=> loadDashboard());
+  }
+
   function switchPanel(id){
     document.querySelectorAll('.panel').forEach(p=> p.classList.toggle('active', p.dataset.panel===id));
 
-    if (id === 'dashboard') loadDashboard();
+    if (id === 'dashboard'){ renderDashboardShell(); loadDashboard(); }
     if (id === 'products') loadProducts();
     if (id === 'categories') loadCategoriesAdmin();
     if (id === 'stock') loadStockPanel();
     if (id === 'orders') loadOrders();
     if (id === 'customers') loadCustomers();
-    if (id === 'coupons') loadCoupons();
-    if (id === 'marketing-banners') loadSettings();
-    if (id === 'announcements') loadAnnouncementsAdmin();
+    if (id === 'marketing'){ loadCoupons(); loadSettings(); loadAnnouncementsAdmin(); }
     if (id === 'settings'){
       loadSettings();
       loadPaymentCredentials();
@@ -2117,6 +2329,19 @@
 
   document.getElementById('menuToggle').addEventListener('click', ()=>{
     document.getElementById('sidebar').classList.toggle('open');
+  });
+
+  const MOBILE_TAB_LABELS = { dashboard:'Dashboard', orders:'Pedidos', products:'Produtos', settings:'Configurações' };
+  document.querySelectorAll('.mobile-tab').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const panel = btn.dataset.tabPanel;
+      document.querySelectorAll('.mobile-tab.active').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('[data-nav-simple].active, [data-nav-child].active').forEach(b=>b.classList.remove('active'));
+      document.querySelector(`[data-nav-simple="${panel}"]`)?.classList.add('active');
+      document.getElementById('pageTitle').textContent = MOBILE_TAB_LABELS[panel] || panel;
+      switchPanel(panel);
+    });
   });
 
   // ---------------- auth ----------------
@@ -2257,7 +2482,6 @@
       });
     });
   }
-  document.getElementById('dashApplyPeriodBtn').addEventListener('click', ()=> loadDashboard());
 
   function renderSalesChartPeriodPills(){
     document.getElementById('salesChartPeriodPills').innerHTML = SALES_CHART_PERIODS.map(p => `
@@ -4014,7 +4238,7 @@
   // próprio lugar (Cupons em Marketing, Logo/Paleta em Personalização,
   // Analytics/Meta Pixel em Analytics), esses botões só levam pra lá.
   document.getElementById('goToPaymentSettingsBtn')?.addEventListener('click', ()=> selectSettingsItem('pagamento'));
-  document.getElementById('goToCouponsBtn')?.addEventListener('click', ()=> navigateTo({ panel:'coupons', label:'Cupons' }));
+  document.getElementById('goToCouponsBtn')?.addEventListener('click', ()=> navigateTo({ panel:'marketing', label:'Marketing' }));
   document.getElementById('goToAnalyticsBtn')?.addEventListener('click', ()=> navigateTo({ panel:'analytics-ga', label:'Google Analytics' }));
   document.getElementById('goToMetaPixelBtn')?.addEventListener('click', ()=> navigateTo({ panel:'analytics-pixel', label:'Meta Pixel' }));
   document.getElementById('goToLogoBtn')?.addEventListener('click', ()=> navigateTo({ panel:'appearance', label:'Personalização' }));
