@@ -26,7 +26,6 @@
     --accent:#F2CA50;
     --accent-dark:#000000;
     --on-accent:#241A00;
-    --hero-accent:#F2CA50;
     --font-body:'Manrope', sans-serif;
     --font-heading:'Libre Caslon Text', serif;
     --tpl-radius:0px;
@@ -267,7 +266,7 @@
 
   .hero-dark{background:#0B0B0C; overflow:hidden; padding:0; background-size:cover; background-position:center;}
   .hero-dark .container{max-width:760px; padding:88px 20px 72px; text-align:center;}
-  .hero-copy .eyebrow{font-family:var(--font-body); font-size:11px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:var(--hero-accent, var(--accent)); margin:0 0 20px;}
+  .hero-copy .eyebrow{font-family:var(--font-body); font-size:11px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:var(--accent); margin:0 0 20px;}
   .hero-title-row{display:flex; align-items:center; justify-content:center; gap:14px; margin:0 0 20px; flex-wrap:wrap;}
   .hero-title-row .mark{width:44px; height:44px; border-radius:10px; border:1.5px solid #3A3A3C; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
   .hero-title-row .mark svg{width:24px; height:24px;}
@@ -277,7 +276,7 @@
   .hero-cta{display:inline-flex; align-items:center; gap:8px; padding:14px 30px; background:var(--accent); color:var(--on-accent, #0B0B0C); border-radius:var(--tpl-radius-sm); font-size:13px; font-weight:700; letter-spacing:var(--tpl-label-tracking); text-transform:uppercase; font-family:var(--font-body); transition:filter .2s ease, transform .2s ease;}
   .hero-cta:hover{filter:brightness(1.08); transform:translateY(-2px);}
   .hero-cta-ghost{background:transparent; color:#fff; border:1.5px solid #3A3A3C;}
-  .hero-cta-ghost:hover{border-color:var(--hero-accent, var(--accent)); color:var(--hero-accent, var(--accent)); filter:none;}
+  .hero-cta-ghost:hover{border-color:var(--accent); color:var(--accent); filter:none;}
 
   /* ---------- TRUST BADGES ---------- */
   .trust{padding-bottom:44px;}
@@ -988,38 +987,32 @@
   const ICON_MENU_LIGHT = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>`;
 
   function headerTemplateMinimal(){
-    // Referência Stitch: Pure Essence — acromático, sem sombras, cantos retos,
-    // espaçamento generoso, navegação com sublinhado fino no hover.
     return `
       <header id="topo" class="tpl-minimal">
         <div class="header-top">
           <div class="mobile-logo-row">
             <button class="menu-toggle-btn" id="mobileMenuBtn" aria-label="Menu">${ICON_MENU_LIGHT}</button>
             <span id="logoImgMobile" class="logo-mark" style="width:26px;height:26px;">${LOGO_SVG_DARK}</span>
-            <span id="brandTextMobile" style="color:#fff;font-weight:600;font-family:var(--font-heading);font-size:15px;letter-spacing:.06em;">JA Store</span>
+            <span id="brandTextMobile" style="color:#fff;font-weight:600;font-family:'Inter',sans-serif;font-size:15px;letter-spacing:.06em;">JA Store</span>
           </div>
-          <div class="container header-main" style="padding-top:18px; padding-bottom:18px;">
-            <div class="search-wrap" style="border-bottom:1px solid rgba(255,255,255,0.25); border-radius:0;">
-              <input id="searchInput" type="text" placeholder="Buscar" style="background:transparent; color:#fff; padding-left:2px;">
-              <button class="search-btn" aria-label="Buscar" style="background:transparent; border-radius:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="1.6"/><path d="M21 21l-4-4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+          <div class="container header-main">
+            <div class="search-wrap">
+              <input id="searchInput" type="text" placeholder="Buscar">
+              <button class="search-btn" aria-label="Buscar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M21 21l-4-4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></button>
             </div>
             <div class="brand-center">
-              <span id="logoImgDesktop" class="logo-mark" style="width:32px;height:32px;">${LOGO_SVG_DARK}</span>
-              <span id="brandTextDesktop" style="font-family:var(--font-heading); letter-spacing:.16em; font-weight:600; font-size:15px;">JA STORE</span>
+              <span id="logoImgDesktop" class="logo-mark" style="width:34px;height:34px;">${LOGO_SVG_DARK}</span>
+              <span id="brandTextDesktop" style="letter-spacing:.14em; font-weight:600;">JA Store</span>
             </div>
-            <nav class="main-nav" style="font-family:var(--font-body); letter-spacing:.06em; font-weight:500; font-size:12.5px; text-transform:uppercase; gap:30px;">
-              <a href="#topo" style="border-bottom:1.5px solid transparent; padding-bottom:3px; transition:border-color .2s ease;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='transparent'">Início</a>
-              <a href="#produtos" style="border-bottom:1.5px solid transparent; padding-bottom:3px; transition:border-color .2s ease;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='transparent'">Produtos</a>
-              <a href="#categorias" style="border-bottom:1.5px solid transparent; padding-bottom:3px; transition:border-color .2s ease;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='transparent'">Categorias</a>
-              <a href="#ofertas" style="border-bottom:1.5px solid transparent; padding-bottom:3px; transition:border-color .2s ease;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='transparent'">Ofertas</a>
-              <a href="#sobre" style="border-bottom:1.5px solid transparent; padding-bottom:3px; transition:border-color .2s ease;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='transparent'">Sobre nós</a>
-              <a href="#contato" style="border-bottom:1.5px solid transparent; padding-bottom:3px; transition:border-color .2s ease;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='transparent'">Contato</a>
+            <nav class="main-nav" style="letter-spacing:.08em; font-weight:600;">
+              <a href="#topo">Início</a><a href="#produtos">Produtos</a><a href="#categorias">Categorias</a>
+              <a href="#ofertas">Ofertas</a><a href="#sobre">Sobre nós</a><a href="#contato">Contato</a>
             </nav>
             <div class="header-right">
-              <button class="icon-btn" id="favoritesToggleBtn" aria-label="Favoritos" title="Meus favoritos" style="border-radius:0; background:transparent;">${ICON_HEART}<span class="fav-count" id="favCount" style="display:none">0</span></button>
-              <a class="icon-btn" href="https://wa.me/5511946790983" target="_blank" rel="noopener" aria-label="WhatsApp" style="border-radius:0; background:transparent;">${ICON_WHATSAPP}</a>
-              <a class="icon-btn" id="instagramLink" href="#" target="_blank" rel="noopener" aria-label="Instagram" style="display:none; border-radius:0; background:transparent;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="#fff" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="#fff"/></svg></a>
-              <button class="cart-btn" id="openCartBtn" style="background:transparent; border:1px solid rgba(255,255,255,0.35); border-radius:0; color:#fff;">${ICON_CART}<span style="display:inline; font-family:var(--font-body); letter-spacing:.05em;">Carrinho</span><span class="cart-count" id="cartCount" style="display:none">0</span></button>
+              <button class="icon-btn" id="favoritesToggleBtn" aria-label="Favoritos" title="Meus favoritos">${ICON_HEART}<span class="fav-count" id="favCount" style="display:none">0</span></button>
+              <a class="icon-btn" href="https://wa.me/5511946790983" target="_blank" rel="noopener" aria-label="WhatsApp">${ICON_WHATSAPP}</a>
+              <a class="icon-btn" id="instagramLink" href="#" target="_blank" rel="noopener" aria-label="Instagram" style="display:none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="#fff" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="#fff"/></svg></a>
+              <button class="cart-btn" id="openCartBtn" style="background:transparent; border:1px solid rgba(255,255,255,0.3);">${ICON_CART}<span style="display:inline; letter-spacing:.05em;">Carrinho</span><span class="cart-count" id="cartCount" style="display:none">0</span></button>
             </div>
           </div>
         </div>
@@ -1032,50 +1025,43 @@
   }
 
   function headerTemplateClassic(){
-    // Referência Stitch: Vivid Pulse — fast-fashion, alto contraste, fundo
-    // carbono escuro (o mesmo tom de --bg do modelo) com rosa/vermelho elétrico
-    // de destaque. Antes o header ficava com fundo branco fixo mesmo o
-    // restante da página sendo escura nesse modelo — corrigido aqui.
     return `
-      <header id="topo" class="tpl-classic" style="background:var(--bg); border-bottom:1px solid var(--line);">
-        <div style="display:flex; align-items:center; gap:14px; padding:16px 20px; max-width:1160px; margin:0 auto; flex-wrap:wrap;">
-          <button class="hdr-mobile-only" id="mobileMenuBtn" aria-label="Menu" style="background:none; border:none; padding:4px;">${ICON_MENU_LIGHT}</button>
-          <span id="logoImgMobile" class="logo-mark hdr-mobile-only" style="width:26px;height:26px;">${LOGO_SVG_DARK}</span>
-          <span id="brandTextMobile" class="hdr-mobile-only" style="font-family:var(--font-heading); font-weight:800; font-size:15px; letter-spacing:.02em; text-transform:uppercase; color:var(--ink);">JA Store</span>
+      <header id="topo" class="tpl-classic" style="background:#fff; border-bottom:1px solid var(--line);">
+        <div style="display:flex; align-items:center; gap:14px; padding:14px 20px; max-width:1160px; margin:0 auto; flex-wrap:wrap;">
+          <button class="hdr-mobile-only" id="mobileMenuBtn" aria-label="Menu" style="background:none; border:none; padding:4px;">${ICON_MENU_DARK}</button>
+          <span id="logoImgMobile" class="logo-mark hdr-mobile-only" style="width:26px;height:26px;">${LOGO_SVG_LIGHT}</span>
+          <span id="brandTextMobile" class="hdr-mobile-only" style="font-weight:800; font-size:15px; letter-spacing:.03em; text-transform:uppercase; color:var(--rust);">JA Store</span>
 
-          <span id="logoImgDesktop" class="logo-mark hdr-desktop-only" style="width:36px;height:36px; border-radius:8px; overflow:hidden;">${LOGO_SVG_DARK}</span>
-          <span id="brandTextDesktop" class="hdr-desktop-only" style="font-family:var(--font-heading); font-weight:800; font-size:20px; letter-spacing:.02em; text-transform:uppercase; color:var(--ink);">JA Store</span>
+          <span id="logoImgDesktop" class="logo-mark hdr-desktop-only" style="width:34px;height:34px;">${LOGO_SVG_LIGHT}</span>
+          <span id="brandTextDesktop" class="hdr-desktop-only" style="font-weight:800; font-size:19px; letter-spacing:.04em; text-transform:uppercase; color:var(--rust);">JA Store</span>
 
-          <nav class="main-nav hdr-desktop-only" style="display:flex; gap:22px; font-family:var(--font-body); font-size:12.5px; font-weight:700; letter-spacing:.02em; text-transform:uppercase; margin-left:28px;">
-            <a href="#topo" style="color:var(--ink-soft); transition:color .2s ease;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-soft)'">Início</a>
-            <a href="#produtos" style="color:var(--ink-soft); transition:color .2s ease;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-soft)'">Produtos</a>
-            <a href="#categorias" style="color:var(--ink-soft); transition:color .2s ease;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-soft)'">Categorias</a>
-            <a href="#ofertas" style="color:var(--accent); border-bottom:2px solid var(--accent); padding-bottom:2px;">Ofertas</a>
-            <a href="#sobre" style="color:var(--ink-soft); transition:color .2s ease;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-soft)'">Sobre nós</a>
-            <a href="#contato" style="color:var(--ink-soft); transition:color .2s ease;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-soft)'">Contato</a>
+          <nav class="main-nav hdr-desktop-only" style="display:flex; gap:22px; font-size:12.5px; font-weight:700; letter-spacing:.02em; text-transform:uppercase; margin-left:28px;">
+            <a href="#topo" style="color:var(--ink);">Início</a><a href="#produtos" style="color:var(--ink);">Produtos</a>
+            <a href="#categorias" style="color:var(--ink);">Categorias</a><a href="#ofertas" style="color:var(--rust); border-bottom:2px solid var(--rust); padding-bottom:2px;">Ofertas</a>
+            <a href="#sobre" style="color:var(--ink);">Sobre nós</a><a href="#contato" style="color:var(--ink);">Contato</a>
           </nav>
 
           <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
-            <button class="icon-btn" id="favoritesToggleBtn" aria-label="Favoritos" title="Meus favoritos" style="background:var(--card); border-radius:var(--tpl-radius-sm); width:36px; height:36px; color:var(--ink); display:flex; align-items:center; justify-content:center; position:relative;">${ICON_HEART}<span class="fav-count" id="favCount" style="display:none; background:var(--accent); color:#fff;">0</span></button>
-            <a class="icon-btn" href="https://wa.me/5511946790983" target="_blank" rel="noopener" aria-label="WhatsApp" style="background:var(--card); border-radius:var(--tpl-radius-sm); width:36px; height:36px; color:var(--ink); display:flex; align-items:center; justify-content:center;">${ICON_WHATSAPP}</a>
-            <a class="icon-btn" id="instagramLink" href="#" target="_blank" rel="noopener" aria-label="Instagram" style="display:none; background:var(--card); border-radius:var(--tpl-radius-sm); width:36px; height:36px; color:var(--ink); align-items:center; justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg></a>
-            <button class="cart-btn" id="openCartBtn" style="background:var(--accent); color:#fff; border-radius:var(--tpl-radius-sm); padding:10px 18px; display:flex; align-items:center; gap:6px; font-family:var(--font-body); font-size:12px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; position:relative; box-shadow:0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent);">${ICON_CART}<span class="hdr-desktop-only" style="display:inline">Carrinho</span><span class="cart-count" id="cartCount" style="display:none; background:#fff; color:var(--accent);">0</span></button>
+            <button class="icon-btn" id="favoritesToggleBtn" aria-label="Favoritos" title="Meus favoritos" style="background:var(--bg); border-radius:50%; width:34px; height:34px; color:var(--ink); display:flex; align-items:center; justify-content:center; position:relative;">${ICON_HEART}<span class="fav-count" id="favCount" style="display:none; background:var(--rust);">0</span></button>
+            <a class="icon-btn" href="https://wa.me/5511946790983" target="_blank" rel="noopener" aria-label="WhatsApp" style="background:var(--bg); border-radius:50%; width:34px; height:34px; color:var(--ink); display:flex; align-items:center; justify-content:center;">${ICON_WHATSAPP}</a>
+            <a class="icon-btn" id="instagramLink" href="#" target="_blank" rel="noopener" aria-label="Instagram" style="display:none; background:var(--bg); border-radius:50%; width:34px; height:34px; color:var(--ink); align-items:center; justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg></a>
+            <button class="cart-btn" id="openCartBtn" style="background:var(--rust); color:#fff; border-radius:8px; padding:9px 16px; display:flex; align-items:center; gap:6px; font-size:12px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; position:relative;">${ICON_CART}<span class="hdr-desktop-only" style="display:inline">Carrinho</span><span class="cart-count" id="cartCount" style="display:none; background:#fff; color:var(--rust);">0</span></button>
           </div>
 
-          <div class="search-wrap hdr-mobile-only" style="width:100%; margin-top:10px; background:var(--card); border:1px solid var(--line); border-radius:var(--tpl-radius-sm); display:flex; align-items:center; padding:2px 10px;">
+          <div class="search-wrap hdr-mobile-only" style="width:100%; margin-top:10px; background:var(--bg); border:1px solid var(--line); border-radius:8px; display:flex; align-items:center; padding:2px 10px;">
             <input id="searchInput" type="text" placeholder="O que você está procurando?" style="flex:1; border:none; background:none; padding:9px 4px; font-size:13px; color:var(--ink);">
             <span style="color:var(--ink-soft);">${ICON_SEARCH}</span>
           </div>
         </div>
 
         <div class="hdr-desktop-only" style="border-top:1px solid var(--line); padding:8px 20px; max-width:1160px; margin:0 auto;">
-          <div class="search-wrap" style="max-width:420px; background:var(--card); border:1px solid var(--line); border-radius:var(--tpl-radius-sm); display:flex; align-items:center; padding:2px 12px;">
+          <div class="search-wrap" style="max-width:420px; background:var(--bg); border:1px solid var(--line); border-radius:8px; display:flex; align-items:center; padding:2px 12px;">
             <input id="searchInputDesktopClassic" type="text" placeholder="Buscar produtos..." style="flex:1; border:none; background:none; padding:8px 4px; font-size:13px; color:var(--ink);" oninput="document.getElementById('searchInput').value=this.value; document.getElementById('searchInput').dispatchEvent(new Event('input'));">
             <span style="color:var(--ink-soft);">${ICON_SEARCH}</span>
           </div>
         </div>
 
-        <div class="cat-nav-wrap" id="categorias" style="background:var(--card);">
+        <div class="cat-nav-wrap" id="categorias" style="background:var(--bg);">
           <nav class="cat-nav" id="catNavDesktop"></nav>
           <div class="cat-nav-mobile" id="catNavMobile"></div>
         </div>
@@ -1123,35 +1109,32 @@
   }
 
   function headerTemplateEcommerce(){
-    // Referência Stitch: Vivid Kinetic — tech, índigo/roxo, glassmorphism
-    // sutil (fundo translúcido + blur), cantos arredondados, botão com
-    // gradiente e leve brilho interno.
     return `
-      <header id="topo" class="tpl-ecommerce" style="background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid var(--line);">
+      <header id="topo" class="tpl-ecommerce" style="background:#fff; border-bottom:1px solid var(--line);">
         <div style="display:flex; align-items:center; gap:16px; padding:14px 20px; max-width:1160px; margin:0 auto;">
           <button class="hdr-mobile-only" id="mobileMenuBtn" aria-label="Menu" style="background:none; border:none; padding:4px;">${ICON_MENU_DARK}</button>
-          <span id="logoImgMobile" class="logo-mark hdr-mobile-only" style="width:26px;height:26px; border-radius:8px; overflow:hidden;">${LOGO_SVG_LIGHT}</span>
-          <span id="brandTextMobile" class="hdr-mobile-only" style="font-family:var(--font-heading); font-weight:700; font-size:14px; color:var(--ink);">JA Store</span>
+          <span id="logoImgMobile" class="logo-mark hdr-mobile-only" style="width:24px;height:24px;">${LOGO_SVG_LIGHT}</span>
+          <span id="brandTextMobile" class="hdr-mobile-only" style="font-weight:800; font-size:14px; color:var(--ink);">JA Store</span>
 
-          <span id="logoImgDesktop" class="logo-mark hdr-desktop-only" style="width:34px;height:34px; border-radius:10px; overflow:hidden;">${LOGO_SVG_LIGHT}</span>
-          <span id="brandTextDesktop" class="hdr-desktop-only" style="font-family:var(--font-heading); font-weight:700; font-size:18px; color:var(--ink); letter-spacing:-.01em;">JA Store</span>
+          <span id="logoImgDesktop" class="logo-mark hdr-desktop-only" style="width:32px;height:32px;">${LOGO_SVG_LIGHT}</span>
+          <span id="brandTextDesktop" class="hdr-desktop-only" style="font-weight:800; font-size:17px; color:var(--ink);">JA Store</span>
 
-          <div class="search-wrap" style="flex:1; background:var(--card); border:1.5px solid var(--line); border-radius:999px; display:flex; align-items:center; padding:2px 6px 2px 18px; max-width:560px; transition:border-color .2s ease, box-shadow .2s ease;" onfocusin="this.style.borderColor='var(--accent)'; this.style.boxShadow='0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent)';" onfocusout="this.style.borderColor='var(--line)'; this.style.boxShadow='none';">
-            <input id="searchInput" type="text" placeholder="Buscar produtos, categorias..." style="flex:1; border:none; background:none; padding:11px 4px; font-size:13px; color:var(--ink); font-family:var(--font-body);">
-            <button class="search-btn" aria-label="Buscar" style="background:linear-gradient(135deg, var(--accent), var(--rust)); border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff;">${ICON_SEARCH}</button>
+          <div class="search-wrap" style="flex:1; background:var(--bg); border:2px solid var(--accent); border-radius:24px; display:flex; align-items:center; padding:2px 16px; max-width:560px;">
+            <input id="searchInput" type="text" placeholder="Buscar produtos, categorias..." style="flex:1; border:none; background:none; padding:10px 4px; font-size:13px; color:var(--ink);">
+            <button class="search-btn" aria-label="Buscar" style="background:var(--accent); border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff;">${ICON_SEARCH}</button>
           </div>
 
           <div style="display:flex; align-items:center; gap:6px; margin-left:auto;">
-            <button class="icon-btn hdr-desktop-only" id="favoritesToggleBtn" aria-label="Favoritos" title="Meus favoritos" style="background:var(--card); border:1px solid var(--line); color:var(--ink); position:relative;">${ICON_HEART}<span class="fav-count" id="favCount" style="display:none; background:var(--rust);">0</span></button>
-            <a class="icon-btn hdr-desktop-only" href="https://wa.me/5511946790983" target="_blank" rel="noopener" aria-label="WhatsApp" style="background:var(--card); border:1px solid var(--line); color:var(--ink);">${ICON_WHATSAPP}</a>
-            <a class="icon-btn" id="instagramLink" href="#" target="_blank" rel="noopener" aria-label="Instagram" style="display:none; background:var(--card); border:1px solid var(--line); color:var(--ink);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg></a>
-            <button class="cart-btn" id="openCartBtn" style="background:linear-gradient(135deg, var(--accent), var(--rust)); color:#fff; border-radius:999px; padding:11px 18px; display:flex; align-items:center; gap:6px; font-family:var(--font-body); font-size:12.5px; font-weight:600; position:relative; box-shadow:0 8px 20px color-mix(in srgb, var(--accent) 30%, transparent);">${ICON_CART}<span class="hdr-desktop-only" style="display:inline">Carrinho</span><span class="cart-count" id="cartCount" style="display:none; background:#fff; color:var(--accent);">0</span></button>
+            <button class="icon-btn hdr-desktop-only" id="favoritesToggleBtn" aria-label="Favoritos" title="Meus favoritos" style="background:none; border:none; color:var(--ink); position:relative; padding:6px;">${ICON_HEART}<span class="fav-count" id="favCount" style="display:none">0</span></button>
+            <a class="icon-btn hdr-desktop-only" href="https://wa.me/5511946790983" target="_blank" rel="noopener" aria-label="WhatsApp" style="color:var(--ink); padding:6px;">${ICON_WHATSAPP}</a>
+            <a class="icon-btn" id="instagramLink" href="#" target="_blank" rel="noopener" aria-label="Instagram" style="display:none; color:var(--ink); padding:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg></a>
+            <button class="cart-btn" id="openCartBtn" style="background:var(--accent); color:#fff; border-radius:8px; padding:10px 16px; display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; position:relative;">${ICON_CART}<span class="hdr-desktop-only" style="display:inline">Carrinho</span><span class="cart-count" id="cartCount" style="display:none; background:#fff; color:var(--accent);">0</span></button>
           </div>
         </div>
 
-        <div class="cat-nav-wrap" id="categorias" style="background:var(--card); border-top:1px solid var(--line);">
-          <nav class="cat-nav" id="catNavDesktop"></nav>
-          <div class="cat-nav-mobile" id="catNavMobile"></div>
+        <div class="cat-nav-wrap" id="categorias" style="background:var(--ink);">
+          <nav class="cat-nav" id="catNavDesktop" style="filter:invert(1) hue-rotate(180deg);"></nav>
+          <div class="cat-nav-mobile" id="catNavMobile" style="filter:invert(1) hue-rotate(180deg);"></div>
         </div>
       </header>
     `;
@@ -1219,12 +1202,6 @@
     document.head.appendChild(link);
   }
 
-  function hexLuminance(hex){
-    const h = (hex||'#000000').replace('#','');
-    const r = parseInt(h.substr(0,2),16)||0, g = parseInt(h.substr(2,2),16)||0, b = parseInt(h.substr(4,2),16)||0;
-    return 0.299*r + 0.587*g + 0.114*b;
-  }
-
   function applyTemplateDesignTokens(key){
     const tokens = TEMPLATE_DESIGN_TOKENS[key];
     if (!tokens) return; // "sem seleção": não mexe em nada, mantém o visual atual
@@ -1238,15 +1215,6 @@
     root.setProperty('--gold', tokens.accent);
     root.setProperty('--rust', tokens.rust);
     root.setProperty('--green', tokens.green);
-    // texto em cima de botões/badges preenchidos com a cor de destaque —
-    // precisa ser claro ou escuro dependendo do quão clara é essa cor (ex:
-    // dourado/rosa precisam de texto escuro; preto/índigo precisam de branco).
-    root.setProperty('--on-accent', hexLuminance(tokens.accent) > 150 ? '#1C1200' : '#FFFFFF');
-    // o hero da Home tem fundo sempre escuro (independente do modelo), então
-    // usar a cor de destaque de um modelo claro (ex: preto do Minimalista)
-    // direto como texto ali ficaria ilegível — nesse caso específico, cai
-    // pra um tom claro neutro que sempre lê bem em cima de fundo escuro.
-    root.setProperty('--hero-accent', hexLuminance(tokens.accent) > 90 ? tokens.accent : '#D9D9D9');
     root.setProperty('--tpl-radius', tokens.radius);
     root.setProperty('--tpl-radius-sm', tokens.radiusSm);
     root.setProperty('--tpl-shadow', tokens.shadow);
