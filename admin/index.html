@@ -595,108 +595,128 @@
              Referência Stitch "Gestão de Marketing" — as 3 áreas que antes eram
              itens separados no menu agora vivem numa página só, cada uma no seu
              cartão. Mesmos ids/lógica de sempre, só a organização visual mudou. -->
+        <!-- Marketing: item único no menu principal, com navegação interna
+             própria (igual Configurações) — cada seção (Cupons/Avisos/
+             Comunicação/Banners) abre sozinha, nunca todas juntas. -->
         <div class="panel" data-panel="marketing">
-          <div class="panel-head">
-            <h2>Marketing</h2>
-            <button class="btn btn-primary" id="newAnnouncementBtn">+ Novo aviso</button>
-          </div>
+          <div class="panel-head"><h2>Marketing</h2></div>
+          <div class="settings-layout-grid" style="display:grid; grid-template-columns:200px 1fr; gap:24px; align-items:start;">
+            <nav id="marketingCategoryNav" style="display:flex; flex-direction:column; gap:2px;"></nav>
+            <div id="marketingContentArea">
 
-          <div class="card">
-            <div class="panel-head"><h2>Banners</h2></div>
-            <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 20px;">
-              Esses banners aparecem na Home da loja pública. As cores, fontes e modelo de menu continuam sendo ajustados em Personalização.
-            </p>
-
-            <p style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.08em; margin:0 0 12px;">Banner principal</p>
-            <div class="settings-grid">
-              <div class="field"><label>Título</label><input id="setBannerMainTitle" placeholder="Ex: Nova coleção chegou"></div>
-              <div class="field"><label>Subtítulo</label><input id="setBannerMainSubtitle" placeholder="Ex: Confira os lançamentos da semana"></div>
-              <div class="field"><label>Texto do botão</label><input id="setBannerMainCtaText" placeholder="Ex: Ver produtos"></div>
-              <div class="field"><label>Link do botão</label><input id="setBannerMainCtaLink" placeholder="Ex: #produtos"></div>
-            </div>
-            <div class="field">
-              <label>Imagem do banner principal</label>
-              <div id="bannerMainImagePreviewWrap" style="display:none; margin-bottom:8px;">
-                <img id="bannerMainImagePreview" style="width:100%; max-width:320px; max-height:140px; object-fit:cover; border-radius:8px; border:1px solid var(--line);">
+            <div class="settings-panel active" data-mpanel="cupons">
+              <div class="card">
+                <div class="panel-head">
+                  <h2>Cupons</h2>
+                  <button class="btn btn-primary" id="newCouponBtn">+ Novo cupom</button>
+                </div>
+                <div class="filters-row">
+                  <input type="text" id="coupSearch" placeholder="Buscar por código...">
+                  <select id="coupStatusFilter">
+                    <option value="">Todos os status</option>
+                    <option value="active">Ativos</option>
+                    <option value="inactive">Inativos</option>
+                  </select>
+                  <select id="coupScopeFilter">
+                    <option value="">Todos os tipos</option>
+                    <option value="percent">Percentual</option>
+                    <option value="fixed">Fixo</option>
+                    <option value="free_shipping">Frete grátis</option>
+                    <option value="first_purchase">1ª compra</option>
+                    <option value="products">Produtos específicos</option>
+                    <option value="category">Categoria</option>
+                  </select>
+                </div>
+                <table>
+                  <thead><tr><th>Cupom</th><th>Desconto</th><th>Tipo</th><th>Mín. compra</th><th>Usos</th><th>Validade</th><th>Status</th><th></th></tr></thead>
+                  <tbody id="couponsBody"></tbody>
+                </table>
               </div>
-              <input type="hidden" id="setBannerMainImage">
-              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                <input type="file" id="bannerMainImageFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:180px; font-size:12.5px;">
-                <button class="btn btn-ghost" id="removeBannerMainImageBtn" type="button">Remover</button>
+            </div>
+
+            <div class="settings-panel" data-mpanel="avisos">
+              <div class="card">
+                <div class="panel-head">
+                  <h2>Avisos</h2>
+                  <button class="btn btn-primary" id="newAnnouncementBtn">+ Novo aviso</button>
+                </div>
+                <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 16px;">
+                  Todos os avisos ativos se movem juntos, numa faixa contínua no topo da loja (estilo painel de notícias). Se não houver nenhum ativo, a faixa some por completo.
+                </p>
+
+                <div style="display:flex; align-items:flex-end; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+                  <div class="field" style="margin-bottom:0; max-width:260px;">
+                    <label>Direção do movimento</label>
+                    <select id="setAnnouncementsDirection">
+                      <option value="rtl">Direita → Esquerda</option>
+                      <option value="ltr">Esquerda → Direita</option>
+                    </select>
+                  </div>
+                  <button class="btn btn-ghost" id="saveAnnouncementsDirectionBtn">Salvar direção</button>
+                </div>
+
+                <table>
+                  <thead><tr><th>Ordem</th><th>Ícone</th><th>Texto</th><th>Link</th><th>Status</th><th></th></tr></thead>
+                  <tbody id="announcementsBody"></tbody>
+                </table>
               </div>
-              <p id="bannerMainImageUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:6px 0 0;"></p>
             </div>
 
-            <p style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.08em; margin:24px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Banner secundário</p>
-            <div class="field"><label>Título</label><input id="setBannerSecondaryTitle" placeholder="Ex: Frete grátis acima de R$ 300"></div>
-            <div class="field"><label>Link</label><input id="setBannerSecondaryLink" placeholder="Ex: #ofertas"></div>
-            <div class="field">
-              <label>Imagem do banner secundário</label>
-              <div id="bannerSecondaryImagePreviewWrap" style="display:none; margin-bottom:8px;">
-                <img id="bannerSecondaryImagePreview" style="width:100%; max-width:320px; max-height:140px; object-fit:cover; border-radius:8px; border:1px solid var(--line);">
+            <div class="settings-panel" data-mpanel="comunicacao">
+              <div class="card">
+                <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px;">Comunicação</p>
+                <p style="font-size:13px; color:var(--ink-soft); margin:0;">Nenhuma ferramenta de comunicação (e-mail, SMS, push) construída ainda — quando existir de verdade, aparece aqui.</p>
               </div>
-              <input type="hidden" id="setBannerSecondaryImage">
-              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                <input type="file" id="bannerSecondaryImageFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:180px; font-size:12.5px;">
-                <button class="btn btn-ghost" id="removeBannerSecondaryImageBtn" type="button">Remover</button>
+            </div>
+
+            <div class="settings-panel" data-mpanel="banners">
+              <div class="card">
+                <div class="panel-head"><h2>Banners</h2></div>
+                <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 20px;">
+                  Esses banners aparecem na Home da loja pública. As cores, fontes e modelo de menu continuam sendo ajustados em Personalização.
+                </p>
+
+                <p style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.08em; margin:0 0 12px;">Banner principal</p>
+                <div class="settings-grid">
+                  <div class="field"><label>Título</label><input id="setBannerMainTitle" placeholder="Ex: Nova coleção chegou"></div>
+                  <div class="field"><label>Subtítulo</label><input id="setBannerMainSubtitle" placeholder="Ex: Confira os lançamentos da semana"></div>
+                  <div class="field"><label>Texto do botão</label><input id="setBannerMainCtaText" placeholder="Ex: Ver produtos"></div>
+                  <div class="field"><label>Link do botão</label><input id="setBannerMainCtaLink" placeholder="Ex: #produtos"></div>
+                </div>
+                <div class="field">
+                  <label>Imagem do banner principal</label>
+                  <div id="bannerMainImagePreviewWrap" style="display:none; margin-bottom:8px;">
+                    <img id="bannerMainImagePreview" style="width:100%; max-width:320px; max-height:140px; object-fit:cover; border-radius:8px; border:1px solid var(--line);">
+                  </div>
+                  <input type="hidden" id="setBannerMainImage">
+                  <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <input type="file" id="bannerMainImageFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:180px; font-size:12.5px;">
+                    <button class="btn btn-ghost" id="removeBannerMainImageBtn" type="button">Remover</button>
+                  </div>
+                  <p id="bannerMainImageUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:6px 0 0;"></p>
+                </div>
+
+                <p style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.08em; margin:24px 0 12px; border-top:1px solid var(--line); padding-top:20px;">Banner secundário</p>
+                <div class="field"><label>Título</label><input id="setBannerSecondaryTitle" placeholder="Ex: Frete grátis acima de R$ 300"></div>
+                <div class="field"><label>Link</label><input id="setBannerSecondaryLink" placeholder="Ex: #ofertas"></div>
+                <div class="field">
+                  <label>Imagem do banner secundário</label>
+                  <div id="bannerSecondaryImagePreviewWrap" style="display:none; margin-bottom:8px;">
+                    <img id="bannerSecondaryImagePreview" style="width:100%; max-width:320px; max-height:140px; object-fit:cover; border-radius:8px; border:1px solid var(--line);">
+                  </div>
+                  <input type="hidden" id="setBannerSecondaryImage">
+                  <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <input type="file" id="bannerSecondaryImageFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" style="flex:1; min-width:180px; font-size:12.5px;">
+                    <button class="btn btn-ghost" id="removeBannerSecondaryImageBtn" type="button">Remover</button>
+                  </div>
+                  <p id="bannerSecondaryImageUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:6px 0 0;"></p>
+                </div>
+
+                <button class="btn btn-primary" id="saveBannersBtn" style="margin-top:8px;">Salvar banners</button>
               </div>
-              <p id="bannerSecondaryImageUploadStatus" style="font-size:12px; color:var(--ink-soft); margin:6px 0 0;"></p>
             </div>
 
-            <button class="btn btn-primary" id="saveBannersBtn" style="margin-top:8px;">Salvar banners</button>
-          </div>
-
-          <div class="card">
-            <div class="panel-head">
-              <h2>Avisos e comunicados</h2>
             </div>
-            <p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 16px;">
-              Todos os avisos ativos se movem juntos, numa faixa contínua no topo da loja (estilo painel de notícias). Se não houver nenhum ativo, a faixa some por completo.
-            </p>
-
-            <div style="display:flex; align-items:flex-end; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-              <div class="field" style="margin-bottom:0; max-width:260px;">
-                <label>Direção do movimento</label>
-                <select id="setAnnouncementsDirection">
-                  <option value="rtl">Direita → Esquerda</option>
-                  <option value="ltr">Esquerda → Direita</option>
-                </select>
-              </div>
-              <button class="btn btn-ghost" id="saveAnnouncementsDirectionBtn">Salvar direção</button>
-            </div>
-
-            <table>
-              <thead><tr><th>Ordem</th><th>Ícone</th><th>Texto</th><th>Link</th><th>Status</th><th></th></tr></thead>
-              <tbody id="announcementsBody"></tbody>
-            </table>
-          </div>
-
-          <div class="card">
-            <div class="panel-head">
-              <h2>Cupons</h2>
-              <button class="btn btn-primary" id="newCouponBtn">+ Novo cupom</button>
-            </div>
-            <div class="filters-row">
-              <input type="text" id="coupSearch" placeholder="Buscar por código...">
-              <select id="coupStatusFilter">
-                <option value="">Todos os status</option>
-                <option value="active">Ativos</option>
-                <option value="inactive">Inativos</option>
-              </select>
-              <select id="coupScopeFilter">
-                <option value="">Todos os tipos</option>
-                <option value="percent">Percentual</option>
-                <option value="fixed">Fixo</option>
-                <option value="free_shipping">Frete grátis</option>
-                <option value="first_purchase">1ª compra</option>
-                <option value="products">Produtos específicos</option>
-                <option value="category">Categoria</option>
-              </select>
-            </div>
-            <table>
-              <thead><tr><th>Cupom</th><th>Desconto</th><th>Tipo</th><th>Mín. compra</th><th>Usos</th><th>Validade</th><th>Status</th><th></th></tr></thead>
-              <tbody id="couponsBody"></tbody>
-            </table>
           </div>
         </div>
 
@@ -836,15 +856,6 @@
                 <button class="btn btn-primary" id="goToPaymentSettingsBtn" type="button">Ir para Pagamentos</button>
               </div>
             </div>
-            <div class="settings-panel " data-spanel="cupons-shortcut">
-              <div class="card">
-<p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Cupons</p>
-                <p style="font-size:13px; color:var(--ink-soft); margin:0 0 16px; max-width:480px;">
-                  Cupons têm sua própria área completa em <b>Marketing → Cupons</b> (criar, editar, todas as regras avançadas).
-                </p>
-                <button class="btn btn-primary" id="goToCouponsBtn" type="button">Ir para Cupons</button>
-              </div>
-            </div>
             <div class="settings-panel " data-spanel="envio">
               <div class="card">
 <div class="field" style="max-width:280px;">
@@ -973,15 +984,6 @@
                 <button class="btn btn-primary" id="goToMetaPixelBtn" type="button">Ir para Meta Pixel</button>
               </div>
             </div>
-            <div class="settings-panel " data-spanel="logomarca-shortcut">
-              <div class="card">
-<p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 12px;">Logomarca</p>
-                <p style="font-size:13px; color:var(--ink-soft); margin:0 0 16px; max-width:480px;">
-                  A logo é editada em <b>Personalização → Loja Online → Logomarca</b> (mesmo local onde já ficam a paleta e a prévia) — não criamos um segundo lugar pra isso.
-                </p>
-                <button class="btn btn-primary" id="goToLogoBtn" type="button">Ir para Personalização</button>
-              </div>
-            </div>
             <div class="settings-panel " data-spanel="dominio">
               <div class="card">
                 <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px;">Domínio</p>
@@ -992,12 +994,6 @@
               <div class="card">
                 <p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px;">Usuários</p>
                 <p style="font-size:13px; color:var(--ink-soft); margin:0;">Adicionar mais administradores exigiria mexer no sistema de login/permissões — fora do escopo desta etapa. Se quiser múltiplos usuários, é melhor tratar como uma etapa própria, com atenção redobrada em segurança.</p>
-              </div>
-            </div>
-            <div class="settings-panel " data-spanel="outras-integracoes">
-              <div class="card">
-<p style="font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px;">Outras integrações</p>
-                <p style="font-size:13px; color:var(--ink-soft); margin:0;">Nenhuma outra integração disponível ainda. Quando alguma nova integração for construída de verdade, ela aparece aqui.</p>
               </div>
             </div>
             </div>
@@ -2365,7 +2361,7 @@
     if (id === 'stock') loadStockPanel();
     if (id === 'orders') loadOrders();
     if (id === 'customers') loadCustomers();
-    if (id === 'marketing'){ loadCoupons(); loadSettings(); loadAnnouncementsAdmin(); }
+    if (id === 'marketing'){ renderMarketingNav(); loadCoupons(); loadSettings(); loadAnnouncementsAdmin(); }
     if (id === 'settings'){
       loadSettings();
       loadPaymentCredentials();
@@ -4240,10 +4236,12 @@
   });
 
   // ================= CONFIGURAÇÕES =================
+  // Logomarca não tem mais atalho aqui — vive só em Personalização, pra não
+  // ter duas telas administrando a mesma coisa. Cupons idem: vive só em
+  // Marketing agora que Marketing ganhou sua própria navegação interna.
   const SETTINGS_CATEGORIES = [
     { label:'LOJA', items:[
       { key:'geral', label:'Geral' },
-      { key:'logomarca-shortcut', label:'Logomarca' },
       { key:'seo', label:'SEO' },
       { key:'policies', label:'Políticas' },
       { key:'security', label:'Segurança' },
@@ -4253,7 +4251,6 @@
     { label:'VENDAS', items:[
       { key:'pagamento', label:'Pagamentos' },
       { key:'checkout', label:'Checkout' },
-      { key:'cupons-shortcut', label:'Cupons' },
     ]},
     { label:'ENTREGA', items:[
       { key:'envio', label:'Frete' },
@@ -4264,10 +4261,34 @@
       { key:'melhorenvio', label:'Melhor Envio' },
       { key:'analytics-shortcut', label:'Analytics' },
       { key:'metapixel-shortcut', label:'Meta Pixel' },
-      { key:'outras-integracoes', label:'Outras integrações' },
     ]},
   ];
   let currentSettingsItem = 'geral';
+
+  // ================= MARKETING (navegação interna própria) =================
+  const MARKETING_SECTIONS = [
+    { key:'cupons', label:'Cupons' },
+    { key:'avisos', label:'Avisos' },
+    { key:'comunicacao', label:'Comunicação' },
+    { key:'banners', label:'Banners' },
+  ];
+  let currentMarketingItem = 'cupons';
+
+  function renderMarketingNav(){
+    const nav = document.getElementById('marketingCategoryNav');
+    nav.innerHTML = MARKETING_SECTIONS.map(item => `
+      <button class="settings-cat-item ${item.key===currentMarketingItem?'active':''}" data-marketingitem="${item.key}" type="button">${item.label}</button>
+    `).join('');
+    document.querySelectorAll('[data-marketingitem]').forEach(btn=>{
+      btn.addEventListener('click', ()=> selectMarketingItem(btn.dataset.marketingitem));
+    });
+  }
+
+  function selectMarketingItem(key){
+    currentMarketingItem = key;
+    document.querySelectorAll('[data-marketingitem]').forEach(b=> b.classList.toggle('active', b.dataset.marketingitem===key));
+    document.querySelectorAll('#marketingContentArea .settings-panel').forEach(p=> p.classList.toggle('active', p.dataset.mpanel===key));
+  }
 
   function renderSettingsNav(){
     const nav = document.getElementById('settingsCategoryNav');
@@ -4287,13 +4308,10 @@
   }
 
   // Atalhos honestos: em vez de duplicar formulários que já têm seu
-  // próprio lugar (Cupons em Marketing, Logo/Paleta em Personalização,
-  // Analytics/Meta Pixel em Analytics), esses botões só levam pra lá.
+  // próprio lugar (Analytics/Meta Pixel em Analytics), esses botões só levam pra lá.
   document.getElementById('goToPaymentSettingsBtn')?.addEventListener('click', ()=> selectSettingsItem('pagamento'));
-  document.getElementById('goToCouponsBtn')?.addEventListener('click', ()=> navigateTo({ panel:'marketing', label:'Marketing' }));
   document.getElementById('goToAnalyticsBtn')?.addEventListener('click', ()=> navigateTo({ panel:'analytics-ga', label:'Google Analytics' }));
   document.getElementById('goToMetaPixelBtn')?.addEventListener('click', ()=> navigateTo({ panel:'analytics-pixel', label:'Meta Pixel' }));
-  document.getElementById('goToLogoBtn')?.addEventListener('click', ()=> navigateTo({ panel:'appearance', label:'Personalização' }));
 
   // ================= POLÍTICAS (Etapa 6) =================
   let allPoliciesAdmin = [];
