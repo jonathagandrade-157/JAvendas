@@ -26,6 +26,7 @@
     --accent:#F2CA50;
     --accent-dark:#000000;
     --on-accent:#241A00;
+    --hero-accent:#F2CA50;
     --font-body:'Manrope', sans-serif;
     --font-heading:'Libre Caslon Text', serif;
     --tpl-radius:0px;
@@ -266,7 +267,7 @@
 
   .hero-dark{background:#0B0B0C; overflow:hidden; padding:0; background-size:cover; background-position:center;}
   .hero-dark .container{max-width:760px; padding:88px 20px 72px; text-align:center;}
-  .hero-copy .eyebrow{font-family:var(--font-body); font-size:11px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:var(--accent); margin:0 0 20px;}
+  .hero-copy .eyebrow{font-family:var(--font-body); font-size:11px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:var(--hero-accent, var(--accent)); margin:0 0 20px;}
   .hero-title-row{display:flex; align-items:center; justify-content:center; gap:14px; margin:0 0 20px; flex-wrap:wrap;}
   .hero-title-row .mark{width:44px; height:44px; border-radius:10px; border:1.5px solid #3A3A3C; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
   .hero-title-row .mark svg{width:24px; height:24px;}
@@ -276,7 +277,39 @@
   .hero-cta{display:inline-flex; align-items:center; gap:8px; padding:14px 30px; background:var(--accent); color:var(--on-accent, #0B0B0C); border-radius:var(--tpl-radius-sm); font-size:13px; font-weight:700; letter-spacing:var(--tpl-label-tracking); text-transform:uppercase; font-family:var(--font-body); transition:filter .2s ease, transform .2s ease;}
   .hero-cta:hover{filter:brightness(1.08); transform:translateY(-2px);}
   .hero-cta-ghost{background:transparent; color:#fff; border:1.5px solid #3A3A3C;}
-  .hero-cta-ghost:hover{border-color:var(--accent); color:var(--accent); filter:none;}
+  .hero-cta-ghost:hover{border-color:var(--hero-accent, var(--accent)); color:var(--hero-accent, var(--accent)); filter:none;}
+
+  /* ---------- HERO: variações por modelo (Fashion/Modern/Minimalist) ----------
+     Premium continua usando .hero-dark (acima) quase como já era — os outros
+     3 modelos têm arquitetura de hero própria, batendo com o Stitch. */
+  .hero-fashion{background:#0B0B0C; overflow:hidden; padding:0; background-size:cover; background-position:center; position:relative;}
+  .hero-fashion .container{max-width:1120px; padding:64px 20px; text-align:left; position:relative;}
+  .hero-fashion .eyebrow{display:inline-block; font-family:var(--font-body); font-size:11px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--hero-accent, var(--accent)); background:color-mix(in srgb, var(--accent) 18%, transparent); padding:6px 12px; border-radius:var(--tpl-radius-sm); margin:0 0 18px;}
+  .hero-fashion h1{font-family:var(--font-heading); font-weight:800; color:#fff; font-size:38px; line-height:1.05; margin:0 0 16px; max-width:520px;}
+  @media (min-width:640px){ .hero-fashion h1{font-size:58px;} }
+  .hero-fashion h1 em{font-style:normal; color:var(--hero-accent, var(--accent));}
+  .hero-fashion p.lead{font-family:var(--font-body); color:#D8D8D8; max-width:420px; margin:0 0 30px; font-size:15.5px; line-height:1.6;}
+  .hero-fashion .hero-cta{border-radius:var(--tpl-radius-sm);}
+  .hero-promo-strip{display:flex; flex-wrap:wrap; gap:0; border-top:1px solid #232326; background:#0B0B0C; font-size:11.5px; color:#C7C7C7;}
+  .hero-promo-strip span{display:flex; align-items:center; gap:8px; padding:12px 20px; flex:1; min-width:200px; justify-content:center; border-right:1px solid #232326;}
+
+  .hero-split{background:var(--bg); overflow:hidden;}
+  .hero-split .container{max-width:1120px; padding:56px 20px; display:grid; grid-template-columns:1fr; gap:32px; align-items:center; text-align:left;}
+  @media (min-width:860px){ .hero-split .container{grid-template-columns:1fr 1fr; padding:80px 20px;} }
+  .hero-split .hero-copy .eyebrow{display:inline-block; background:color-mix(in srgb, var(--accent) 12%, transparent); padding:6px 14px; border-radius:999px; margin:0 0 18px; color:var(--accent);}
+  .hero-split h1{font-family:var(--font-heading); font-weight:700; color:var(--ink); font-size:34px; line-height:1.12; margin:0 0 16px;}
+  @media (min-width:640px){ .hero-split h1{font-size:44px;} }
+  .hero-split p.lead{font-family:var(--font-body); color:var(--ink-soft); max-width:420px; margin:0 0 28px; font-size:15.5px; line-height:1.65;}
+  #heroImageWrap{width:100%; min-height:260px; border-radius:var(--tpl-radius); background:var(--card) center/cover no-repeat; border:1px solid var(--line);}
+  @media (min-width:860px){ #heroImageWrap{min-height:420px;} }
+
+  .hero-minimal{background:var(--bg);}
+  .hero-minimal .container{max-width:1120px; padding:40px 20px; display:grid; grid-template-columns:1fr; gap:28px; align-items:center; text-align:left;}
+  @media (min-width:860px){ .hero-minimal .container{grid-template-columns:0.9fr 1.1fr; padding:60px 20px;} }
+  .hero-minimal h1{font-family:var(--font-heading); font-weight:700; color:var(--ink); font-size:32px; line-height:1.1; text-transform:uppercase; margin:0 0 18px;}
+  @media (min-width:640px){ .hero-minimal h1{font-size:42px;} }
+  .hero-minimal p.lead{font-family:var(--font-body); color:var(--ink-soft); max-width:380px; margin:0 0 26px; font-size:14.5px; line-height:1.7;}
+  .hero-minimal .hero-cta{border-radius:0;}
 
   /* ---------- TRUST BADGES ---------- */
   .trust{padding-bottom:44px;}
@@ -320,6 +353,21 @@
   @media (min-width:640px){ .footer-inner{flex-direction:row; justify-content:space-between; align-items:center;} }
   .footer-links a{color:var(--ink-soft); transition:color .2s ease;}
   .footer-links a:hover{color:var(--accent);}
+
+  /* ---------- FOOTER: variações por modelo ---------- */
+  .footer-cols{display:grid; grid-template-columns:1fr; gap:28px; padding:44px 20px 32px;}
+  @media (min-width:640px){ .footer-cols{grid-template-columns:1.4fr 1fr 1fr;} }
+  .footer-cols-4{grid-template-columns:1fr;}
+  @media (min-width:640px){ .footer-cols-4{grid-template-columns:1.4fr 1fr 1fr 1fr;} }
+  .footer-col{display:flex; flex-direction:column; gap:9px;}
+  .footer-col p{margin:0; font-size:13px; color:var(--ink-soft); line-height:1.6;}
+  .footer-col-title{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--ink); margin:0 0 4px !important;}
+  .footer-col a{font-size:13px; color:var(--ink-soft); transition:color .2s ease;}
+  .footer-col a:hover{color:var(--accent);}
+  .footer-bottom{padding:18px 20px; border-top:1px solid var(--line); font-size:12px; color:var(--ink-soft);}
+  .footer-bottom-minimal{display:flex; flex-direction:column; gap:14px; padding:32px 20px; text-align:center; border-top:none;}
+  @media (min-width:640px){ .footer-bottom-minimal{flex-direction:row; justify-content:space-between; align-items:center; text-align:left;} }
+  .footer-bottom-minimal .footer-links{display:flex; gap:16px; flex-wrap:wrap; justify-content:center;}
 
   /* ---------- QUICK VIEW MODAL ---------- */
   .overlay{position:fixed; inset:0; z-index:60; background:rgba(0,0,0,0.72); backdrop-filter:blur(2px); display:none; align-items:center; justify-content:center;}
@@ -479,26 +527,11 @@
   <span class="floating-cart-count" id="floatingCartCount">0</span>
 </button>
 
-<section class="hero-dark" id="heroDark">
-  <div class="container">
-    <div class="hero-copy">
-      <p class="eyebrow"><span id="brandTextHero">JA Store</span> · coleção atual</p>
-      <div class="hero-title-row">
-        <span class="mark">
-          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-            <text x="20" y="27" text-anchor="middle" font-family="Inter, sans-serif" font-weight="800" font-size="17" fill="#fff">JA</text>
-          </svg>
-        </span>
-        <h1 class="serif" id="heroTitle">Estilo que te representa.</h1>
-      </div>
-      <p class="lead" id="heroSubtitle">Calçados, camisetas, conjuntos, moletons e mais — peças pensadas pro seu dia a dia, com envio para todo o Brasil.</p>
-      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-        <a href="#produtos" class="hero-cta" id="heroCtaBtn">Comprar agora</a>
-        <a href="#ofertas" class="hero-cta hero-cta-ghost">Ver ofertas</a>
-      </div>
-    </div>
-  </div>
-</section>
+<!-- Conteúdo real montado por renderHeroShell(), que escolhe entre os 4
+     modelos (Fashion/Modern/Premium/Minimalist) — todos usam os MESMOS ids
+     (heroTitle, heroSubtitle, heroCtaBtn, brandTextHero), então os dados
+     reais do banner (Personalização) continuam funcionando igual. -->
+<div id="heroShell"></div>
 
 <section class="container" id="secondaryBannerSection" style="padding:20px 20px 0; display:none;">
   <a id="secondaryBannerLink" href="#" style="display:block; position:relative; border-radius:14px; overflow:hidden; min-height:140px; background-size:cover; background-position:center;">
@@ -613,19 +646,9 @@
   <p style="color:var(--ink-soft); font-size:15px;">Atendimento: Seg. a sex., 9h às 18h</p>
 </section>
 
-<footer>
-  <div class="container footer-inner">
-    <span>© 2026 <span id="brandTextFooter">JA Store</span></span>
-    <span class="footer-links">
-      <a href="politica.html?slug=troca-e-devolucao">Troca e Devolução</a> ·
-      <a href="politica.html?slug=politica-de-privacidade">Privacidade</a> ·
-      <a href="politica.html?slug=termos-de-uso">Termos</a> ·
-      <a href="politica.html?slug=politica-de-frete">Frete</a> ·
-      <a href="politica.html?slug=politica-de-cookies">Cookies</a>
-    </span>
-    <span>Preços de venda rápida — ajuste no catálogo sempre que o custo do fornecedor mudar.</span>
-  </div>
-</footer>
+<!-- Conteúdo real montado por renderFooterShell() — mesmo id brandTextFooter
+     e mesmos links de política nos 4 modelos, só a organização visual muda. -->
+<div id="footerShell"></div>
 
 <!-- Quick view modal -->
 <div class="overlay" id="qvOverlay">
@@ -987,32 +1010,38 @@
   const ICON_MENU_LIGHT = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>`;
 
   function headerTemplateMinimal(){
+    // Referência Stitch: Pure Essence — acromático, sem sombras, cantos retos,
+    // espaçamento generoso, navegação com sublinhado fino no hover.
     return `
       <header id="topo" class="tpl-minimal">
         <div class="header-top">
           <div class="mobile-logo-row">
             <button class="menu-toggle-btn" id="mobileMenuBtn" aria-label="Menu">${ICON_MENU_LIGHT}</button>
             <span id="logoImgMobile" class="logo-mark" style="width:26px;height:26px;">${LOGO_SVG_DARK}</span>
-            <span id="brandTextMobile" style="color:#fff;font-weight:600;font-family:'Inter',sans-serif;font-size:15px;letter-spacing:.06em;">JA Store</span>
+            <span id="brandTextMobile" style="color:#fff;font-weight:600;font-family:var(--font-heading);font-size:15px;letter-spacing:.06em;">JA Store</span>
           </div>
-          <div class="container header-main">
-            <div class="search-wrap">
-              <input id="searchInput" type="text" placeholder="Buscar">
-              <button class="search-btn" aria-label="Buscar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="M21 21l-4-4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></button>
+          <div class="container header-main" style="padding-top:18px; padding-bottom:18px;">
+            <div class="search-wrap" style="border-bottom:1px solid rgba(255,255,255,0.25); border-radius:0;">
+              <input id="searchInput" type="text" placeholder="Buscar" style="background:transparent; color:#fff; padding-left:2px;">
+              <button class="search-btn" aria-label="Buscar" style="background:transparent; border-radius:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="1.6"/><path d="M21 21l-4-4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></button>
             </div>
             <div class="brand-center">
-              <span id="logoImgDesktop" class="logo-mark" style="width:34px;height:34px;">${LOGO_SVG_DARK}</span>
-              <span id="brandTextDesktop" style="letter-spacing:.14em; font-weight:600;">JA Store</span>
+              <span id="logoImgDesktop" class="logo-mark" style="width:32px;height:32px;">${LOGO_SVG_DARK}</span>
+              <span id="brandTextDesktop" style="font-family:var(--font-heading); letter-spacing:.16em; font-weight:600; font-size:15px;">JA STORE</span>
             </div>
-            <nav class="main-nav" style="letter-spacing:.08em; font-weight:600;">
-              <a href="#topo">Início</a><a href="#produtos">Produtos</a><a href="#categorias">Categorias</a>
-              <a href="#ofertas">Ofertas</a><a href="#sobre">Sobre nós</a><a href="#contato">Contato</a>
+            <nav class="main-nav" style="font-family:var(--font-body); letter-spacing:.06em; font-weight:500; font-size:12.5px; text-transform:uppercase; gap:30px;">
+              <a href="#topo" style="border-bottom:1.5px solid transparent; padding-bottom:3px; transition:border-color .2s ease;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='transparent'">Início</a>
+              <a href="#produtos" style="border-bottom:1.5px solid transparent; padding-bottom:3px; transition:border-color .2s ease;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='transparent'">Produtos</a>
+              <a href="#categorias" style="border-bottom:1.5px solid transparent; padding-bottom:3px; transition:border-color .2s ease;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='transparent'">Categorias</a>
+              <a href="#ofertas" style="border-bottom:1.5px solid transparent; padding-bottom:3px; transition:border-color .2s ease;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='transparent'">Ofertas</a>
+              <a href="#sobre" style="border-bottom:1.5px solid transparent; padding-bottom:3px; transition:border-color .2s ease;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='transparent'">Sobre nós</a>
+              <a href="#contato" style="border-bottom:1.5px solid transparent; padding-bottom:3px; transition:border-color .2s ease;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='transparent'">Contato</a>
             </nav>
             <div class="header-right">
-              <button class="icon-btn" id="favoritesToggleBtn" aria-label="Favoritos" title="Meus favoritos">${ICON_HEART}<span class="fav-count" id="favCount" style="display:none">0</span></button>
-              <a class="icon-btn" href="https://wa.me/5511946790983" target="_blank" rel="noopener" aria-label="WhatsApp">${ICON_WHATSAPP}</a>
-              <a class="icon-btn" id="instagramLink" href="#" target="_blank" rel="noopener" aria-label="Instagram" style="display:none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="#fff" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="#fff"/></svg></a>
-              <button class="cart-btn" id="openCartBtn" style="background:transparent; border:1px solid rgba(255,255,255,0.3);">${ICON_CART}<span style="display:inline; letter-spacing:.05em;">Carrinho</span><span class="cart-count" id="cartCount" style="display:none">0</span></button>
+              <button class="icon-btn" id="favoritesToggleBtn" aria-label="Favoritos" title="Meus favoritos" style="border-radius:0; background:transparent;">${ICON_HEART}<span class="fav-count" id="favCount" style="display:none">0</span></button>
+              <a class="icon-btn" href="https://wa.me/5511946790983" target="_blank" rel="noopener" aria-label="WhatsApp" style="border-radius:0; background:transparent;">${ICON_WHATSAPP}</a>
+              <a class="icon-btn" id="instagramLink" href="#" target="_blank" rel="noopener" aria-label="Instagram" style="display:none; border-radius:0; background:transparent;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="#fff" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="#fff"/></svg></a>
+              <button class="cart-btn" id="openCartBtn" style="background:transparent; border:1px solid rgba(255,255,255,0.35); border-radius:0; color:#fff;">${ICON_CART}<span style="display:inline; font-family:var(--font-body); letter-spacing:.05em;">Carrinho</span><span class="cart-count" id="cartCount" style="display:none">0</span></button>
             </div>
           </div>
         </div>
@@ -1025,43 +1054,50 @@
   }
 
   function headerTemplateClassic(){
+    // Referência Stitch: Vivid Pulse — fast-fashion, alto contraste, fundo
+    // carbono escuro (o mesmo tom de --bg do modelo) com rosa/vermelho elétrico
+    // de destaque. Antes o header ficava com fundo branco fixo mesmo o
+    // restante da página sendo escura nesse modelo — corrigido aqui.
     return `
-      <header id="topo" class="tpl-classic" style="background:#fff; border-bottom:1px solid var(--line);">
-        <div style="display:flex; align-items:center; gap:14px; padding:14px 20px; max-width:1160px; margin:0 auto; flex-wrap:wrap;">
-          <button class="hdr-mobile-only" id="mobileMenuBtn" aria-label="Menu" style="background:none; border:none; padding:4px;">${ICON_MENU_DARK}</button>
-          <span id="logoImgMobile" class="logo-mark hdr-mobile-only" style="width:26px;height:26px;">${LOGO_SVG_LIGHT}</span>
-          <span id="brandTextMobile" class="hdr-mobile-only" style="font-weight:800; font-size:15px; letter-spacing:.03em; text-transform:uppercase; color:var(--rust);">JA Store</span>
+      <header id="topo" class="tpl-classic" style="background:var(--bg); border-bottom:1px solid var(--line);">
+        <div style="display:flex; align-items:center; gap:14px; padding:16px 20px; max-width:1160px; margin:0 auto; flex-wrap:wrap;">
+          <button class="hdr-mobile-only" id="mobileMenuBtn" aria-label="Menu" style="background:none; border:none; padding:4px;">${ICON_MENU_LIGHT}</button>
+          <span id="logoImgMobile" class="logo-mark hdr-mobile-only" style="width:26px;height:26px;">${LOGO_SVG_DARK}</span>
+          <span id="brandTextMobile" class="hdr-mobile-only" style="font-family:var(--font-heading); font-weight:800; font-size:15px; letter-spacing:.02em; text-transform:uppercase; color:var(--ink);">JA Store</span>
 
-          <span id="logoImgDesktop" class="logo-mark hdr-desktop-only" style="width:34px;height:34px;">${LOGO_SVG_LIGHT}</span>
-          <span id="brandTextDesktop" class="hdr-desktop-only" style="font-weight:800; font-size:19px; letter-spacing:.04em; text-transform:uppercase; color:var(--rust);">JA Store</span>
+          <span id="logoImgDesktop" class="logo-mark hdr-desktop-only" style="width:36px;height:36px; border-radius:8px; overflow:hidden;">${LOGO_SVG_DARK}</span>
+          <span id="brandTextDesktop" class="hdr-desktop-only" style="font-family:var(--font-heading); font-weight:800; font-size:20px; letter-spacing:.02em; text-transform:uppercase; color:var(--ink);">JA Store</span>
 
-          <nav class="main-nav hdr-desktop-only" style="display:flex; gap:22px; font-size:12.5px; font-weight:700; letter-spacing:.02em; text-transform:uppercase; margin-left:28px;">
-            <a href="#topo" style="color:var(--ink);">Início</a><a href="#produtos" style="color:var(--ink);">Produtos</a>
-            <a href="#categorias" style="color:var(--ink);">Categorias</a><a href="#ofertas" style="color:var(--rust); border-bottom:2px solid var(--rust); padding-bottom:2px;">Ofertas</a>
-            <a href="#sobre" style="color:var(--ink);">Sobre nós</a><a href="#contato" style="color:var(--ink);">Contato</a>
+          <nav class="main-nav hdr-desktop-only" style="display:flex; gap:22px; font-family:var(--font-body); font-size:12.5px; font-weight:700; letter-spacing:.02em; text-transform:uppercase; margin-left:28px;">
+            <a href="#topo" style="color:var(--ink-soft); transition:color .2s ease;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-soft)'">Início</a>
+            <a href="#produtos" style="color:var(--ink-soft); transition:color .2s ease;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-soft)'">Produtos</a>
+            <a href="#categorias" style="color:var(--ink-soft); transition:color .2s ease;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-soft)'">Categorias</a>
+            <a href="#ofertas" style="color:var(--accent); border-bottom:2px solid var(--accent); padding-bottom:2px;">Ofertas</a>
+            <a href="#sobre" style="color:var(--ink-soft); transition:color .2s ease;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-soft)'">Sobre nós</a>
+            <a href="#contato" style="color:var(--ink-soft); transition:color .2s ease;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink-soft)'">Contato</a>
           </nav>
 
           <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
-            <button class="icon-btn" id="favoritesToggleBtn" aria-label="Favoritos" title="Meus favoritos" style="background:var(--bg); border-radius:50%; width:34px; height:34px; color:var(--ink); display:flex; align-items:center; justify-content:center; position:relative;">${ICON_HEART}<span class="fav-count" id="favCount" style="display:none; background:var(--rust);">0</span></button>
-            <a class="icon-btn" href="https://wa.me/5511946790983" target="_blank" rel="noopener" aria-label="WhatsApp" style="background:var(--bg); border-radius:50%; width:34px; height:34px; color:var(--ink); display:flex; align-items:center; justify-content:center;">${ICON_WHATSAPP}</a>
-            <a class="icon-btn" id="instagramLink" href="#" target="_blank" rel="noopener" aria-label="Instagram" style="display:none; background:var(--bg); border-radius:50%; width:34px; height:34px; color:var(--ink); align-items:center; justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg></a>
-            <button class="cart-btn" id="openCartBtn" style="background:var(--rust); color:#fff; border-radius:8px; padding:9px 16px; display:flex; align-items:center; gap:6px; font-size:12px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; position:relative;">${ICON_CART}<span class="hdr-desktop-only" style="display:inline">Carrinho</span><span class="cart-count" id="cartCount" style="display:none; background:#fff; color:var(--rust);">0</span></button>
+            <button class="icon-btn" id="favoritesToggleBtn" aria-label="Favoritos" title="Meus favoritos" style="background:var(--card); border-radius:var(--tpl-radius-sm); width:36px; height:36px; color:var(--ink); display:flex; align-items:center; justify-content:center; position:relative;">${ICON_HEART}<span class="fav-count" id="favCount" style="display:none; background:var(--accent); color:#fff;">0</span></button>
+            <a class="icon-btn" href="https://wa.me/5511946790983" target="_blank" rel="noopener" aria-label="WhatsApp" style="background:var(--card); border-radius:var(--tpl-radius-sm); width:36px; height:36px; color:var(--ink); display:flex; align-items:center; justify-content:center;">${ICON_WHATSAPP}</a>
+            <a class="icon-btn" id="instagramLink" href="#" target="_blank" rel="noopener" aria-label="Instagram" style="display:none; background:var(--card); border-radius:var(--tpl-radius-sm); width:36px; height:36px; color:var(--ink); align-items:center; justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg></a>
+            <button class="cart-btn" id="openCartBtn" style="background:var(--accent); color:#fff; border-radius:var(--tpl-radius-sm); padding:10px 18px; display:flex; align-items:center; gap:6px; font-family:var(--font-body); font-size:12px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; position:relative; box-shadow:0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent);">${ICON_CART}<span class="hdr-desktop-only" style="display:inline">Carrinho</span><span class="cart-count" id="cartCount" style="display:none; background:#fff; color:var(--accent);">0</span></button>
           </div>
 
-          <div class="search-wrap hdr-mobile-only" style="width:100%; margin-top:10px; background:var(--bg); border:1px solid var(--line); border-radius:8px; display:flex; align-items:center; padding:2px 10px;">
+          <div class="search-wrap hdr-mobile-only" style="width:100%; margin-top:10px; background:var(--card); border:1px solid var(--line); border-radius:var(--tpl-radius-sm); display:flex; align-items:center; padding:2px 10px;">
             <input id="searchInput" type="text" placeholder="O que você está procurando?" style="flex:1; border:none; background:none; padding:9px 4px; font-size:13px; color:var(--ink);">
             <span style="color:var(--ink-soft);">${ICON_SEARCH}</span>
           </div>
         </div>
 
         <div class="hdr-desktop-only" style="border-top:1px solid var(--line); padding:8px 20px; max-width:1160px; margin:0 auto;">
-          <div class="search-wrap" style="max-width:420px; background:var(--bg); border:1px solid var(--line); border-radius:8px; display:flex; align-items:center; padding:2px 12px;">
+          <div class="search-wrap" style="max-width:420px; background:var(--card); border:1px solid var(--line); border-radius:var(--tpl-radius-sm); display:flex; align-items:center; padding:2px 12px;">
             <input id="searchInputDesktopClassic" type="text" placeholder="Buscar produtos..." style="flex:1; border:none; background:none; padding:8px 4px; font-size:13px; color:var(--ink);" oninput="document.getElementById('searchInput').value=this.value; document.getElementById('searchInput').dispatchEvent(new Event('input'));">
             <span style="color:var(--ink-soft);">${ICON_SEARCH}</span>
           </div>
         </div>
 
-        <div class="cat-nav-wrap" id="categorias" style="background:var(--bg);">
+        <div class="cat-nav-wrap" id="categorias" style="background:var(--card);">
           <nav class="cat-nav" id="catNavDesktop"></nav>
           <div class="cat-nav-mobile" id="catNavMobile"></div>
         </div>
@@ -1109,32 +1145,35 @@
   }
 
   function headerTemplateEcommerce(){
+    // Referência Stitch: Vivid Kinetic — tech, índigo/roxo, glassmorphism
+    // sutil (fundo translúcido + blur), cantos arredondados, botão com
+    // gradiente e leve brilho interno.
     return `
-      <header id="topo" class="tpl-ecommerce" style="background:#fff; border-bottom:1px solid var(--line);">
+      <header id="topo" class="tpl-ecommerce" style="background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid var(--line);">
         <div style="display:flex; align-items:center; gap:16px; padding:14px 20px; max-width:1160px; margin:0 auto;">
           <button class="hdr-mobile-only" id="mobileMenuBtn" aria-label="Menu" style="background:none; border:none; padding:4px;">${ICON_MENU_DARK}</button>
-          <span id="logoImgMobile" class="logo-mark hdr-mobile-only" style="width:24px;height:24px;">${LOGO_SVG_LIGHT}</span>
-          <span id="brandTextMobile" class="hdr-mobile-only" style="font-weight:800; font-size:14px; color:var(--ink);">JA Store</span>
+          <span id="logoImgMobile" class="logo-mark hdr-mobile-only" style="width:26px;height:26px; border-radius:8px; overflow:hidden;">${LOGO_SVG_LIGHT}</span>
+          <span id="brandTextMobile" class="hdr-mobile-only" style="font-family:var(--font-heading); font-weight:700; font-size:14px; color:var(--ink);">JA Store</span>
 
-          <span id="logoImgDesktop" class="logo-mark hdr-desktop-only" style="width:32px;height:32px;">${LOGO_SVG_LIGHT}</span>
-          <span id="brandTextDesktop" class="hdr-desktop-only" style="font-weight:800; font-size:17px; color:var(--ink);">JA Store</span>
+          <span id="logoImgDesktop" class="logo-mark hdr-desktop-only" style="width:34px;height:34px; border-radius:10px; overflow:hidden;">${LOGO_SVG_LIGHT}</span>
+          <span id="brandTextDesktop" class="hdr-desktop-only" style="font-family:var(--font-heading); font-weight:700; font-size:18px; color:var(--ink); letter-spacing:-.01em;">JA Store</span>
 
-          <div class="search-wrap" style="flex:1; background:var(--bg); border:2px solid var(--accent); border-radius:24px; display:flex; align-items:center; padding:2px 16px; max-width:560px;">
-            <input id="searchInput" type="text" placeholder="Buscar produtos, categorias..." style="flex:1; border:none; background:none; padding:10px 4px; font-size:13px; color:var(--ink);">
-            <button class="search-btn" aria-label="Buscar" style="background:var(--accent); border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff;">${ICON_SEARCH}</button>
+          <div class="search-wrap" style="flex:1; background:var(--card); border:1.5px solid var(--line); border-radius:999px; display:flex; align-items:center; padding:2px 6px 2px 18px; max-width:560px; transition:border-color .2s ease, box-shadow .2s ease;" onfocusin="this.style.borderColor='var(--accent)'; this.style.boxShadow='0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent)';" onfocusout="this.style.borderColor='var(--line)'; this.style.boxShadow='none';">
+            <input id="searchInput" type="text" placeholder="Buscar produtos, categorias..." style="flex:1; border:none; background:none; padding:11px 4px; font-size:13px; color:var(--ink); font-family:var(--font-body);">
+            <button class="search-btn" aria-label="Buscar" style="background:linear-gradient(135deg, var(--accent), var(--rust)); border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff;">${ICON_SEARCH}</button>
           </div>
 
           <div style="display:flex; align-items:center; gap:6px; margin-left:auto;">
-            <button class="icon-btn hdr-desktop-only" id="favoritesToggleBtn" aria-label="Favoritos" title="Meus favoritos" style="background:none; border:none; color:var(--ink); position:relative; padding:6px;">${ICON_HEART}<span class="fav-count" id="favCount" style="display:none">0</span></button>
-            <a class="icon-btn hdr-desktop-only" href="https://wa.me/5511946790983" target="_blank" rel="noopener" aria-label="WhatsApp" style="color:var(--ink); padding:6px;">${ICON_WHATSAPP}</a>
-            <a class="icon-btn" id="instagramLink" href="#" target="_blank" rel="noopener" aria-label="Instagram" style="display:none; color:var(--ink); padding:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg></a>
-            <button class="cart-btn" id="openCartBtn" style="background:var(--accent); color:#fff; border-radius:8px; padding:10px 16px; display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; position:relative;">${ICON_CART}<span class="hdr-desktop-only" style="display:inline">Carrinho</span><span class="cart-count" id="cartCount" style="display:none; background:#fff; color:var(--accent);">0</span></button>
+            <button class="icon-btn hdr-desktop-only" id="favoritesToggleBtn" aria-label="Favoritos" title="Meus favoritos" style="background:var(--card); border:1px solid var(--line); color:var(--ink); position:relative;">${ICON_HEART}<span class="fav-count" id="favCount" style="display:none; background:var(--rust);">0</span></button>
+            <a class="icon-btn hdr-desktop-only" href="https://wa.me/5511946790983" target="_blank" rel="noopener" aria-label="WhatsApp" style="background:var(--card); border:1px solid var(--line); color:var(--ink);">${ICON_WHATSAPP}</a>
+            <a class="icon-btn" id="instagramLink" href="#" target="_blank" rel="noopener" aria-label="Instagram" style="display:none; background:var(--card); border:1px solid var(--line); color:var(--ink);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg></a>
+            <button class="cart-btn" id="openCartBtn" style="background:linear-gradient(135deg, var(--accent), var(--rust)); color:#fff; border-radius:999px; padding:11px 18px; display:flex; align-items:center; gap:6px; font-family:var(--font-body); font-size:12.5px; font-weight:600; position:relative; box-shadow:0 8px 20px color-mix(in srgb, var(--accent) 30%, transparent);">${ICON_CART}<span class="hdr-desktop-only" style="display:inline">Carrinho</span><span class="cart-count" id="cartCount" style="display:none; background:#fff; color:var(--accent);">0</span></button>
           </div>
         </div>
 
-        <div class="cat-nav-wrap" id="categorias" style="background:var(--ink);">
-          <nav class="cat-nav" id="catNavDesktop" style="filter:invert(1) hue-rotate(180deg);"></nav>
-          <div class="cat-nav-mobile" id="catNavMobile" style="filter:invert(1) hue-rotate(180deg);"></div>
+        <div class="cat-nav-wrap" id="categorias" style="background:var(--card); border-top:1px solid var(--line);">
+          <nav class="cat-nav" id="catNavDesktop"></nav>
+          <div class="cat-nav-mobile" id="catNavMobile"></div>
         </div>
       </header>
     `;
@@ -1202,6 +1241,12 @@
     document.head.appendChild(link);
   }
 
+  function hexLuminance(hex){
+    const h = (hex||'#000000').replace('#','');
+    const r = parseInt(h.substr(0,2),16)||0, g = parseInt(h.substr(2,2),16)||0, b = parseInt(h.substr(4,2),16)||0;
+    return 0.299*r + 0.587*g + 0.114*b;
+  }
+
   function applyTemplateDesignTokens(key){
     const tokens = TEMPLATE_DESIGN_TOKENS[key];
     if (!tokens) return; // "sem seleção": não mexe em nada, mantém o visual atual
@@ -1215,6 +1260,15 @@
     root.setProperty('--gold', tokens.accent);
     root.setProperty('--rust', tokens.rust);
     root.setProperty('--green', tokens.green);
+    // texto em cima de botões/badges preenchidos com a cor de destaque —
+    // precisa ser claro ou escuro dependendo do quão clara é essa cor (ex:
+    // dourado/rosa precisam de texto escuro; preto/índigo precisam de branco).
+    root.setProperty('--on-accent', hexLuminance(tokens.accent) > 150 ? '#1C1200' : '#FFFFFF');
+    // o hero da Home tem fundo sempre escuro (independente do modelo), então
+    // usar a cor de destaque de um modelo claro (ex: preto do Minimalista)
+    // direto como texto ali ficaria ilegível — nesse caso específico, cai
+    // pra um tom claro neutro que sempre lê bem em cima de fundo escuro.
+    root.setProperty('--hero-accent', hexLuminance(tokens.accent) > 90 ? tokens.accent : '#D9D9D9');
     root.setProperty('--tpl-radius', tokens.radius);
     root.setProperty('--tpl-radius-sm', tokens.radiusSm);
     root.setProperty('--tpl-shadow', tokens.shadow);
@@ -1224,16 +1278,229 @@
     root.setProperty('--font-body', tokens.fontBody);
     ensureGoogleFontLoaded(tokens.fontHeadingImport);
     ensureGoogleFontLoaded(tokens.fontBodyImport);
+    document.documentElement.setAttribute('data-store-model', key);
+  }
+
+  // ================= HERO: 4 modelos completos =================
+  // Cada função devolve o <div class="container">...</div> do hero inteiro,
+  // usando sempre os MESMOS ids (heroTitle, heroSubtitle, heroCtaBtn,
+  // brandTextHero) — assim os dados reais do banner principal
+  // (Personalização → banner_main_*) continuam funcionando igual não
+  // importa qual dos 4 modelos está ativo.
+  function heroTemplatePremium(){
+    // Referência Stitch "Premium": fundo escuro, centralizado, serifado.
+    return `
+      <div class="container">
+        <div class="hero-copy">
+          <p class="eyebrow"><span id="brandTextHero">JA Store</span> · coleção atual</p>
+          <div class="hero-title-row">
+            <span class="mark">
+              <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                <text x="20" y="27" text-anchor="middle" font-family="Inter, sans-serif" font-weight="800" font-size="17" fill="#fff">JA</text>
+              </svg>
+            </span>
+            <h1 class="serif" id="heroTitle">Estilo que te representa.</h1>
+          </div>
+          <p class="lead" id="heroSubtitle">Calçados, camisetas, conjuntos, moletons e mais — peças pensadas pro seu dia a dia, com envio para todo o Brasil.</p>
+          <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+            <a href="#produtos" class="hero-cta" id="heroCtaBtn">Comprar agora</a>
+            <a href="#ofertas" class="hero-cta hero-cta-ghost">Ver ofertas</a>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function heroTemplateClassic(){
+    // Referência Stitch "Fashion": full-bleed escuro, headline em duas
+    // cores, alinhado à esquerda, com tira de benefícios (frete/parcelamento).
+    return `
+      <div class="container">
+        <span class="eyebrow"><span id="brandTextHero">JA Store</span> · coleção atual</span>
+        <h1 id="heroTitle">Estilo que <em>te representa.</em></h1>
+        <p class="lead" id="heroSubtitle">Calçados, camisetas, conjuntos, moletons e mais — peças pensadas pro seu dia a dia, com envio para todo o Brasil.</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <a href="#produtos" class="hero-cta" id="heroCtaBtn">Comprar agora</a>
+          <a href="#ofertas" class="hero-cta hero-cta-ghost">Ver ofertas</a>
+        </div>
+      </div>
+      <div class="hero-promo-strip">
+        <span>🚚 Frete grátis acima de R$ 300</span>
+        <span>💳 Em até 12x sem juros</span>
+        <span>⚡ Troca fácil em até 30 dias</span>
+      </div>
+    `;
+  }
+
+  function heroTemplateEcommerce(){
+    // Referência Stitch "Modern": claro, layout dividido texto/imagem, CTA em pílula.
+    return `
+      <div class="container">
+        <div class="hero-copy">
+          <span class="eyebrow"><span id="brandTextHero">JA Store</span> · nova coleção</span>
+          <h1 id="heroTitle">Estilo que te representa.</h1>
+          <p class="lead" id="heroSubtitle">Calçados, camisetas, conjuntos, moletons e mais — peças pensadas pro seu dia a dia, com envio para todo o Brasil.</p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="#produtos" class="hero-cta" id="heroCtaBtn" style="border-radius:999px;">Comprar agora</a>
+            <a href="#ofertas" class="hero-cta hero-cta-ghost" style="border-radius:999px; color:var(--ink); border-color:var(--line);">Ver ofertas</a>
+          </div>
+        </div>
+        <div id="heroImageWrap"></div>
+      </div>
+    `;
+  }
+
+  function heroTemplateMinimal(){
+    // Referência Stitch "Minimalist": claro, editorial, dividido texto/imagem, cantos retos.
+    return `
+      <div class="container">
+        <div class="hero-copy">
+          <span id="brandTextHero" style="display:none;">JA Store</span>
+          <h1 id="heroTitle">Estilo que te representa.</h1>
+          <p class="lead" id="heroSubtitle">Calçados, camisetas, conjuntos, moletons e mais — peças pensadas pro seu dia a dia, com envio para todo o Brasil.</p>
+          <a href="#produtos" class="hero-cta" id="heroCtaBtn">Comprar agora</a>
+        </div>
+        <div id="heroImageWrap"></div>
+      </div>
+    `;
+  }
+
+  const HERO_TEMPLATES = {
+    classic: { cls:'hero-fashion', build:heroTemplateClassic },
+    ecommerce: { cls:'hero-split', build:heroTemplateEcommerce },
+    premium: { cls:'hero-dark', build:heroTemplatePremium },
+    minimal: { cls:'hero-minimal', build:heroTemplateMinimal },
+  };
+
+  function renderHeroShell(key){
+    const shell = document.getElementById('heroShell');
+    if (!shell) return;
+    const tpl = HERO_TEMPLATES[key] || HERO_TEMPLATES.premium;
+    shell.innerHTML = `<section class="${tpl.cls}" id="heroDark">${tpl.build()}</section>`;
+  }
+
+  // ================= FOOTER: 4 modelos completos =================
+  const FOOTER_POLICY_LINKS = `
+    <a href="politica.html?slug=troca-e-devolucao">Troca e Devolução</a>
+    <a href="politica.html?slug=politica-de-privacidade">Privacidade</a>
+    <a href="politica.html?slug=termos-de-uso">Termos</a>
+    <a href="politica.html?slug=politica-de-frete">Frete</a>
+    <a href="politica.html?slug=politica-de-cookies">Cookies</a>
+  `;
+
+  function footerTemplatePremium(){
+    return `
+      <div class="container footer-cols">
+        <div class="footer-col footer-col-brand">
+          <span class="serif" style="font-size:18px; color:var(--ink);"><span id="brandTextFooter">JA Store</span></span>
+          <p>Uma experiência única em moda e estilo, com curadoria de verdade.</p>
+        </div>
+        <div class="footer-col">
+          <p class="footer-col-title">Institucional</p>
+          <a href="#sobre">Sobre nós</a>
+          <a href="politica.html?slug=politica-de-privacidade">Privacidade</a>
+          <a href="politica.html?slug=termos-de-uso">Termos</a>
+        </div>
+        <div class="footer-col">
+          <p class="footer-col-title">Ajuda</p>
+          <a href="politica.html?slug=politica-de-frete">Frete</a>
+          <a href="politica.html?slug=troca-e-devolucao">Troca e Devolução</a>
+          <a href="#contato">Contato</a>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <span>© 2026 <span id="brandTextFooterBottom">JA Store</span>. Todos os direitos reservados.</span>
+      </div>
+    `;
+  }
+
+  function footerTemplateClassic(){
+    return `
+      <div class="container footer-cols">
+        <div class="footer-col footer-col-brand">
+          <span style="font-weight:800; font-size:18px; color:#fff;"><span id="brandTextFooter">JA Store</span></span>
+          <p>Seu estilo, suas escolhas, seu lugar.</p>
+        </div>
+        <div class="footer-col">
+          <p class="footer-col-title">Compre</p>
+          <a href="#produtos">Feminino</a><a href="#produtos">Masculino</a><a href="#ofertas">Ofertas</a>
+        </div>
+        <div class="footer-col">
+          <p class="footer-col-title">Atendimento</p>
+          <a href="#contato">Atendimento</a>
+          <a href="politica.html?slug=troca-e-devolucao">Trocas</a>
+          <a href="politica.html?slug=politica-de-privacidade">Privacidade</a>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <span>© 2026 <span id="brandTextFooterBottom">JA Store</span>. Todos os direitos reservados.</span>
+      </div>
+    `;
+  }
+
+  function footerTemplateEcommerce(){
+    return `
+      <div class="container footer-cols footer-cols-4">
+        <div class="footer-col footer-col-brand">
+          <span style="font-weight:800; font-size:18px; color:var(--ink);"><span id="brandTextFooter">JA Store</span></span>
+          <p>Tecnologia, estilo e qualidade em um só lugar.</p>
+        </div>
+        <div class="footer-col">
+          <p class="footer-col-title">Compre</p>
+          <a href="#produtos">Todos os produtos</a><a href="#novidades">Novidades</a><a href="#mais-vendidos">Mais vendidos</a>
+        </div>
+        <div class="footer-col">
+          <p class="footer-col-title">Atendimento</p>
+          <a href="#contato">Suporte</a>
+          <a href="politica.html?slug=politica-de-privacidade">Privacidade</a>
+          <a href="politica.html?slug=termos-de-uso">Termos</a>
+        </div>
+        <div class="footer-col">
+          <p class="footer-col-title">Newsletter</p>
+          <p style="font-size:12.5px; color:var(--ink-soft); margin:0;">Receba novidades e ofertas.</p>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <span>© 2026 <span id="brandTextFooterBottom">JA Store</span>. Todos os direitos reservados.</span>
+      </div>
+    `;
+  }
+
+  function footerTemplateMinimal(){
+    return `
+      <div class="container footer-bottom footer-bottom-minimal">
+        <span id="brandTextFooter" style="font-weight:700; text-transform:uppercase; letter-spacing:.06em;">JA Store</span>
+        <span class="footer-links">${FOOTER_POLICY_LINKS}</span>
+        <span>© 2026 <span id="brandTextFooterBottom">JA Store</span>. Todos os direitos reservados.</span>
+      </div>
+    `;
+  }
+
+  const FOOTER_TEMPLATES = {
+    classic: footerTemplateClassic,
+    ecommerce: footerTemplateEcommerce,
+    premium: footerTemplatePremium,
+    minimal: footerTemplateMinimal,
+  };
+
+  function renderFooterShell(key){
+    const shell = document.getElementById('footerShell');
+    if (!shell) return;
+    const builder = FOOTER_TEMPLATES[key] || FOOTER_TEMPLATES.premium;
+    shell.innerHTML = `<footer>${builder()}</footer>`;
   }
 
   function applyHeaderTemplate(key){
+    // A loja sempre tem um dos 4 modelos ativos — sem chave reconhecida,
+    // cai no Premium (não existe mais "layout antigo" como alternativa).
+    const activeKey = HEADER_TEMPLATES[key] ? key : 'premium';
     const root = document.getElementById('headerRoot');
     if (!root) return;
-    const builder = HEADER_TEMPLATES[key];
-    if (!builder) return; // valor vazio/inválido: mantém o header que já está no HTML (não mexe em nada)
 
-    applyTemplateDesignTokens(key);
-    root.innerHTML = builder();
+    applyTemplateDesignTokens(activeKey);
+    root.innerHTML = HEADER_TEMPLATES[activeKey]();
+    renderHeroShell(activeKey);
+    renderFooterShell(activeKey);
 
     // Como o header inteiro foi trocado por um novo pedaço de HTML, os
     // elementos antigos (e os "escutadores de clique" que estavam neles)
@@ -1293,7 +1560,7 @@
     // ---------- nome da loja (com fallback "JA Store") ----------
     const storeName = (data.store_name || '').trim();
     if (storeName){
-      ['brandTextMobile','brandTextDesktop','brandTextHero','brandTextInstagram','brandTextSobreTitle','brandTextSobreBody','brandTextFooter'].forEach(id=>{
+      ['brandTextMobile','brandTextDesktop','brandTextHero','brandTextInstagram','brandTextSobreTitle','brandTextSobreBody','brandTextFooter','brandTextFooterBottom'].forEach(id=>{
         const el = document.getElementById(id);
         if (el) el.textContent = storeName;
       });
@@ -1391,15 +1658,25 @@
       if (trustFreeShippingEl) trustFreeShippingEl.textContent = `Acima de ${formatBRL(freeShippingValue)}`;
 
       // ---------- banner principal ----------
-      if (data.banner_main_title) document.getElementById('heroTitle').textContent = data.banner_main_title;
-      if (data.banner_main_subtitle) document.getElementById('heroSubtitle').textContent = data.banner_main_subtitle;
-      if (data.banner_main_cta_text) document.getElementById('heroCtaBtn').textContent = data.banner_main_cta_text;
-      if (data.banner_main_cta_link) document.getElementById('heroCtaBtn').href = data.banner_main_cta_link;
+      const heroTitleEl = document.getElementById('heroTitle');
+      const heroSubtitleEl = document.getElementById('heroSubtitle');
+      const heroCtaEl = document.getElementById('heroCtaBtn');
+      if (data.banner_main_title && heroTitleEl) heroTitleEl.textContent = data.banner_main_title;
+      if (data.banner_main_subtitle && heroSubtitleEl) heroSubtitleEl.textContent = data.banner_main_subtitle;
+      if (data.banner_main_cta_text && heroCtaEl) heroCtaEl.textContent = data.banner_main_cta_text;
+      if (data.banner_main_cta_link && heroCtaEl) heroCtaEl.href = data.banner_main_cta_link;
       if (data.banner_main_image){
         const heroEl = document.getElementById('heroDark');
-        heroEl.style.backgroundImage = `linear-gradient(rgba(11,11,12,0.55), rgba(11,11,12,0.75)), url('${data.banner_main_image}')`;
-        heroEl.style.backgroundSize = 'cover';
-        heroEl.style.backgroundPosition = 'center';
+        if (heroEl){
+          heroEl.style.backgroundImage = `linear-gradient(rgba(11,11,12,0.55), rgba(11,11,12,0.75)), url('${data.banner_main_image}')`;
+          heroEl.style.backgroundSize = 'cover';
+          heroEl.style.backgroundPosition = 'center';
+        }
+        // Modelos com layout dividido (Modern/Minimalist) mostram a mesma
+        // imagem do banner como foto em destaque, sem o degradê escuro por
+        // cima (esse aqui não fica atrás de texto).
+        const heroImgWrap = document.getElementById('heroImageWrap');
+        if (heroImgWrap) heroImgWrap.style.backgroundImage = `url('${data.banner_main_image}')`;
       }
 
       // ---------- banner secundário ----------
@@ -1934,10 +2211,12 @@
   }
 
   // ---------------- init ----------------
-  renderCatNav();
-  renderCartUI();
-  updateFavCount();
-  bindHeaderInteractions();
+  // Pinta o modelo padrão (Premium) na hora, sem esperar o banco — hero e
+  // footer agora são montados por JS (renderHeroShell/renderFooterShell) e
+  // ficariam em branco até loadStoreSettingsPublic() resolver, ou pra
+  // sempre se essa chamada falhar. applyHeaderTemplate() já religa
+  // catNav/carrinho/interações do header por dentro.
+  applyHeaderTemplate();
   loadProducts();
   loadSubcategoriesPublic();
   loadTestimonials();
