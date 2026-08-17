@@ -9,13 +9,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* Mesma identidade "Premium — Lux Noir" aplicada em index.html —
-       o checkout ainda não tem o sistema de 4 modelos/cores dinâmicas da
-       Home (isso é um recurso à parte, fora do escopo desta reforma
-       visual), então usamos o mesmo padrão de fábrica direto aqui. */
+    /* Valores de fábrica (Premium) — só pra não piscar em branco antes do
+       JS aplicar o modelo real (mesmos 4 modelos da Home: Fashion/Modern/
+       Premium/Minimalist), lido de store_settings.header_template. */
     --bg:#131313; --ink:#E5E2E1; --ink-soft:#D0C5AF; --line:#333333;
     --green:#F2CA50; --rust:#F2CA50; --gold:#F2CA50; --card:#1A1A1A;
     --accent:#F2CA50; --accent-dark:#000000; --on-accent:#241A00;
+    --tpl-radius:0px; --tpl-radius-sm:0px;
     --font-body:'Manrope', sans-serif; --font-heading:'Libre Caslon Text', serif;
   }
   *{box-sizing:border-box;}
@@ -25,7 +25,7 @@
   .serif{font-family:var(--font-heading); font-weight:400; letter-spacing:-0.01em;}
   a{color:inherit;}
   input,select{
-    width:100%; padding:12px 14px; border-radius:0; border:1.5px solid var(--line);
+    width:100%; padding:12px 14px; border-radius:var(--tpl-radius-sm); border:1.5px solid var(--line);
     font-family:var(--font-body); font-size:14px; background:var(--bg); color:var(--ink); outline:none;
     transition:border-color .15s ease;
   }
@@ -37,12 +37,12 @@
   .row-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;}
   button{cursor:pointer; font-family:inherit;}
 
-  header{background:#0B0B0C; padding:0; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:20;}
+  header{background:var(--header-bg,#0B0B0C); padding:0; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:20;}
   header .container{max-width:1160px; margin:0 auto; display:flex; align-items:center; gap:24px; padding:16px 20px;}
-  header .brand{display:flex; align-items:center; gap:10px; color:#fff; font-size:18px; letter-spacing:.1em;}
+  header .brand{display:flex; align-items:center; gap:10px; color:var(--header-ink,#fff); font-size:18px; letter-spacing:.1em;}
   header .brand img{height:28px; width:auto;}
   header .main-nav{display:none; align-items:center; gap:26px; flex:1;}
-  header .main-nav a{color:#e8e8e8; font-family:var(--font-body); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; opacity:.85; transition:opacity .2s ease, color .2s ease;}
+  header .main-nav a{color:var(--header-ink,#e8e8e8); font-family:var(--font-body); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; opacity:.85; transition:opacity .2s ease, color .2s ease;}
   header .main-nav a:hover{opacity:1; color:var(--accent);}
   @media (min-width:800px){ header .main-nav{display:flex;} }
   header .back-link{color:var(--accent); font-family:var(--font-body); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-left:auto; opacity:.9; transition:opacity .2s ease;}
@@ -52,7 +52,7 @@
   .layout{display:grid; grid-template-columns:1fr; gap:28px; padding:36px 0 80px;}
   @media (min-width:900px){ .layout{grid-template-columns:1.5fr 1fr;} }
 
-  .card{background:var(--card); border:1px solid var(--line); border-radius:0; padding:26px; margin-bottom:20px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--tpl-radius); padding:26px; margin-bottom:20px;}
   .card h2{font-family:var(--font-heading); font-weight:400; font-size:18px; margin:0 0 20px; display:flex; align-items:center; gap:10px; color:var(--ink);}
   .step-num{
     width:24px; height:24px; border-radius:50%; background:var(--accent); color:var(--on-accent);
@@ -65,14 +65,14 @@
   .cart-line .name{font-size:13.5px; font-weight:600; margin:0 0 2px; color:var(--ink);}
   .cart-line .meta{font-size:12px; color:var(--ink-soft); margin:0;}
   .qty-controls{display:flex; align-items:center; gap:8px; margin-top:8px;}
-  .qty-btn{width:24px; height:24px; border:1px solid var(--line); background:none; color:var(--ink); border-radius:0; font-size:13px; line-height:1; transition:border-color .15s ease;}
+  .qty-btn{width:24px; height:24px; border:1px solid var(--line); background:none; color:var(--ink); border-radius:var(--tpl-radius-sm); font-size:13px; line-height:1; transition:border-color .15s ease;}
   .qty-btn:hover{border-color:var(--accent);}
   .remove-btn{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); background:none; border:none; text-decoration:underline; margin-left:auto; transition:color .15s ease;}
   .remove-btn:hover{color:var(--accent);}
   .line-total{font-size:13.5px; font-weight:700; color:var(--ink); white-space:nowrap;}
 
   .shipping-opt{
-    display:flex; align-items:center; gap:10px; padding:14px; border:1.5px solid var(--line); color:var(--ink);
+    display:flex; align-items:center; gap:10px; padding:14px; border:1.5px solid var(--line); border-radius:var(--tpl-radius-sm); color:var(--ink);
     margin-bottom:8px; cursor:pointer; font-size:13.5px; transition:border-color .15s ease;
   }
   .shipping-opt:hover{border-color:color-mix(in srgb, var(--accent) 50%, var(--line));}
@@ -81,7 +81,7 @@
 
   .coupon-row{display:flex; gap:8px;}
   .coupon-row input{flex:1;}
-  .coupon-row button{padding:0 20px; border:1.5px solid var(--accent); background:transparent; color:var(--accent); font-family:var(--font-body); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; transition:background .2s ease, color .2s ease;}
+  .coupon-row button{padding:0 20px; border:1.5px solid var(--accent); border-radius:var(--tpl-radius-sm); background:transparent; color:var(--accent); font-family:var(--font-body); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; transition:background .2s ease, color .2s ease;}
   .coupon-row button:hover{background:var(--accent); color:var(--on-accent);}
   #couponMsg{font-size:12.5px; margin-top:8px;}
 
@@ -90,7 +90,7 @@
 
   .pay-methods{display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;}
   .pay-pill{
-    flex:1; min-width:100px; text-align:center; padding:14px 8px; border:1.5px solid var(--line);
+    flex:1; min-width:100px; text-align:center; padding:14px 8px; border:1.5px solid var(--line); border-radius:var(--tpl-radius-sm);
     font-family:var(--font-body); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-soft); cursor:pointer; background:transparent; transition:all .15s ease;
   }
   .pay-pill:hover{border-color:color-mix(in srgb, var(--accent) 50%, var(--line));}
@@ -98,7 +98,7 @@
   .pay-note{font-size:12px; color:var(--ink-soft); line-height:1.5; margin-top:-10px; margin-bottom:18px;}
 
   .pay-btn{
-    width:100%; padding:16px; border:none; background:var(--accent); color:var(--on-accent);
+    width:100%; padding:16px; border:none; border-radius:var(--tpl-radius-sm); background:var(--accent); color:var(--on-accent);
     font-family:var(--font-body); font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; transition:filter .2s ease;
   }
   .pay-btn:hover:not(:disabled){filter:brightness(1.08);}
@@ -177,15 +177,63 @@
   let MOTOBOY_FREE_SHIPPING = false;
   let MELHOR_ENVIO_ENABLED = true;
 
+  // Mesmos 4 modelos completos da Home (index.html) — replicados aqui
+  // porque esta é uma página HTML separada, sem módulo JS compartilhado.
+  // Só os tokens de cor/tipografia/formato; a lógica de pagamento/frete/
+  // pedido abaixo continua exatamente a mesma nos 4.
+  const TEMPLATE_DESIGN_TOKENS = {
+    classic: { bg:'#131313', card:'#1E1E1E', ink:'#F5F3F2', inkSoft:'#8E8E93', line:'#2A2A2A', accent:'#FF5168', radius:'4px', radiusSm:'2px', fontHeading:"'Montserrat', sans-serif", fontHeadingImport:'Montserrat:wght@700;800', fontBody:"'Be Vietnam Pro', sans-serif", fontBodyImport:'Be+Vietnam+Pro:wght@400;500;700' },
+    premium: { bg:'#131313', card:'#1A1A1A', ink:'#E5E2E1', inkSoft:'#D0C5AF', line:'#333333', accent:'#F2CA50', radius:'0px', radiusSm:'0px', fontHeading:"'Libre Caslon Text', serif", fontHeadingImport:'Libre+Caslon+Text', fontBody:"'Manrope', sans-serif", fontBodyImport:'Manrope:wght@400;500;600' },
+    ecommerce: { bg:'#F8FAFC', card:'#FFFFFF', ink:'#191C1E', inkSoft:'#464554', line:'#E2E8F0', accent:'#4648D4', radius:'16px', radiusSm:'8px', fontHeading:"'Hanken Grotesk', sans-serif", fontHeadingImport:'Hanken+Grotesk:wght@700;800', fontBody:"'Plus Jakarta Sans', sans-serif", fontBodyImport:'Plus+Jakarta+Sans:wght@400;500;600' },
+    minimal: { bg:'#F9F9F9', card:'#FFFFFF', ink:'#1A1C1C', inkSoft:'#757575', line:'#F0F0F0', accent:'#111111', radius:'0px', radiusSm:'0px', fontHeading:"'Manrope', sans-serif", fontHeadingImport:'Manrope:wght@600;700', fontBody:"'Inter', sans-serif", fontBodyImport:'Inter:wght@400;500' },
+  };
+  const loadedGoogleFonts = new Set();
+  function ensureGoogleFontLoaded(importName){
+    if (!importName || loadedGoogleFonts.has(importName)) return;
+    loadedGoogleFonts.add(importName);
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${importName}&display=swap`;
+    document.head.appendChild(link);
+  }
+  function hexLuminance(hex){
+    const h = (hex||'#000000').replace('#','');
+    const r = parseInt(h.substr(0,2),16)||0, g = parseInt(h.substr(2,2),16)||0, b = parseInt(h.substr(4,2),16)||0;
+    return 0.299*r + 0.587*g + 0.114*b;
+  }
+  function applyStoreModel(key){
+    const tokens = TEMPLATE_DESIGN_TOKENS[key] || TEMPLATE_DESIGN_TOKENS.premium;
+    const root = document.documentElement.style;
+    root.setProperty('--bg', tokens.bg);
+    root.setProperty('--card', tokens.card);
+    root.setProperty('--ink', tokens.ink);
+    root.setProperty('--ink-soft', tokens.inkSoft);
+    root.setProperty('--line', tokens.line);
+    root.setProperty('--accent', tokens.accent);
+    root.setProperty('--rust', tokens.accent);
+    root.setProperty('--on-accent', hexLuminance(tokens.accent) > 150 ? '#241A00' : '#FFFFFF');
+    root.setProperty('--tpl-radius', tokens.radius);
+    root.setProperty('--tpl-radius-sm', tokens.radiusSm);
+    root.setProperty('--font-heading', tokens.fontHeading);
+    root.setProperty('--font-body', tokens.fontBody);
+    const headerIsDark = hexLuminance(tokens.bg) < 128;
+    root.setProperty('--header-bg', headerIsDark ? '#0B0B0C' : tokens.card);
+    root.setProperty('--header-ink', headerIsDark ? '#FFFFFF' : tokens.ink);
+    document.documentElement.setAttribute('data-store-model', TEMPLATE_DESIGN_TOKENS[key] ? key : 'premium');
+    ensureGoogleFontLoaded(tokens.fontHeadingImport);
+    ensureGoogleFontLoaded(tokens.fontBodyImport);
+  }
+
   async function loadStoreConfig(){
     try {
       const sb = window.getSupabaseClient();
       const { data, error } = await sb
         .from('store_settings')
-        .select('free_shipping_threshold, pix_discount_percent, motoboy_free_shipping, logo_url, payment_pix_enabled, payment_card_enabled, payment_boleto_enabled, melhor_envio_enabled')
+        .select('free_shipping_threshold, pix_discount_percent, motoboy_free_shipping, logo_url, header_template, payment_pix_enabled, payment_card_enabled, payment_boleto_enabled, melhor_envio_enabled')
         .eq('id', 1)
         .maybeSingle();
       if (error) throw error;
+      applyStoreModel(data && data.header_template);
       if (data){
         if (data.free_shipping_threshold != null) FREE_SHIPPING_THRESHOLD = Number(data.free_shipping_threshold);
         if (data.pix_discount_percent != null) PIX_DISCOUNT_RATE = Number(data.pix_discount_percent) / 100;
@@ -215,6 +263,7 @@
       }
     } catch (err) {
       console.error('Não foi possível carregar configurações da loja — usando padrões.', err);
+      applyStoreModel(null);
     }
   }
 
