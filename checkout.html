@@ -58,6 +58,16 @@
     width:24px; height:24px; border-radius:50%; background:var(--accent); color:var(--on-accent);
     font-family:var(--font-body); font-size:12px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
   }
+  /* Skin por modelo nos mesmos cards/steps — sem tocar no fluxo de compra */
+  [data-store-model="classic"] .card h2, [data-store-model="ecommerce"] .card h2{
+    font-family:var(--font-body); font-weight:800; font-size:14px; text-transform:uppercase; letter-spacing:.04em;
+  }
+  [data-store-model="classic"] .step-num, [data-store-model="ecommerce"] .step-num{border-radius:var(--tpl-radius-sm);}
+  [data-store-model="minimal"] .card h2{
+    font-family:var(--font-body); font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.08em;
+  }
+  [data-store-model="minimal"] .step-num{background:transparent; border:1.5px solid var(--ink); color:var(--ink); border-radius:0;}
+  [data-store-model="premium"] .card h2{letter-spacing:.02em;}
 
   .cart-line{display:flex; gap:14px; align-items:center; padding:12px 0; border-bottom:1px solid var(--line);}
   .cart-line:last-child{border-bottom:none;}

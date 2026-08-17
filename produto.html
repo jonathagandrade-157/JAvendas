@@ -56,10 +56,15 @@
 
   .product-info .eyebrow{font-family:var(--font-body); font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin:0 0 10px;}
   .product-info h1{font-family:var(--font-heading); font-weight:400; font-size:28px; line-height:1.2; margin:0 0 16px; color:var(--ink);}
+  .rating-summary{display:flex; align-items:center; gap:8px; margin:0 0 12px; color:var(--accent); font-size:13px; letter-spacing:1px;}
+  .rating-summary .rs-count{color:var(--ink-soft); font-size:12px; letter-spacing:normal;}
+  [data-store-model="minimal"] .rating-summary{display:none;}
   .price-row{display:flex; align-items:baseline; gap:12px; margin-bottom:8px;}
   .price-old{font-size:15px; color:var(--ink-soft); text-decoration:line-through;}
   .price-now{font-family:var(--font-heading); font-size:28px; font-weight:400; color:var(--ink);}
   .price-now.on-sale{color:var(--accent);}
+  .price-badge{display:none; font-size:11px; font-weight:800; text-transform:uppercase; padding:3px 8px; border-radius:var(--tpl-radius-sm); background:var(--rust); color:#fff;}
+  [data-store-model="classic"] .price-badge, [data-store-model="ecommerce"] .price-badge{display:inline-block;}
   .price-notes{font-size:12.5px; color:var(--ink-soft); margin:0 0 24px; line-height:1.6;}
   .price-notes b{color:var(--accent);}
 
@@ -78,6 +83,12 @@
   .qty-value{font-size:15px; font-weight:700; color:var(--ink); width:24px; text-align:center;}
 
   .action-row{display:flex; flex-direction:column; gap:10px; margin-bottom:28px;}
+  /* Modern/Fashion: botões lado a lado, com favoritar como ícone à parte —
+     mais "app de compra"; Premium/Minimalist mantêm empilhado (referência). */
+  [data-store-model="classic"] .action-row, [data-store-model="ecommerce"] .action-row{flex-direction:row; flex-wrap:wrap;}
+  [data-store-model="classic"] .action-row .btn-buy, [data-store-model="ecommerce"] .action-row .btn-buy,
+  [data-store-model="classic"] .action-row .btn-add, [data-store-model="ecommerce"] .action-row .btn-add{flex:1 1 45%;}
+  [data-store-model="classic"] .action-row .btn-fav, [data-store-model="ecommerce"] .action-row .btn-fav{flex:1 1 100%;}
   .btn-add{padding:16px; border:1.5px solid var(--accent); border-radius:var(--tpl-radius-sm); background:transparent; color:var(--accent); font-family:var(--font-body); font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; transition:background .2s ease, color .2s ease;}
   .btn-add:hover{background:var(--accent); color:var(--on-accent);}
   .btn-buy{padding:16px; border:none; border-radius:var(--tpl-radius-sm); background:var(--accent); color:var(--on-accent); font-family:var(--font-body); font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; transition:filter .2s ease;}
@@ -396,9 +407,11 @@
         <div class="product-info">
           <p class="eyebrow">${product.categoryLabel || product.category}</p>
           <h1 class="serif">${product.name}</h1>
+          <div class="rating-summary" id="productRatingSummary"></div>
           <div class="price-row">
             ${onSale ? `<span class="price-old">${formatBRL(product.price)}</span>` : ''}
             <span class="price-now ${onSale?'on-sale':''}">${soldOut ? 'Indisponível' : formatBRL(effectivePrice(product))}</span>
+            ${onSale ? `<span class="price-badge" id="priceBadge">-${Math.round((1-Number(product.sale_price)/Number(product.price))*100)}%</span>` : ''}
           </div>
           <p class="price-notes">Em até <b>12x</b> no cartão · <b>5% de desconto</b> pagando no Pix no checkout</p>
 
@@ -582,16 +595,30 @@
       const { data, error } = await sb.from('product_reviews').select('*').eq('product_id', product.id).eq('active', true).order('created_at', { ascending:false });
       if (error) throw error;
       const el = document.getElementById('reviewsList');
-      if (!el) return;
-      el.innerHTML = (data && data.length)
-        ? data.map(r => `
-          <div class="review-card">
-            <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
-            <p style="font-size:14px; margin:0; color:var(--ink-soft);">${r.comment || ''}</p>
-            <p class="review-name">${r.customer_name}</p>
-          </div>
-        `).join('')
-        : `<p class="review-empty">Ainda não há avaliações para este produto.</p>`;
+      if (el){
+        el.innerHTML = (data && data.length)
+          ? data.map(r => `
+            <div class="review-card">
+              <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+              <p style="font-size:14px; margin:0; color:var(--ink-soft);">${r.comment || ''}</p>
+              <p class="review-name">${r.customer_name}</p>
+            </div>
+          `).join('')
+          : `<p class="review-empty">Ainda não há avaliações para este produto.</p>`;
+      }
+
+      // Resumo de nota (estrelas ao lado do título) — só com dado real:
+      // produto sem avaliação nenhuma não mostra o bloco (não inventa nota).
+      const summaryEl = document.getElementById('productRatingSummary');
+      if (summaryEl){
+        if (data && data.length){
+          const avg = data.reduce((s,r)=>s+r.rating,0) / data.length;
+          const full = Math.round(avg);
+          summaryEl.innerHTML = `${'★'.repeat(full)}<span style="color:var(--line);">${'★'.repeat(5-full)}</span><span class="rs-count">(${data.length} avaliaç${data.length===1?'ão':'ões'})</span>`;
+        } else {
+          summaryEl.innerHTML = '';
+        }
+      }
     } catch (err) {
       console.error(err);
     }
