@@ -177,8 +177,10 @@
   .panel.active{display:block; animation:panelIn .18s ease;}
   @keyframes panelIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
   .card{background:var(--card); border:1px solid var(--line); border-radius:var(--admin-radius); box-shadow:var(--admin-shadow); padding:20px 22px; margin-bottom:18px;}
-  .panel-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;}
+  .panel-head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; flex-wrap:wrap; gap:10px;}
   .panel-head h2{font-size:18px; margin:0; font-weight:400; letter-spacing:.01em;}
+  .panel-head-text{display:flex; flex-direction:column; gap:5px;}
+  .admin-page-desc{margin:0; font-size:12.5px; color:var(--ink-soft); font-weight:400; max-width:520px;}
 
   .filters-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
   .filters-row input[type=text]{flex:1; min-width:180px;}
@@ -336,11 +338,18 @@
   [data-admin-model="ecommerce"] .integration-tile{border-color:color-mix(in srgb, var(--admin-accent) 25%, var(--line));}
   [data-admin-model="minimal"] .integration-tile-icon{border-radius:0; background:transparent;}
 
-  /* Personalização (Loja Online / Painel Administrativo) — cartões à
-     esquerda, prévia fixa à direita, batendo com a referência Stitch. */
-  .personalization-layout{display:grid; grid-template-columns:1fr 420px; gap:20px; align-items:start;}
-  .personalization-preview{position:sticky; top:86px;}
-  @media (max-width:1100px){ .personalization-layout{grid-template-columns:1fr;} .personalization-preview{position:static;} }
+  /* Personalização (Loja Online / Painel Administrativo) — coluna de
+     configurações com rolagem própria à esquerda, prévia sempre visível
+     à direita (também com rolagem própria se o conteúdo passar da altura
+     disponível) — nenhuma das duas depende de rolar a página inteira. */
+  .personalization-layout{display:grid; grid-template-columns:1fr 420px; gap:20px; align-items:start; height:calc(100vh - 86px - 26px); min-height:420px;}
+  .personalization-main{height:100%; overflow-y:auto; padding-right:6px; margin-right:-6px;}
+  .personalization-preview{height:100%; overflow-y:auto;}
+  @media (max-width:1100px){
+    .personalization-layout{grid-template-columns:1fr; height:auto;}
+    .personalization-main{height:auto; overflow:visible; padding-right:0; margin-right:0;}
+    .personalization-preview{height:auto; overflow:visible;}
+  }
 
   /* Cartões com ícone (Modelo de Layout / Modelo do painel) — substitui os
      antigos cartões de amostra de cor por ícone+nome, com destaque na borda
@@ -479,7 +488,10 @@
         <div class="panel" data-panel="products">
           <div class="card">
             <div class="panel-head">
-              <h2>Produtos</h2>
+              <div class="panel-head-text">
+                <h2>Produtos</h2>
+                <p class="admin-page-desc">Cadastre, edite e organize os produtos vendidos na loja.</p>
+              </div>
               <button class="btn btn-primary" id="newProductBtn">+ Novo produto</button>
             </div>
             <div class="filters-row">
@@ -566,7 +578,12 @@
         <!-- ---------- PEDIDOS ---------- -->
         <div class="panel" data-panel="orders">
           <div class="card">
-            <div class="panel-head"><h2>Pedidos</h2></div>
+            <div class="panel-head">
+              <div class="panel-head-text">
+                <h2>Pedidos</h2>
+                <p class="admin-page-desc">Acompanhe, filtre e atualize o status dos pedidos da loja.</p>
+              </div>
+            </div>
             <div class="status-tabs" id="orderStatusTabs"></div>
             <div class="filters-row">
               <input type="text" id="orderSearch" placeholder="Buscar pedido...">
@@ -583,7 +600,10 @@
         <div class="panel" data-panel="customers">
           <div class="card">
             <div class="panel-head">
-              <h2>Clientes</h2>
+              <div class="panel-head-text">
+                <h2>Clientes</h2>
+                <p class="admin-page-desc">Veja e busque os clientes que já compraram na loja.</p>
+              </div>
               <span style="font-size:12px;color:var(--ink-soft);">calculado a partir dos pedidos</span>
             </div>
             <div class="filters-row">
@@ -606,7 +626,12 @@
              própria (igual Configurações) — cada seção (Cupons/Avisos/
              Comunicação/Banners) abre sozinha, nunca todas juntas. -->
         <div class="panel" data-panel="marketing">
-          <div class="panel-head"><h2>Marketing</h2></div>
+          <div class="panel-head">
+            <div class="panel-head-text">
+              <h2>Marketing</h2>
+              <p class="admin-page-desc">Cupons, avisos, comunicação e banners da loja, organizados por seção.</p>
+            </div>
+          </div>
           <div class="settings-layout-grid" style="display:grid; grid-template-columns:200px 1fr; gap:24px; align-items:start;">
             <nav id="marketingCategoryNav" style="display:flex; flex-direction:column; gap:2px;"></nav>
             <div id="marketingContentArea">
@@ -729,13 +754,17 @@
 
         <!-- ---------- CONFIGURAÇÕES ---------- -->
         <div class="panel" data-panel="settings">
-          <div class="panel-head"><h2>Configurações</h2></div>
+          <div class="panel-head">
+            <div class="panel-head-text">
+              <h2>Configurações</h2>
+              <p class="admin-page-desc">Dados da loja, vendas, entrega e integrações, organizados por grupo.</p>
+            </div>
+          </div>
           <div class="settings-layout-grid" style="display:grid; grid-template-columns:200px 1fr; gap:24px; align-items:start;">
             <nav id="settingsCategoryNav" style="display:flex; flex-direction:column; gap:2px;"></nav>
             <div id="settingsContentArea">
             <div class="settings-panel active" data-spanel="geral">
               <div class="card">
-          <div class="card">
               <div class="settings-grid">
                 <div class="field"><label>Nome da loja</label><input id="setStoreName"></div>
                 <div class="field"><label>E-mail</label><input id="setStoreEmail" type="email"></div>
@@ -750,14 +779,10 @@
                 <div class="field"><label>TikTok (link completo, opcional)</label><input id="setTiktokUrl" placeholder="https://tiktok.com/@jastore"></div>
               </div>
               <button class="btn btn-primary" id="saveSettingsBtn">Salvar alterações</button>
-            
-          </div>
-        
               </div>
             </div>
             <div class="settings-panel " data-spanel="seo">
               <div class="card">
-          <div class="card">
               <div class="field"><label>Título da loja (aba do navegador e Google)</label><input id="setSeoTitle" placeholder="JA Store — Streetwear, esporte e casual"></div>
               <div class="field"><label>Descrição (aparece no Google, embaixo do título)</label><textarea id="setSeoDescription" rows="3" placeholder="Calçados, camisetas, conjuntos e mais, com envio para todo o Brasil."></textarea></div>
               <div class="field"><label>Palavras-chave (separadas por vírgula)</label><input id="setSeoKeywords" placeholder="streetwear, tênis, camisetas, moda masculina"></div>
@@ -765,14 +790,10 @@
                 O título e a descrição já atualizam de verdade no Google e na aba do navegador. O <b>preview ao compartilhar no WhatsApp/Instagram</b> usa uma versão fixa (não muda sozinho com isso aqui) — se quiser trocar essa prévia, é um ajuste separado, direto no código.
               </p>
               <button class="btn btn-primary" id="saveSeoBtn">Salvar SEO</button>
-            
-          </div>
-        
               </div>
             </div>
             <div class="settings-panel " data-spanel="policies">
               <div class="card">
-          <div class="card">
               <div style="display:grid; grid-template-columns:220px 1fr; gap:20px;" id="policiesLayout">
                 <div>
                   <p style="font-size:12px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px;">Políticas</p>
@@ -790,14 +811,10 @@
                 </div>
                 <p id="policyEmptyState" style="color:var(--ink-soft); font-size:13px;">Selecione uma política ao lado pra editar.</p>
               </div>
-            
-          </div>
-        
               </div>
             </div>
             <div class="settings-panel " data-spanel="security">
               <div class="card">
-          <div class="card">
               <div class="card" style="max-width:420px; box-shadow:none; border:1px solid var(--line); padding:20px;">
                 <h2 style="margin:0 0 4px; font-size:16px;">Alterar senha</h2>
                 <p style="font-size:12px; color:var(--ink-soft); margin:0 0 18px;">Usa o mesmo sistema de login que você já tem — a senha nunca fica salva em texto puro, isso é feito pelo próprio Supabase.</p>
@@ -807,14 +824,10 @@
                 <button class="btn btn-primary" id="changePasswordBtn">Alterar senha</button>
                 <p id="passwordChangeStatus" style="font-size:12.5px; margin-top:10px;"></p>
               </div>
-            
-          </div>
-        
               </div>
             </div>
             <div class="settings-panel " data-spanel="pagamento">
               <div class="card">
-          <div class="card">
               <div class="field" style="max-width:280px;">
                 <label>Desconto no Pix (%)</label>
                 <input id="setPixDiscount" type="number" step="0.5" min="0" max="100">
@@ -849,9 +862,6 @@
               </div>
               <button class="btn btn-ghost" id="savePixKeyBtn" style="margin-bottom:8px;">Salvar chave Pix (registro)</button>
               <p id="pixKeyStatus" style="font-size:12.5px;"></p>
-            
-          </div>
-        
               </div>
             </div>
             <div class="settings-panel " data-spanel="checkout">
@@ -883,7 +893,6 @@
             </div>
             <div class="settings-panel " data-spanel="motoboy">
               <div class="card">
-          <div class="card">
               <div class="field">
                 <label><input type="checkbox" id="setMotoboyEnabled" style="width:auto;display:inline-block;margin-right:6px;">Ativar entrega por Motoboy</label>
               </div>
@@ -916,9 +925,6 @@
               </div>
 
               <button class="btn btn-primary" id="saveMotoboySettingsBtn" style="margin-top:16px;">Salvar configuração de Motoboy</button>
-            
-          </div>
-        
               </div>
             </div>
             <div class="settings-panel " data-spanel="mercadopago">
@@ -1010,7 +1016,10 @@
         <div class="panel" data-panel="analytics-ga">
           <div class="card" style="max-width:520px;">
             <div class="panel-head">
-              <h2>Google Analytics 4</h2>
+              <div class="panel-head-text">
+                <h2>Google Analytics 4</h2>
+                <p class="admin-page-desc">Conecte o Google Analytics pra acompanhar visitas e vendas da loja.</p>
+              </div>
               <span class="badge" id="gaStatusBadge">—</span>
             </div>
             <div class="field"><label><input type="checkbox" id="setGaEnabled" style="width:auto;display:inline-block;margin-right:6px;">Ativar Google Analytics</label></div>
@@ -1030,7 +1039,10 @@
         <div class="panel" data-panel="analytics-pixel">
           <div class="card" style="max-width:520px;">
             <div class="panel-head">
-              <h2>Meta Pixel</h2>
+              <div class="panel-head-text">
+                <h2>Meta Pixel</h2>
+                <p class="admin-page-desc">Conecte o Pixel da Meta pra acompanhar conversões de anúncios.</p>
+              </div>
               <span class="badge" id="pixelStatusBadge">—</span>
             </div>
             <div class="field"><label><input type="checkbox" id="setMetaPixelEnabled" style="width:auto;display:inline-block;margin-right:6px;">Ativar Meta Pixel</label></div>
